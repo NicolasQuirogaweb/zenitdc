@@ -16,13 +16,18 @@ export const metadata: Metadata = {
   title: "Zenit DC - Sistema de Gestión",
   description: "Sistema de gestión de obras para constructora",
   manifest: "/manifest.json",
-  themeColor: "#2563EB",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "Zenit DC",
   },
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
+};
+
+export const viewport = {
+  themeColor: "#2563EB",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({
