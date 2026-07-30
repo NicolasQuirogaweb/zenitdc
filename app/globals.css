@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-blue-accent: #2563EB;
+  --color-green-alert: #16a34a;
+  --color-red-alert: #dc2626;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+input, textarea, select {
+  font-size: 16px;
+}
