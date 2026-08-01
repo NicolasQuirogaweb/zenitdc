@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import type { Obra, PresupuestoItem, PagoCliente, PagoProveedor } from '@/types'
+import type { Obra, PresupuestoItem, PagoCliente, PagoProveedor, GastoMaterial } from '@/types'
 
 const formatter = new Intl.NumberFormat('es-AR', {
   style: 'currency',
@@ -44,6 +44,14 @@ export default function DetalleObraPage() {
   const [fechaProv, setFechaProv] = useState(() => new Date().toISOString().slice(0, 10))
   const [observacionesProv, setObservacionesProv] = useState('')
   const [agregandoProv, setAgregandoProv] = useState(false)
+  const [gastosMat, setGastosMat] = useState<GastoMaterial[]>([])
+  const [errorMat, setErrorMat] = useState('')
+  const [material, setMaterial] = useState('')
+  const [cantidad, setCantidad] = useState('')
+  const [montoMat, setMontoMat] = useState('')
+  const [fechaMat, setFechaMat] = useState(() => new Date().toISOString().slice(0, 10))
+  const [observacionesMat, setObservacionesMat] = useState('')
+  const [agregandoMat, setAgregandoMat] = useState(false)
 
   const fetchData = () => {
     const supabase = createClient()
@@ -79,6 +87,14 @@ export default function DetalleObraPage() {
       .order('fecha', { ascending: false })
       .then(({ data }) => {
         if (data) setPagosProveedor(data)
+      })
+    supabase
+      .from('gastos_materiales')
+      .select('*')
+      .eq('obra_id', id)
+      .order('fecha', { ascending: false })
+      .then(({ data }) => {
+        if (data) setGastosMat(data)
       })
   }
 
@@ -207,9 +223,54 @@ export default function DetalleObraPage() {
     if (res.ok) fetchData()
   }
 
+  const handleAgregarMat = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const montoNum = Number(montoMat)
+    if (!material.trim() || !montoNum || montoNum <= 0 || !fechaMat) {
+      setErrorMat('Completá material, monto (mayor a 0) y fecha')
+      return
+    }
+
+    setErrorMat('')
+    setAgregandoMat(true)
+    const res = await fetch(`/api/obras/${id}/gastos-materiales`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        material: material.trim(),
+        cantidad: cantidad.trim() || null,
+        monto: montoNum,
+        fecha: fechaMat,
+        observaciones: observacionesMat.trim() || null,
+      }),
+    })
+
+    setAgregandoMat(false)
+    if (!res.ok) {
+      const err = await res.json()
+      setErrorMat(typeof err.error === 'string' ? err.error : 'Error al registrar gasto de material')
+      return
+    }
+
+    setMaterial('')
+    setCantidad('')
+    setMontoMat('')
+    setFechaMat(new Date().toISOString().slice(0, 10))
+    setObservacionesMat('')
+    fetchData()
+  }
+
+  const handleEliminarMat = async (gastoId: string, gastoMonto: number) => {
+    if (!confirm(`¿Eliminar el gasto de material de ${formatter.format(gastoMonto)}?`)) return
+
+    const res = await fetch(`/api/gastos-materiales/${gastoId}`, { method: 'DELETE' })
+    if (res.ok) fetchData()
+  }
+
   const total = items.reduce((s, i) => s + Number(i.monto), 0)
   const totalPagos = pagos.reduce((s, p) => s + Number(p.monto), 0)
   const totalProv = pagosProveedor.reduce((s, p) => s + Number(p.monto), 0)
+  const totalMat = gastosMat.reduce((s, g) => s + Number(g.monto), 0)
 
   if (loading) {
     return (
@@ -539,6 +600,121 @@ export default function DetalleObraPage() {
           <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-3">
             <p className="font-semibold text-slate-800">Total pagado a proveedores</p>
             <p className="font-semibold text-slate-800">{formatter.format(totalProv)}</p>
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-lg bg-white p-4 shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-800">Gastos de materiales</h2>
+
+          {errorMat && (
+            <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-alert">{errorMat}</p>
+          )}
+
+          <form onSubmit={handleAgregarMat} className="mt-4 grid grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="material" className="block text-sm font-medium text-slate-700">
+                Material
+              </label>
+              <input
+                id="material"
+                value={material}
+                onChange={(e) => setMaterial(e.target.value)}
+                placeholder="Ej: Cemento"
+                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+              />
+            </div>
+            <div>
+              <label htmlFor="cantidad" className="block text-sm font-medium text-slate-700">
+                Cantidad
+              </label>
+              <input
+                id="cantidad"
+                value={cantidad}
+                onChange={(e) => setCantidad(e.target.value)}
+                placeholder="Ej: 10 bolsas"
+                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+              />
+            </div>
+            <div>
+              <label htmlFor="montoMat" className="block text-sm font-medium text-slate-700">
+                Monto
+              </label>
+              <input
+                id="montoMat"
+                type="number"
+                inputMode="decimal"
+                min="0.01"
+                step="0.01"
+                value={montoMat}
+                onChange={(e) => setMontoMat(e.target.value)}
+                placeholder="0,00"
+                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+              />
+            </div>
+            <div>
+              <label htmlFor="fechaMat" className="block text-sm font-medium text-slate-700">
+                Fecha
+              </label>
+              <input
+                id="fechaMat"
+                type="date"
+                value={fechaMat}
+                onChange={(e) => setFechaMat(e.target.value)}
+                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+              />
+            </div>
+            <div className="col-span-2">
+              <label htmlFor="observacionesMat" className="block text-sm font-medium text-slate-700">
+                Observaciones
+              </label>
+              <input
+                id="observacionesMat"
+                value={observacionesMat}
+                onChange={(e) => setObservacionesMat(e.target.value)}
+                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={agregandoMat}
+              className="col-span-2 rounded-lg bg-blue-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+            >
+              {agregandoMat ? 'Registrando...' : '+ Registrar gasto de material'}
+            </button>
+          </form>
+
+          <div className="mt-4 divide-y divide-slate-100">
+            {gastosMat.length === 0 ? (
+              <p className="py-3 text-sm text-slate-500">No hay gastos de materiales registrados aún</p>
+            ) : (
+              gastosMat.map((gasto) => (
+                <div key={gasto.id} className="flex items-center justify-between py-2">
+                  <div>
+                    <p className="font-medium text-slate-800">
+                      {gasto.material}
+                      {gasto.cantidad && <span className="text-slate-500"> · {gasto.cantidad}</span>}
+                    </p>
+                    <p className="text-sm text-slate-500">
+                      {formatter.format(Number(gasto.monto))} · {formatFecha(gasto.fecha)}
+                    </p>
+                    {gasto.observaciones && (
+                      <p className="text-xs text-slate-400">{gasto.observaciones}</p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => handleEliminarMat(gasto.id, Number(gasto.monto))}
+                    className="text-sm text-red-alert hover:underline"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-3">
+            <p className="font-semibold text-slate-800">Total en materiales</p>
+            <p className="font-semibold text-slate-800">{formatter.format(totalMat)}</p>
           </div>
         </div>
       </div>
