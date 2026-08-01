@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# prompt de contexto (no subir a GitHub)
+prompt_senior_zenitdc.md
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
