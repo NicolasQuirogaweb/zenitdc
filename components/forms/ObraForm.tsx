@@ -19,7 +19,7 @@ export default function ObraForm({ defaultValues, onSubmit, submitLabel }: Props
   useEffect(() => {
     const supabase = createClient()
     supabase.from('clientes').select('id, nombre').order('nombre').then(({ data }) => {
-      if (data) setClientes(data)
+      if (data) setClientes(data as unknown as Cliente[])
     })
   }, [])
 

@@ -97,6 +97,12 @@ export default function ObrasPage() {
                   </div>
                   <div className="flex gap-2 ml-3">
                     <a
+                      href={`/obras/${o.id}`}
+                      className="text-sm text-blue-accent hover:underline"
+                    >
+                      Ver
+                    </a>
+                    <a
                       href={`/obras/${o.id}/editar`}
                       className="text-sm text-blue-accent hover:underline"
                     >
