@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import type { Obra, PresupuestoItem, PagoCliente } from '@/types'
+import type { Obra, PresupuestoItem, PagoCliente, PagoProveedor } from '@/types'
 
 const formatter = new Intl.NumberFormat('es-AR', {
   style: 'currency',
@@ -36,6 +36,14 @@ export default function DetalleObraPage() {
   const [metodoPago, setMetodoPago] = useState('')
   const [observacionesPago, setObservacionesPago] = useState('')
   const [agregandoPago, setAgregandoPago] = useState(false)
+  const [pagosProveedor, setPagosProveedor] = useState<PagoProveedor[]>([])
+  const [errorProv, setErrorProv] = useState('')
+  const [proveedor, setProveedor] = useState('')
+  const [concepto, setConcepto] = useState('')
+  const [montoProv, setMontoProv] = useState('')
+  const [fechaProv, setFechaProv] = useState(() => new Date().toISOString().slice(0, 10))
+  const [observacionesProv, setObservacionesProv] = useState('')
+  const [agregandoProv, setAgregandoProv] = useState(false)
 
   const fetchData = () => {
     const supabase = createClient()
@@ -63,6 +71,14 @@ export default function DetalleObraPage() {
       .order('fecha', { ascending: false })
       .then(({ data }) => {
         if (data) setPagos(data)
+      })
+    supabase
+      .from('pagos_proveedores')
+      .select('*')
+      .eq('obra_id', id)
+      .order('fecha', { ascending: false })
+      .then(({ data }) => {
+        if (data) setPagosProveedor(data)
       })
   }
 
@@ -147,8 +163,53 @@ export default function DetalleObraPage() {
     if (res.ok) fetchData()
   }
 
+  const handleAgregarProv = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const montoNum = Number(montoProv)
+    if (!proveedor.trim() || !montoNum || montoNum <= 0 || !fechaProv) {
+      setErrorProv('Completá proveedor, monto (mayor a 0) y fecha')
+      return
+    }
+
+    setErrorProv('')
+    setAgregandoProv(true)
+    const res = await fetch(`/api/obras/${id}/pagos-proveedores`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        proveedor: proveedor.trim(),
+        concepto: concepto.trim() || null,
+        monto: montoNum,
+        fecha: fechaProv,
+        observaciones: observacionesProv.trim() || null,
+      }),
+    })
+
+    setAgregandoProv(false)
+    if (!res.ok) {
+      const err = await res.json()
+      setErrorProv(typeof err.error === 'string' ? err.error : 'Error al registrar pago a proveedor')
+      return
+    }
+
+    setProveedor('')
+    setConcepto('')
+    setMontoProv('')
+    setFechaProv(new Date().toISOString().slice(0, 10))
+    setObservacionesProv('')
+    fetchData()
+  }
+
+  const handleEliminarProv = async (pagoId: string, pagoMonto: number) => {
+    if (!confirm(`¿Eliminar el pago a proveedor de ${formatter.format(pagoMonto)}?`)) return
+
+    const res = await fetch(`/api/pagos-proveedores/${pagoId}`, { method: 'DELETE' })
+    if (res.ok) fetchData()
+  }
+
   const total = items.reduce((s, i) => s + Number(i.monto), 0)
   const totalPagos = pagos.reduce((s, p) => s + Number(p.monto), 0)
+  const totalProv = pagosProveedor.reduce((s, p) => s + Number(p.monto), 0)
 
   if (loading) {
     return (
@@ -363,6 +424,121 @@ export default function DetalleObraPage() {
           <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-3">
             <p className="font-semibold text-slate-800">Total pagado</p>
             <p className="font-semibold text-slate-800">{formatter.format(totalPagos)}</p>
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-lg bg-white p-4 shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-800">Pagos a proveedores</h2>
+
+          {errorProv && (
+            <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-alert">{errorProv}</p>
+          )}
+
+          <form onSubmit={handleAgregarProv} className="mt-4 grid grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="proveedor" className="block text-sm font-medium text-slate-700">
+                Proveedor
+              </label>
+              <input
+                id="proveedor"
+                value={proveedor}
+                onChange={(e) => setProveedor(e.target.value)}
+                placeholder="Ej: Ferretería Central"
+                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+              />
+            </div>
+            <div>
+              <label htmlFor="concepto" className="block text-sm font-medium text-slate-700">
+                Concepto
+              </label>
+              <input
+                id="concepto"
+                value={concepto}
+                onChange={(e) => setConcepto(e.target.value)}
+                placeholder="Ej: Material eléctrico"
+                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+              />
+            </div>
+            <div>
+              <label htmlFor="montoProv" className="block text-sm font-medium text-slate-700">
+                Monto
+              </label>
+              <input
+                id="montoProv"
+                type="number"
+                inputMode="decimal"
+                min="0.01"
+                step="0.01"
+                value={montoProv}
+                onChange={(e) => setMontoProv(e.target.value)}
+                placeholder="0,00"
+                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+              />
+            </div>
+            <div>
+              <label htmlFor="fechaProv" className="block text-sm font-medium text-slate-700">
+                Fecha
+              </label>
+              <input
+                id="fechaProv"
+                type="date"
+                value={fechaProv}
+                onChange={(e) => setFechaProv(e.target.value)}
+                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+              />
+            </div>
+            <div className="col-span-2">
+              <label htmlFor="observacionesProv" className="block text-sm font-medium text-slate-700">
+                Observaciones
+              </label>
+              <input
+                id="observacionesProv"
+                value={observacionesProv}
+                onChange={(e) => setObservacionesProv(e.target.value)}
+                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={agregandoProv}
+              className="col-span-2 rounded-lg bg-blue-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+            >
+              {agregandoProv ? 'Registrando...' : '+ Registrar pago a proveedor'}
+            </button>
+          </form>
+
+          <div className="mt-4 divide-y divide-slate-100">
+            {pagosProveedor.length === 0 ? (
+              <p className="py-3 text-sm text-slate-500">No hay pagos a proveedores registrados aún</p>
+            ) : (
+              pagosProveedor.map((pago) => (
+                <div key={pago.id} className="flex items-center justify-between py-2">
+                  <div>
+                    <p className="font-medium text-slate-800">
+                      {pago.proveedor}
+                      {pago.concepto && <span className="text-slate-500"> · {pago.concepto}</span>}
+                    </p>
+                    <p className="text-sm text-slate-500">
+                      {formatter.format(Number(pago.monto))} · {formatFecha(pago.fecha)}
+                    </p>
+                    {pago.observaciones && (
+                      <p className="text-xs text-slate-400">{pago.observaciones}</p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => handleEliminarProv(pago.id, Number(pago.monto))}
+                    className="text-sm text-red-alert hover:underline"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-3">
+            <p className="font-semibold text-slate-800">Total pagado a proveedores</p>
+            <p className="font-semibold text-slate-800">{formatter.format(totalProv)}</p>
           </div>
         </div>
       </div>
