@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { createClient, getAuthenticatedUser } from '@/lib/supabase/server'
 import { obraSchema } from '@/lib/validations/obras'
 
+const BUCKET = 'fotos-obra'
+
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getAuthenticatedUser()
@@ -45,6 +47,24 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     const { id } = await params
 
     const supabase = await createClient()
+
+    const { data: fotos, error: fotosError } = await supabase
+      .from('fotos_obra')
+      .select('storage_path')
+      .eq('obra_id', id)
+
+    if (fotosError) {
+      return NextResponse.json({ error: fotosError.message }, { status: 500 })
+    }
+
+    const paths = (fotos ?? []).map((foto) => foto.storage_path)
+    if (paths.length > 0) {
+      const { error: removeError } = await supabase.storage.from(BUCKET).remove(paths)
+      if (removeError) {
+        return NextResponse.json({ error: removeError.message }, { status: 500 })
+      }
+    }
+
     const { error } = await supabase.from('obras').delete().eq('id', id)
 
     if (error) {

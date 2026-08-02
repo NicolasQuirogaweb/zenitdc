@@ -72,6 +72,13 @@ export default function DetalleObraPage() {
 
         {obra.descripcion && <p className="mt-3 text-sm text-slate-600">{obra.descripcion}</p>}
 
+        <a
+          href={`/obras/${id}/fotos`}
+          className="mt-4 inline-flex items-center rounded-lg bg-blue-accent px-4 py-2 text-sm font-semibold text-white"
+        >
+          Ver fotos
+        </a>
+
         <div className="mt-6 space-y-4">
           <PresupuestoSection obraId={id} />
           <PagosClientesSection obraId={id} />
