@@ -37,19 +37,15 @@ export async function getBalanceGeneral(): Promise<BalanceGeneral> {
 
   const obraIds = obras.data?.map((o) => o.id) ?? []
 
-  let totalIngresosEmpresa = 0
-  let totalEgresosEmpresa = 0
+  const balances = await Promise.all(obraIds.map((id) => getBalanceObra(id)))
 
-  for (const id of obraIds) {
-    const balance = await getBalanceObra(id)
-    totalIngresosEmpresa += balance.total_ingresos
-    totalEgresosEmpresa += balance.total_egresos
-  }
+  const totalIngresosEmpresa = balances.reduce((s, b) => s + b.total_ingresos, 0)
 
   const totalGastosGenerales =
     gastosGenerales.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0
 
-  totalEgresosEmpresa += totalGastosGenerales
+  const totalEgresosEmpresa =
+    balances.reduce((s, b) => s + b.total_egresos, 0) + totalGastosGenerales
 
   return {
     total_ingresos: totalIngresosEmpresa,
