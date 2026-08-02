@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getAuthenticatedUser } from '@/lib/supabase/server'
 import { gastoMaterialSchema } from '@/lib/validations/gastosMaterial'
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const user = await getAuthenticatedUser()
+    if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+
     const { id } = await params
     const body = await request.json()
     const parsed = gastoMaterialSchema.safeParse(body)
@@ -36,6 +39,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const user = await getAuthenticatedUser()
+    if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+
     const { id } = await params
 
     const supabase = await createClient()

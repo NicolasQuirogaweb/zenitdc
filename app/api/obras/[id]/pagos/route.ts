@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getAuthenticatedUser } from '@/lib/supabase/server'
 import { pagoClienteSchema } from '@/lib/validations/pagos'
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const user = await getAuthenticatedUser()
+    if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+
     const { id } = await params
     const body = await request.json()
     const parsed = pagoClienteSchema.safeParse(body)

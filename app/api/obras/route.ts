@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getAuthenticatedUser } from '@/lib/supabase/server'
 import { obraSchema } from '@/lib/validations/obras'
 
 export async function POST(request: Request) {
   try {
+    const user = await getAuthenticatedUser()
+    if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+
     const body = await request.json()
     const parsed = obraSchema.safeParse(body)
 
