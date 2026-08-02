@@ -24,10 +24,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 
     const fotosConUrl = await Promise.all(
       fotos.map(async (foto) => {
-        const { data: url } = await supabase.storage
+        const { data: signed } = await supabase.storage
           .from(BUCKET)
           .createSignedUrl(foto.storage_path, 3600)
-        return { ...foto, url: url ?? null }
+        return { ...foto, url: signed?.signedUrl ?? null }
       })
     )
 
@@ -105,11 +105,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: insertError.message }, { status: 500 })
     }
 
-    const { data: url } = await supabase.storage
+    const { data: signed } = await supabase.storage
       .from(BUCKET)
       .createSignedUrl(storagePath, 3600)
 
-    return NextResponse.json({ ...data, url: url ?? null }, { status: 201 })
+    return NextResponse.json({ ...data, url: signed?.signedUrl ?? null }, { status: 201 })
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Error inesperado' },
