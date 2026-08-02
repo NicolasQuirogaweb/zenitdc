@@ -8,6 +8,7 @@ import PresupuestoSection from '@/components/obra/PresupuestoSection'
 import PagosClientesSection from '@/components/obra/PagosClientesSection'
 import PagosProveedoresSection from '@/components/obra/PagosProveedoresSection'
 import GastosMaterialesSection from '@/components/obra/GastosMaterialesSection'
+import BalanceSection from '@/components/obra/BalanceSection'
 
 interface ObraConCliente extends Obra {
   clientes: { nombre: string } | null
@@ -80,6 +81,7 @@ export default function DetalleObraPage() {
         </a>
 
         <div className="mt-6 space-y-4">
+          <BalanceSection obraId={id} />
           <PresupuestoSection obraId={id} />
           <PagosClientesSection obraId={id} />
           <PagosProveedoresSection obraId={id} />
