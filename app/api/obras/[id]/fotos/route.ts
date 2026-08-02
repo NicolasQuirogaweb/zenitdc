@@ -27,7 +27,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         const { data: url } = await supabase.storage
           .from(BUCKET)
           .createSignedUrl(foto.storage_path, 3600)
-        return { ...foto, signed_url: url ?? null }
+        return { ...foto, url: url ?? null }
       })
     )
 
