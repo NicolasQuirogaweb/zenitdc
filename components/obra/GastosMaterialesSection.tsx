@@ -45,7 +45,7 @@ export default function GastosMaterialesSection({ obraId }: Props) {
 
     setError('')
     setAgregando(true)
-    const res = await fetch(`/api/obras/${obraId}/gastos-material`, {
+    const res = await fetch(`/api/obras/${obraId}/gastos-materiales`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -75,7 +75,7 @@ export default function GastosMaterialesSection({ obraId }: Props) {
   const handleEliminar = async (gastoId: string, gastoMonto: number) => {
     if (!confirm(`¿Eliminar el gasto de ${formatMoney(gastoMonto)}?`)) return
 
-    const res = await fetch(`/api/gastos-material/${gastoId}`, { method: 'DELETE' })
+    const res = await fetch(`/api/gastos-materiales/${gastoId}`, { method: 'DELETE' })
     if (res.ok) fetchGastos()
   }
 

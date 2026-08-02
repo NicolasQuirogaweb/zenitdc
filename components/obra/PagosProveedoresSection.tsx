@@ -45,7 +45,7 @@ export default function PagosProveedoresSection({ obraId }: Props) {
 
     setError('')
     setAgregando(true)
-    const res = await fetch(`/api/obras/${obraId}/pagos-proveedor`, {
+    const res = await fetch(`/api/obras/${obraId}/pagos-proveedores`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -75,7 +75,7 @@ export default function PagosProveedoresSection({ obraId }: Props) {
   const handleEliminar = async (pagoId: string, pagoMonto: number) => {
     if (!confirm(`¿Eliminar el pago a proveedor de ${formatMoney(pagoMonto)}?`)) return
 
-    const res = await fetch(`/api/pagos-proveedor/${pagoId}`, { method: 'DELETE' })
+    const res = await fetch(`/api/pagos-proveedores/${pagoId}`, { method: 'DELETE' })
     if (res.ok) fetchPagos()
   }
 
