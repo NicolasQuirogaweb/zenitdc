@@ -48,6 +48,15 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     const { error } = await supabase.from('clientes').delete().eq('id', id)
 
     if (error) {
+      if (
+        error.message.includes('foreign key constraint') ||
+        error.message.includes('violates foreign key')
+      ) {
+        return NextResponse.json(
+          { error: 'No se puede eliminar: el cliente tiene obras asociadas' },
+          { status: 409 }
+        )
+      }
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 

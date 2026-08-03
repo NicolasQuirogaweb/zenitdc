@@ -8,6 +8,7 @@ import type { Cliente } from '@/types'
 export default function ClientesPage() {
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const router = useRouter()
   const supabase = createClient()
 
@@ -30,7 +31,13 @@ export default function ClientesPage() {
     if (!confirm('¿Eliminar este cliente?')) return
 
     const res = await fetch(`/api/clientes/${id}`, { method: 'DELETE' })
-    if (res.ok) fetchClientes()
+    if (res.ok) {
+      setError('')
+      fetchClientes()
+      return
+    }
+    const err = await res.json()
+    setError(typeof err.error === 'string' ? err.error : 'No se pudo eliminar el cliente')
   }
 
   if (loading) {
@@ -53,6 +60,10 @@ export default function ClientesPage() {
             + Nuevo
           </a>
         </div>
+
+        {error && (
+          <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-alert">{error}</p>
+        )}
 
         {clientes.length === 0 ? (
           <div className="mt-8 text-center">
