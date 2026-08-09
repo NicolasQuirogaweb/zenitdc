@@ -1,4 +1,4 @@
-const VERSION = 'zenitdc-v1'
+const VERSION = 'zenitdc-v2'
 const CACHE_STATIC = `${VERSION}-static`
 const CACHE_NAV = `${VERSION}-nav`
 
@@ -47,24 +47,23 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
+  if (url.pathname.startsWith('/_next/webpack-')) {
+    return
+  }
+
   if (request.mode === 'navigate') {
     event.respondWith(networkFirstNavigation(request))
     return
   }
 
-  if (url.pathname.startsWith('/_next/') || url.pathname.startsWith('/static/')) {
-    event.respondWith(cacheFirstStatic(request))
-    return
-  }
-
-  event.respondWith(cacheFirstStatic(request))
+  event.respondWith(networkFirst(request))
 })
 
 async function networkFirstNavigation(request) {
   const cache = await caches.open(CACHE_NAV)
   try {
     const response = await fetch(request)
-    if (response && response.ok) {
+    if (response && response.ok && !response.redirected) {
       await cache.put(request, response.clone())
     }
     return response
@@ -75,17 +74,17 @@ async function networkFirstNavigation(request) {
   }
 }
 
-async function cacheFirstStatic(request) {
+async function networkFirst(request) {
   const cache = await caches.open(CACHE_STATIC)
-  const cached = await cache.match(request)
-  if (cached) return cached
   try {
     const response = await fetch(request)
-    if (response && response.ok) {
+    if (response && response.ok && !response.redirected) {
       await cache.put(request, response.clone())
     }
     return response
   } catch {
-    return cached
+    const cached = await cache.match(request)
+    if (cached) return cached
+    return Response.error()
   }
 }
