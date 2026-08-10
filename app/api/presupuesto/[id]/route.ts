@@ -17,6 +17,32 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     }
 
     const supabase = await createClient()
+    const { data: actual } = await supabase
+      .from('presupuesto_items')
+      .select('obra_id')
+      .eq('id', id)
+      .single()
+
+    const rubroNormalizado = parsed.data.rubro.trim().toLowerCase()
+
+    if (actual) {
+      const { data: existentes } = await supabase
+        .from('presupuesto_items')
+        .select('id, rubro')
+        .eq('obra_id', actual.obra_id)
+
+      const yaExiste = existentes?.some(
+        (item) => item.id !== id && item.rubro.trim().toLowerCase() === rubroNormalizado
+      )
+
+      if (yaExiste) {
+        return NextResponse.json(
+          { error: `El rubro "${parsed.data.rubro}" ya está cargado en esta obra. Podés editarlo.` },
+          { status: 409 }
+        )
+      }
+    }
+
     const { data, error } = await supabase
       .from('presupuesto_items')
       .update(parsed.data)

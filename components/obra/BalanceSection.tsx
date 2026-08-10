@@ -34,7 +34,7 @@ export default function BalanceSection({ obraId, refreshKey }: Props) {
   if (loading) {
     return (
       <div className="rounded-lg bg-white p-4 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-800">Balance</h2>
+        <h2 className="text-lg font-semibold text-slate-800">Balance de la obra</h2>
         <p className="mt-3 text-sm text-slate-500">Cargando...</p>
       </div>
     )
@@ -43,7 +43,7 @@ export default function BalanceSection({ obraId, refreshKey }: Props) {
   if (error || !balance) {
     return (
       <div className="rounded-lg bg-white p-4 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-800">Balance</h2>
+        <h2 className="text-lg font-semibold text-slate-800">Balance de la obra</h2>
         <p className="mt-3 text-sm text-red-alert">{error || 'No disponible'}</p>
       </div>
     )
@@ -51,10 +51,12 @@ export default function BalanceSection({ obraId, refreshKey }: Props) {
 
   const resultado = balance.total_ingresos - balance.total_egresos
   const resultadoPositivo = resultado >= 0
+  const saldoPendiente = balance.total_presupuestado - balance.total_ingresos
+  const saldoPendientePositivo = saldoPendiente > 0
 
   return (
     <div className="rounded-lg bg-white p-4 shadow-sm">
-      <h2 className="text-lg font-semibold text-slate-800">Balance</h2>
+      <h2 className="text-lg font-semibold text-slate-800">Balance de la obra</h2>
 
       <div className="mt-4 space-y-3">
         <div className="flex items-center justify-between">
@@ -64,8 +66,18 @@ export default function BalanceSection({ obraId, refreshKey }: Props) {
           </p>
         </div>
         <div className="flex items-center justify-between">
-          <p className="text-sm text-slate-500">Ingresos</p>
+          <p className="text-sm text-slate-500">Pagos del cliente</p>
           <p className="font-semibold text-green-600">{formatMoney(balance.total_ingresos)}</p>
+        </div>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-slate-500">Saldo pendiente del cliente</p>
+          <p
+            className={`font-bold ${
+              saldoPendientePositivo ? 'text-red-alert' : 'text-green-600'
+            }`}
+          >
+            {formatMoney(saldoPendiente)}
+          </p>
         </div>
         <div className="flex items-center justify-between">
           <p className="text-sm text-slate-500">Egresos</p>

@@ -17,6 +17,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       .select('*')
       .eq('obra_id', id)
       .order('fecha', { ascending: false })
+      .order('created_at', { ascending: false })
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })

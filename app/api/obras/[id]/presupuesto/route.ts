@@ -17,6 +17,23 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
 
     const supabase = await createClient()
+    const { data: existentes } = await supabase
+      .from('presupuesto_items')
+      .select('rubro')
+      .eq('obra_id', id)
+
+    const rubroNormalizado = parsed.data.rubro.trim().toLowerCase()
+    const yaExiste = existentes?.some(
+      (item) => item.rubro.trim().toLowerCase() === rubroNormalizado
+    )
+
+    if (yaExiste) {
+      return NextResponse.json(
+        { error: `El rubro "${parsed.data.rubro}" ya está cargado en esta obra. Podés editarlo.` },
+        { status: 409 }
+      )
+    }
+
     const { data, error } = await supabase
       .from('presupuesto_items')
       .insert({ ...parsed.data, obra_id: id })

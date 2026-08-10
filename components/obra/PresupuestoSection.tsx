@@ -18,6 +18,9 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
   const [rubro, setRubro] = useState('')
   const [monto, setMonto] = useState('')
   const [agregando, setAgregando] = useState(false)
+  const [editandoId, setEditandoId] = useState<string | null>(null)
+  const [editRubro, setEditRubro] = useState('')
+  const [editMonto, setEditMonto] = useState('')
 
   const fetchItems = () => {
     const supabase = createClient()
@@ -25,7 +28,7 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
       .from('presupuesto_items')
       .select('*')
       .eq('obra_id', obraId)
-      .order('created_at', { ascending: true })
+      .order('created_at', { ascending: false })
       .then(({ data }) => {
         if (data) setItems(data)
       })
@@ -40,6 +43,14 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
     const montoNum = Number(monto)
     if (!rubro.trim() || !montoNum || montoNum <= 0) {
       setError('Completá el rubro y un monto mayor a 0')
+      return
+    }
+
+    const yaExiste = items.some(
+      (item) => item.rubro.trim().toLowerCase() === rubro.trim().toLowerCase()
+    )
+    if (yaExiste) {
+      setError(`El rubro "${rubro.trim()}" ya está cargado. Podés editarlo.`)
       return
     }
 
@@ -72,6 +83,57 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
       fetchItems()
       onDatosCambiaron?.()
     }
+  }
+
+  const iniciarEdicion = (item: PresupuestoItem) => {
+    setEditandoId(item.id)
+    setEditRubro(item.rubro)
+    setEditMonto(String(item.monto))
+    setError('')
+  }
+
+  const cancelarEdicion = () => {
+    setEditandoId(null)
+    setEditRubro('')
+    setEditMonto('')
+    setError('')
+  }
+
+  const guardarEdicion = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editandoId) return
+    const montoNum = Number(editMonto)
+    if (!editRubro.trim() || !montoNum || montoNum <= 0) {
+      setError('Completá el rubro y un monto mayor a 0')
+      return
+    }
+
+    const yaExiste = items.some(
+      (item) =>
+        item.id !== editandoId &&
+        item.rubro.trim().toLowerCase() === editRubro.trim().toLowerCase()
+    )
+    if (yaExiste) {
+      setError(`El rubro "${editRubro.trim()}" ya está cargado en otro item.`)
+      return
+    }
+
+    setError('')
+    const res = await fetch(`/api/presupuesto/${editandoId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rubro: editRubro.trim(), monto: montoNum }),
+    })
+
+    if (!res.ok) {
+      const err = await res.json()
+      setError(typeof err.error === 'string' ? err.error : 'Error al guardar cambios')
+      return
+    }
+
+    cancelarEdicion()
+    fetchItems()
+    onDatosCambiaron?.()
   }
 
   const total = items.reduce((s, i) => s + Number(i.monto), 0)
@@ -124,25 +186,70 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
         {items.length === 0 ? (
           <p className="py-3 text-sm text-slate-500">No hay rubros cargados aún</p>
         ) : (
-          items.map((item) => (
-            <div key={item.id} className="flex items-center justify-between py-2">
-              <div>
-                <p className="font-medium text-slate-800">{item.rubro}</p>
-                <p className="text-sm text-slate-500">{formatMoney(Number(item.monto))}</p>
+          items.map((item) => {
+            const editando = item.id === editandoId
+            return (
+              <div key={item.id} className="flex items-center justify-between py-2">
+                {editando ? (
+                  <form onSubmit={guardarEdicion} className="flex w-full items-center gap-2">
+                    <input
+                      value={editRubro}
+                      onChange={(e) => setEditRubro(e.target.value)}
+                      className="block w-full min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+                    />
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min="0.01"
+                      step="0.01"
+                      value={editMonto}
+                      onChange={(e) => setEditMonto(e.target.value)}
+                      className="block w-28 rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+                    />
+                    <button
+                      type="submit"
+                      className="rounded-lg bg-green-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-green-700"
+                    >
+                      Guardar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelarEdicion}
+                      className="rounded-lg bg-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-300"
+                    >
+                      Cancelar
+                    </button>
+                  </form>
+                ) : (
+                  <>
+                    <div>
+                      <p className="font-medium text-slate-800">{item.rubro}</p>
+                      <p className="text-sm text-slate-500">{formatMoney(Number(item.monto))}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => iniciarEdicion(item)}
+                        className="text-sm text-blue-accent hover:underline"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => handleEliminar(item.id, item.rubro)}
+                        className="text-sm text-red-alert hover:underline"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
-              <button
-                onClick={() => handleEliminar(item.id, item.rubro)}
-                className="text-sm text-red-alert hover:underline"
-              >
-                Eliminar
-              </button>
-            </div>
-          ))
+            )
+          })
         )}
       </div>
 
       <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-3">
-        <p className="font-semibold text-slate-800">Total presupuestado</p>
+        <p className="font-semibold text-slate-800">Total presupuesto aprobado</p>
         <p className="font-semibold text-slate-800">{formatMoney(total)}</p>
       </div>
     </div>

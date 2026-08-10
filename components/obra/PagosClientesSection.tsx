@@ -14,7 +14,6 @@ interface Props {
 
 export default function PagosClientesSection({ obraId, onDatosCambiaron }: Props) {
   const [pagos, setPagos] = useState<PagoCliente[]>([])
-  const [totalPresupuestado, setTotalPresupuestado] = useState(0)
   const [error, setError] = useState('')
   const [monto, setMonto] = useState('')
   const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10))
@@ -36,15 +35,6 @@ export default function PagosClientesSection({ obraId, onDatosCambiaron }: Props
   }
 
   useEffect(() => {
-    const supabase = createClient()
-    supabase
-      .from('presupuesto_items')
-      .select('monto')
-      .eq('obra_id', obraId)
-      .then(({ data }) => {
-        const total = data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0
-        setTotalPresupuestado(total)
-      })
     fetchPagos()
   }, [obraId])
 
@@ -93,9 +83,6 @@ export default function PagosClientesSection({ obraId, onDatosCambiaron }: Props
       onDatosCambiaron?.()
     }
   }
-
-  const totalPagado = pagos.reduce((s, p) => s + Number(p.monto), 0)
-  const saldoPendiente = totalPresupuestado - totalPagado
 
   return (
     <div className="rounded-lg bg-white p-4 shadow-sm">
@@ -191,21 +178,6 @@ export default function PagosClientesSection({ obraId, onDatosCambiaron }: Props
             </div>
           ))
         )}
-      </div>
-
-      <div className="mt-4 space-y-1 border-t border-slate-200 pt-3">
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-slate-500">Total presupuesto aprobado</p>
-          <p className="font-semibold text-slate-800">{formatMoney(totalPresupuestado)}</p>
-        </div>
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-slate-500">Total pagado</p>
-          <p className="font-semibold text-slate-800">{formatMoney(totalPagado)}</p>
-        </div>
-        <div className="flex items-center justify-between border-t border-slate-100 pt-2">
-          <p className="font-semibold text-slate-800">Saldo pendiente</p>
-          <p className="font-bold text-red-alert">{formatMoney(saldoPendiente)}</p>
-        </div>
       </div>
     </div>
   )
