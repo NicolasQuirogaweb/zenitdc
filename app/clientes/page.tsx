@@ -53,12 +53,17 @@ export default function ClientesPage() {
       <div className="mx-auto max-w-lg">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-slate-800">Clientes</h1>
-          <a
-            href="/clientes/nuevo"
-            className="rounded-lg bg-blue-accent px-3 py-1.5 text-sm font-semibold text-white"
-          >
-            + Nuevo
-          </a>
+          <div className="flex items-center gap-3">
+            <a href="/dashboard" className="text-sm text-blue-accent hover:underline">
+              Volver
+            </a>
+            <a
+              href="/clientes/nuevo"
+              className="rounded-lg bg-blue-accent px-3 py-1.5 text-sm font-semibold text-white"
+            >
+              + Nuevo
+            </a>
+          </div>
         </div>
 
         {error && (
