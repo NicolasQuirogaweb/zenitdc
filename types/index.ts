@@ -78,8 +78,18 @@ export interface BalanceObra {
   diferencia_vs_presupuesto: number
 }
 
+export interface BalancePorObra {
+  obra_id: string
+  obra_nombre: string
+  cliente_nombre: string
+  total_ingresos: number
+  total_egresos: number
+  resultado: number
+}
+
 export interface BalanceGeneral {
   total_ingresos: number
   total_egresos: number
   resultado: number
+  por_obra: BalancePorObra[]
 }
