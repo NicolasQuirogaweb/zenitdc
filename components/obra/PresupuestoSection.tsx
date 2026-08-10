@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { formatMoney } from '@/lib/utils/formato'
 import { RUBROS_PRESUPUESTO } from '@/lib/constantes'
 import SelectConOpciones from '@/components/ui/SelectConOpciones'
+import CollapsibleCard from '@/components/ui/CollapsibleCard'
 import type { PresupuestoItem } from '@/types'
 
 interface Props {
@@ -139,10 +140,11 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
   const total = items.reduce((s, i) => s + Number(i.monto), 0)
 
   return (
-    <div className="rounded-lg bg-white p-4 shadow-sm">
-      <h2 className="text-lg font-semibold text-slate-800">Presupuesto aprobado</h2>
-      <p className="mt-1 text-sm text-slate-500">Cargá el detalle del presupuesto general</p>
-
+    <CollapsibleCard
+      titulo="Presupuesto aprobado"
+      subtitulo="Cargá el detalle del presupuesto general"
+      abiertoInicial
+    >
       {error && (
         <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-alert">{error}</p>
       )}
@@ -253,6 +255,6 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
         <p className="font-semibold text-slate-800">Total presupuesto aprobado</p>
         <p className="font-semibold text-slate-800">{formatMoney(total)}</p>
       </div>
-    </div>
+    </CollapsibleCard>
   )
 }

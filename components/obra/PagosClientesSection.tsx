@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { formatMoney, formatFecha } from '@/lib/utils/formato'
 import { METODOS_PAGO } from '@/lib/constantes'
 import SelectConOpciones from '@/components/ui/SelectConOpciones'
+import CollapsibleCard from '@/components/ui/CollapsibleCard'
 import type { PagoCliente } from '@/types'
 
 interface Props {
@@ -85,10 +86,10 @@ export default function PagosClientesSection({ obraId, onDatosCambiaron }: Props
   }
 
   return (
-    <div className="rounded-lg bg-white p-4 shadow-sm">
-      <h2 className="text-lg font-semibold text-slate-800">Pagos del cliente</h2>
-      <p className="mt-1 text-sm text-slate-500">Registrá los pagos recibidos del cliente</p>
-
+    <CollapsibleCard
+      titulo="Pagos del cliente"
+      subtitulo="Registrá los pagos recibidos del cliente"
+    >
       {error && (
         <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-alert">{error}</p>
       )}
@@ -180,6 +181,6 @@ export default function PagosClientesSection({ obraId, onDatosCambiaron }: Props
           ))
         )}
       </div>
-    </div>
+    </CollapsibleCard>
   )
 }

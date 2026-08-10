@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { formatMoney, formatFecha } from '@/lib/utils/formato'
 import { MATERIALES } from '@/lib/constantes'
 import SelectConOpciones from '@/components/ui/SelectConOpciones'
+import CollapsibleCard from '@/components/ui/CollapsibleCard'
 import type { GastoMaterial } from '@/types'
 
 interface Props {
@@ -90,10 +91,10 @@ export default function GastosMaterialesSection({ obraId, onDatosCambiaron }: Pr
   const total = gastos.reduce((s, g) => s + Number(g.monto), 0)
 
   return (
-    <div className="rounded-lg bg-white p-4 shadow-sm">
-      <h2 className="text-lg font-semibold text-slate-800">Gastos de materiales</h2>
-      <p className="mt-1 text-sm text-slate-500">Cargá los materiales comprados para la obra</p>
-
+    <CollapsibleCard
+      titulo="Gastos de materiales"
+      subtitulo="Cargá los materiales comprados para la obra"
+    >
       {error && (
         <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-alert">{error}</p>
       )}
@@ -202,6 +203,6 @@ export default function GastosMaterialesSection({ obraId, onDatosCambiaron }: Pr
         <p className="font-semibold text-slate-800">Total en materiales</p>
         <p className="font-semibold text-slate-800">{formatMoney(total)}</p>
       </div>
-    </div>
+    </CollapsibleCard>
   )
 }
