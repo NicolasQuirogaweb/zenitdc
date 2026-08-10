@@ -9,9 +9,10 @@ import type { GastoGeneral } from '@/types'
 
 interface Props {
   obraId: string
+  onDatosCambiaron?: () => void
 }
 
-export default function GastosRealesSection({ obraId }: Props) {
+export default function GastosRealesSection({ obraId, onDatosCambiaron }: Props) {
   const [gastos, setGastos] = useState<GastoGeneral[]>([])
   const [error, setError] = useState('')
   const [concepto, setConcepto] = useState('')
@@ -27,6 +28,7 @@ export default function GastosRealesSection({ obraId }: Props) {
       .select('*')
       .eq('obra_id', obraId)
       .order('fecha', { ascending: false })
+      .order('created_at', { ascending: false })
       .then(({ data }) => {
         if (data) setGastos(data as GastoGeneral[])
       })
@@ -69,20 +71,24 @@ export default function GastosRealesSection({ obraId }: Props) {
     setFecha(new Date().toISOString().slice(0, 10))
     setObservaciones('')
     fetchGastos()
+    onDatosCambiaron?.()
   }
 
   const handleEliminar = async (gastoId: string, gastoMonto: number) => {
     if (!confirm(`¿Eliminar el gasto de ${formatMoney(gastoMonto)}?`)) return
 
     const res = await fetch(`/api/gastos-generales/${gastoId}`, { method: 'DELETE' })
-    if (res.ok) fetchGastos()
+    if (res.ok) {
+      fetchGastos()
+      onDatosCambiaron?.()
+    }
   }
 
   const total = gastos.reduce((s, g) => s + Number(g.monto), 0)
 
   return (
     <div className="rounded-lg bg-white p-4 shadow-sm">
-      <h2 className="text-lg font-semibold text-slate-800">Gastos reales</h2>
+      <h2 className="text-lg font-semibold text-slate-800">Gastos generales de la obra</h2>
 
       {error && (
         <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-alert">{error}</p>

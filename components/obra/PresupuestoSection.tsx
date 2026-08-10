@@ -9,9 +9,10 @@ import type { PresupuestoItem } from '@/types'
 
 interface Props {
   obraId: string
+  onDatosCambiaron?: () => void
 }
 
-export default function PresupuestoSection({ obraId }: Props) {
+export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) {
   const [items, setItems] = useState<PresupuestoItem[]>([])
   const [error, setError] = useState('')
   const [rubro, setRubro] = useState('')
@@ -60,20 +61,24 @@ export default function PresupuestoSection({ obraId }: Props) {
     setRubro('')
     setMonto('')
     fetchItems()
+    onDatosCambiaron?.()
   }
 
   const handleEliminar = async (itemId: string, itemRubro: string) => {
     if (!confirm(`¿Eliminar el rubro "${itemRubro}"?`)) return
 
     const res = await fetch(`/api/presupuesto/${itemId}`, { method: 'DELETE' })
-    if (res.ok) fetchItems()
+    if (res.ok) {
+      fetchItems()
+      onDatosCambiaron?.()
+    }
   }
 
   const total = items.reduce((s, i) => s + Number(i.monto), 0)
 
   return (
     <div className="rounded-lg bg-white p-4 shadow-sm">
-      <h2 className="text-lg font-semibold text-slate-800">Presupuesto</h2>
+      <h2 className="text-lg font-semibold text-slate-800">Presupuesto aprobado</h2>
 
       {error && (
         <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-alert">{error}</p>

@@ -19,6 +19,9 @@ export default function DetalleObraPage() {
   const { id } = useParams<{ id: string }>()
   const [obra, setObra] = useState<ObraConCliente | null>(null)
   const [loading, setLoading] = useState(true)
+  const [refreshKey, setRefreshKey] = useState(0)
+
+  const notificarCambio = () => setRefreshKey((k) => k + 1)
 
   useEffect(() => {
     const supabase = createClient()
@@ -117,11 +120,11 @@ export default function DetalleObraPage() {
             </a>
           </div>
 
-          <PresupuestoSection obraId={id} />
-          <GastosRealesSection obraId={id} />
-          <GastosMaterialesSection obraId={id} />
-          <PagosClientesSection obraId={id} />
-          <BalanceSection obraId={id} />
+          <PresupuestoSection obraId={id} onDatosCambiaron={notificarCambio} />
+          <GastosRealesSection obraId={id} onDatosCambiaron={notificarCambio} />
+          <GastosMaterialesSection obraId={id} onDatosCambiaron={notificarCambio} />
+          <PagosClientesSection obraId={id} onDatosCambiaron={notificarCambio} />
+          <BalanceSection obraId={id} refreshKey={refreshKey} />
         </div>
       </div>
     </div>

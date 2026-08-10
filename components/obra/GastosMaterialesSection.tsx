@@ -9,9 +9,10 @@ import type { GastoMaterial } from '@/types'
 
 interface Props {
   obraId: string
+  onDatosCambiaron?: () => void
 }
 
-export default function GastosMaterialesSection({ obraId }: Props) {
+export default function GastosMaterialesSection({ obraId, onDatosCambiaron }: Props) {
   const [gastos, setGastos] = useState<GastoMaterial[]>([])
   const [error, setError] = useState('')
   const [material, setMaterial] = useState('')
@@ -28,6 +29,7 @@ export default function GastosMaterialesSection({ obraId }: Props) {
       .select('*')
       .eq('obra_id', obraId)
       .order('fecha', { ascending: false })
+      .order('created_at', { ascending: false })
       .then(({ data }) => {
         if (data) setGastos(data)
       })
@@ -72,13 +74,17 @@ export default function GastosMaterialesSection({ obraId }: Props) {
     setFecha(new Date().toISOString().slice(0, 10))
     setObservaciones('')
     fetchGastos()
+    onDatosCambiaron?.()
   }
 
   const handleEliminar = async (gastoId: string, gastoMonto: number) => {
     if (!confirm(`¿Eliminar el gasto de ${formatMoney(gastoMonto)}?`)) return
 
     const res = await fetch(`/api/gastos-materiales/${gastoId}`, { method: 'DELETE' })
-    if (res.ok) fetchGastos()
+    if (res.ok) {
+      fetchGastos()
+      onDatosCambiaron?.()
+    }
   }
 
   const total = gastos.reduce((s, g) => s + Number(g.monto), 0)

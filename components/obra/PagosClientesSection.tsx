@@ -9,9 +9,10 @@ import type { PagoCliente } from '@/types'
 
 interface Props {
   obraId: string
+  onDatosCambiaron?: () => void
 }
 
-export default function PagosClientesSection({ obraId }: Props) {
+export default function PagosClientesSection({ obraId, onDatosCambiaron }: Props) {
   const [pagos, setPagos] = useState<PagoCliente[]>([])
   const [totalPresupuestado, setTotalPresupuestado] = useState(0)
   const [error, setError] = useState('')
@@ -28,6 +29,7 @@ export default function PagosClientesSection({ obraId }: Props) {
       .select('*')
       .eq('obra_id', obraId)
       .order('fecha', { ascending: false })
+      .order('created_at', { ascending: false })
       .then(({ data }) => {
         if (data) setPagos(data)
       })
@@ -79,13 +81,17 @@ export default function PagosClientesSection({ obraId }: Props) {
     setMetodoPago('')
     setObservaciones('')
     fetchPagos()
+    onDatosCambiaron?.()
   }
 
   const handleEliminar = async (pagoId: string, pagoMonto: number) => {
     if (!confirm(`¿Eliminar el pago de ${formatMoney(pagoMonto)}?`)) return
 
     const res = await fetch(`/api/pagos/${pagoId}`, { method: 'DELETE' })
-    if (res.ok) fetchPagos()
+    if (res.ok) {
+      fetchPagos()
+      onDatosCambiaron?.()
+    }
   }
 
   const totalPagado = pagos.reduce((s, p) => s + Number(p.monto), 0)
@@ -189,7 +195,7 @@ export default function PagosClientesSection({ obraId }: Props) {
 
       <div className="mt-4 space-y-1 border-t border-slate-200 pt-3">
         <div className="flex items-center justify-between">
-          <p className="text-sm text-slate-500">Total presupuestado</p>
+          <p className="text-sm text-slate-500">Total presupuesto aprobado</p>
           <p className="font-semibold text-slate-800">{formatMoney(totalPresupuestado)}</p>
         </div>
         <div className="flex items-center justify-between">

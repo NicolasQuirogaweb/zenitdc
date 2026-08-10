@@ -6,9 +6,10 @@ import type { BalanceObra } from '@/types'
 
 interface Props {
   obraId: string
+  refreshKey?: number
 }
 
-export default function BalanceSection({ obraId }: Props) {
+export default function BalanceSection({ obraId, refreshKey }: Props) {
   const [balance, setBalance] = useState<BalanceObra | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -28,7 +29,7 @@ export default function BalanceSection({ obraId }: Props) {
         setError('Error al cargar el balance')
         setLoading(false)
       })
-  }, [obraId])
+  }, [obraId, refreshKey])
 
   if (loading) {
     return (
@@ -57,7 +58,7 @@ export default function BalanceSection({ obraId }: Props) {
 
       <div className="mt-4 space-y-3">
         <div className="flex items-center justify-between">
-          <p className="text-sm text-slate-500">Presupuestado</p>
+          <p className="text-sm text-slate-500">Presupuesto aprobado</p>
           <p className="font-semibold text-slate-800">
             {formatMoney(balance.total_presupuestado)}
           </p>
