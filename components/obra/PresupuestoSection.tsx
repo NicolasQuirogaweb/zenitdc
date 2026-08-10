@@ -141,6 +141,7 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
   return (
     <div className="rounded-lg bg-white p-4 shadow-sm">
       <h2 className="text-lg font-semibold text-slate-800">Presupuesto aprobado</h2>
+      <p className="mt-1 text-sm text-slate-500">Cargá el detalle del presupuesto general</p>
 
       {error && (
         <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-alert">{error}</p>

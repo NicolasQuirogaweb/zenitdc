@@ -57,6 +57,7 @@ export default function BalanceSection({ obraId, refreshKey }: Props) {
   return (
     <div className="rounded-lg bg-white p-4 shadow-sm">
       <h2 className="text-lg font-semibold text-slate-800">Balance de la obra</h2>
+      <p className="mt-1 text-sm text-slate-500">Se actualiza automáticamente</p>
 
       <div className="mt-4 space-y-3">
         <div className="flex items-center justify-between">
