@@ -54,35 +54,19 @@ export default function DashboardPage() {
 
         <div className="mt-8 space-y-3">
           <a
-            href="/obras"
-            className="block rounded-lg bg-white p-4 shadow-sm transition hover:shadow-md"
-          >
-            <h2 className="font-semibold text-slate-800">Obras</h2>
-            <p className="mt-1 text-sm text-slate-500">Gestionar obras en curso</p>
-          </a>
-
-          <a
             href="/clientes"
             className="block rounded-lg bg-white p-4 shadow-sm transition hover:shadow-md"
           >
-            <h2 className="font-semibold text-slate-800">Clientes</h2>
-            <p className="mt-1 text-sm text-slate-500">Administrar clientes</p>
-          </a>
-
-          <a
-            href="/gastos-generales"
-            className="block rounded-lg bg-white p-4 shadow-sm transition hover:shadow-md"
-          >
-            <h2 className="font-semibold text-slate-800">Gastos Generales</h2>
-            <p className="mt-1 text-sm text-slate-500">Combustible, seguros, etc.</p>
+            <h2 className="font-semibold text-slate-800">Administrar clientes y sus obras</h2>
+            <p className="mt-1 text-sm text-slate-500">Clientes, proyectos y presupuestos</p>
           </a>
 
           <a
             href="/balance"
             className="block rounded-lg bg-white p-4 shadow-sm transition hover:shadow-md"
           >
-            <h2 className="font-semibold text-slate-800">Balance</h2>
-            <p className="mt-1 text-sm text-slate-500">Resumen financiero</p>
+            <h2 className="font-semibold text-slate-800">Resumen financiero general</h2>
+            <p className="mt-1 text-sm text-slate-500">Ingresos, egresos y resultado</p>
           </a>
         </div>
       </div>

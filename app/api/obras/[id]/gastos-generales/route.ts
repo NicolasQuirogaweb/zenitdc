@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient, getAuthenticatedUser } from '@/lib/supabase/server'
-import { pagoProveedorSchema } from '@/lib/validations/pagosProveedor'
+import { gastoGeneralSchema } from '@/lib/validations/gastosGenerales'
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -9,7 +9,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     const { id } = await params
     const body = await request.json()
-    const parsed = pagoProveedorSchema.safeParse(body)
+    const parsed = gastoGeneralSchema.safeParse(body)
 
     if (!parsed.success) {
       const mensajes = Object.values(parsed.error.flatten().fieldErrors).flat().join(', ')
@@ -18,7 +18,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     const supabase = await createClient()
     const { data, error } = await supabase
-      .from('pagos_proveedores')
+      .from('gastos_generales')
       .insert({ ...parsed.data, obra_id: id })
       .select()
       .single()

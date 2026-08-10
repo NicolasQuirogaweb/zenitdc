@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatMoney, formatFecha } from '@/lib/utils/formato'
+import { METODOS_PAGO } from '@/lib/constantes'
+import SelectConOpciones from '@/components/ui/SelectConOpciones'
 import type { PagoCliente } from '@/types'
 
 interface Props {
@@ -11,6 +13,7 @@ interface Props {
 
 export default function PagosClientesSection({ obraId }: Props) {
   const [pagos, setPagos] = useState<PagoCliente[]>([])
+  const [totalPresupuestado, setTotalPresupuestado] = useState(0)
   const [error, setError] = useState('')
   const [monto, setMonto] = useState('')
   const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10))
@@ -31,6 +34,15 @@ export default function PagosClientesSection({ obraId }: Props) {
   }
 
   useEffect(() => {
+    const supabase = createClient()
+    supabase
+      .from('presupuesto_items')
+      .select('monto')
+      .eq('obra_id', obraId)
+      .then(({ data }) => {
+        const total = data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0
+        setTotalPresupuestado(total)
+      })
     fetchPagos()
   }, [obraId])
 
@@ -76,11 +88,12 @@ export default function PagosClientesSection({ obraId }: Props) {
     if (res.ok) fetchPagos()
   }
 
-  const total = pagos.reduce((s, p) => s + Number(p.monto), 0)
+  const totalPagado = pagos.reduce((s, p) => s + Number(p.monto), 0)
+  const saldoPendiente = totalPresupuestado - totalPagado
 
   return (
     <div className="rounded-lg bg-white p-4 shadow-sm">
-      <h2 className="text-lg font-semibold text-slate-800">Pagos de clientes</h2>
+      <h2 className="text-lg font-semibold text-slate-800">Pagos del cliente</h2>
 
       {error && (
         <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-alert">{error}</p>
@@ -115,19 +128,17 @@ export default function PagosClientesSection({ obraId }: Props) {
             className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
           />
         </div>
-        <div>
-          <label htmlFor="metodoPago" className="block text-sm font-medium text-slate-700">
-            Método de pago
-          </label>
-          <input
+        <div className="col-span-2">
+          <SelectConOpciones
+            label="Método de pago"
             id="metodoPago"
+            opciones={METODOS_PAGO}
             value={metodoPago}
-            onChange={(e) => setMetodoPago(e.target.value)}
-            placeholder="Ej: Transferencia"
-            className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+            onChange={setMetodoPago}
+            placeholder="Escribí el método de pago"
           />
         </div>
-        <div>
+        <div className="col-span-2">
           <label htmlFor="observaciones" className="block text-sm font-medium text-slate-700">
             Observaciones
           </label>
@@ -176,9 +187,19 @@ export default function PagosClientesSection({ obraId }: Props) {
         )}
       </div>
 
-      <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-3">
-        <p className="font-semibold text-slate-800">Total pagado</p>
-        <p className="font-semibold text-slate-800">{formatMoney(total)}</p>
+      <div className="mt-4 space-y-1 border-t border-slate-200 pt-3">
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-slate-500">Total presupuestado</p>
+          <p className="font-semibold text-slate-800">{formatMoney(totalPresupuestado)}</p>
+        </div>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-slate-500">Total pagado</p>
+          <p className="font-semibold text-slate-800">{formatMoney(totalPagado)}</p>
+        </div>
+        <div className="flex items-center justify-between border-t border-slate-100 pt-2">
+          <p className="font-semibold text-slate-800">Saldo pendiente</p>
+          <p className="font-bold text-red-alert">{formatMoney(saldoPendiente)}</p>
+        </div>
       </div>
     </div>
   )

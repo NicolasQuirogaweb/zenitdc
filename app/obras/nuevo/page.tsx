@@ -1,12 +1,15 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import ObraForm from '@/components/forms/ObraForm'
 import type { ObraFormData } from '@/lib/validations/obras'
+import type { Obra } from '@/types'
 
-export default function NuevaObraPage() {
+function NuevaObraContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const clienteId = searchParams.get('cliente_id') ?? ''
   const [error, setError] = useState('')
 
   const handleSubmit = async (data: ObraFormData) => {
@@ -23,7 +26,11 @@ export default function NuevaObraPage() {
       return
     }
 
-    router.push('/obras')
+    if (clienteId) {
+      router.push(`/clientes/${clienteId}/obras`)
+    } else {
+      router.push('/obras')
+    }
     router.refresh()
   }
 
@@ -34,8 +41,20 @@ export default function NuevaObraPage() {
         {error && (
           <p className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-alert">{error}</p>
         )}
-        <ObraForm onSubmit={handleSubmit} submitLabel="Crear Obra" />
+        <ObraForm
+          onSubmit={handleSubmit}
+          submitLabel="Crear Obra"
+          defaultValues={clienteId ? ({ cliente_id: clienteId } as unknown as Obra) : undefined}
+        />
       </div>
     </div>
+  )
+}
+
+export default function NuevaObraPage() {
+  return (
+    <Suspense>
+      <NuevaObraContent />
+    </Suspense>
   )
 }

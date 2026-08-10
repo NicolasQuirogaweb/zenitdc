@@ -39,17 +39,6 @@ export interface PagoCliente {
   created_at: string
 }
 
-export interface PagoProveedor {
-  id: string
-  obra_id: string
-  proveedor: string
-  concepto: string | null
-  monto: number
-  fecha: string
-  observaciones: string | null
-  created_at: string
-}
-
 export interface GastoMaterial {
   id: string
   obra_id: string
@@ -63,6 +52,7 @@ export interface GastoMaterial {
 
 export interface GastoGeneral {
   id: string
+  obra_id: string
   concepto: string
   monto: number
   fecha: string

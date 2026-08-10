@@ -92,6 +92,12 @@ export default function ClientesPage() {
                 </div>
                 <div className="flex gap-2">
                   <a
+                    href={`/clientes/${c.id}/obras`}
+                    className="text-sm font-medium text-blue-accent hover:underline"
+                  >
+                    Ver obras
+                  </a>
+                  <a
                     href={`/clientes/${c.id}/editar`}
                     className="text-sm text-blue-accent hover:underline"
                   >

@@ -4,17 +4,17 @@ import type { BalanceObra, BalanceGeneral } from '@/types'
 export async function getBalanceObra(obraId: string): Promise<BalanceObra> {
   const supabase = await createClient()
 
-  const [presupuesto, ingresos, egresosProv, egresosMat] = await Promise.all([
+  const [presupuesto, ingresos, egresosGen, egresosMat] = await Promise.all([
     supabase.from('presupuesto_items').select('monto').eq('obra_id', obraId),
     supabase.from('pagos_clientes').select('monto').eq('obra_id', obraId),
-    supabase.from('pagos_proveedores').select('monto').eq('obra_id', obraId),
+    supabase.from('gastos_generales').select('monto').eq('obra_id', obraId),
     supabase.from('gastos_materiales').select('monto').eq('obra_id', obraId),
   ])
 
   const totalPresupuestado = presupuesto.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0
   const totalIngresos = ingresos.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0
   const totalEgresos =
-    (egresosProv.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0) +
+    (egresosGen.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0) +
     (egresosMat.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0)
 
   return {
@@ -30,22 +30,14 @@ export async function getBalanceObra(obraId: string): Promise<BalanceObra> {
 export async function getBalanceGeneral(): Promise<BalanceGeneral> {
   const supabase = await createClient()
 
-  const [obras, gastosGenerales] = await Promise.all([
-    supabase.from('obras').select('id'),
-    supabase.from('gastos_generales').select('monto'),
-  ])
+  const { data: obras } = await supabase.from('obras').select('id')
 
-  const obraIds = obras.data?.map((o) => o.id) ?? []
+  const obraIds = obras?.map((o) => o.id) ?? []
 
   const balances = await Promise.all(obraIds.map((id) => getBalanceObra(id)))
 
   const totalIngresosEmpresa = balances.reduce((s, b) => s + b.total_ingresos, 0)
-
-  const totalGastosGenerales =
-    gastosGenerales.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0
-
-  const totalEgresosEmpresa =
-    balances.reduce((s, b) => s + b.total_egresos, 0) + totalGastosGenerales
+  const totalEgresosEmpresa = balances.reduce((s, b) => s + b.total_egresos, 0)
 
   return {
     total_ingresos: totalIngresosEmpresa,

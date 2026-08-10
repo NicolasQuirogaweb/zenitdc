@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatMoney } from '@/lib/utils/formato'
+import { RUBROS_PRESUPUESTO } from '@/lib/constantes'
+import SelectConOpciones from '@/components/ui/SelectConOpciones'
 import type { PresupuestoItem } from '@/types'
 
 interface Props {
@@ -78,16 +80,14 @@ export default function PresupuestoSection({ obraId }: Props) {
       )}
 
       <form onSubmit={handleAgregar} className="mt-4 grid grid-cols-2 gap-3">
-        <div>
-          <label htmlFor="rubro" className="block text-sm font-medium text-slate-700">
-            Rubro
-          </label>
-          <input
+        <div className="col-span-2">
+          <SelectConOpciones
+            label="Rubro"
             id="rubro"
+            opciones={RUBROS_PRESUPUESTO}
             value={rubro}
-            onChange={(e) => setRubro(e.target.value)}
-            placeholder="Ej: Materiales"
-            className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+            onChange={setRubro}
+            placeholder="Escribí el rubro"
           />
         </div>
         <div>

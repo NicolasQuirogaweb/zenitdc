@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatMoney, formatFecha } from '@/lib/utils/formato'
+import { MATERIALES } from '@/lib/constantes'
+import SelectConOpciones from '@/components/ui/SelectConOpciones'
 import type { GastoMaterial } from '@/types'
 
 interface Props {
@@ -91,15 +93,13 @@ export default function GastosMaterialesSection({ obraId }: Props) {
 
       <form onSubmit={handleAgregar} className="mt-4 grid grid-cols-2 gap-3">
         <div>
-          <label htmlFor="material" className="block text-sm font-medium text-slate-700">
-            Material
-          </label>
-          <input
+          <SelectConOpciones
+            label="Material"
             id="material"
+            opciones={MATERIALES}
             value={material}
-            onChange={(e) => setMaterial(e.target.value)}
-            placeholder="Ej: Cemento"
-            className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+            onChange={setMaterial}
+            placeholder="Escribí el material"
           />
         </div>
         <div>
