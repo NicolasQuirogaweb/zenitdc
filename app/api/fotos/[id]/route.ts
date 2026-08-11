@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server'
-import { createClient, getAuthenticatedUser } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
+import { requireUser, catchApiError, supabaseErrorResponse } from '@/lib/api/helpers'
 
 const BUCKET = 'fotos-obra'
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await getAuthenticatedUser()
-    if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    const { user, response } = await requireUser()
+    if (!user) return response
 
     const { id } = await params
 
@@ -18,7 +19,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
       .single()
 
     if (fetchError) {
-      return NextResponse.json({ error: fetchError.message }, { status: 500 })
+      return supabaseErrorResponse(fetchError)
     }
 
     if (foto?.storage_path) {
@@ -27,21 +28,18 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
         .remove([foto.storage_path])
 
       if (removeError) {
-        return NextResponse.json({ error: removeError.message }, { status: 500 })
+        return supabaseErrorResponse(removeError)
       }
     }
 
     const { error } = await supabase.from('fotos_obra').delete().eq('id', id)
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return supabaseErrorResponse(error)
     }
 
     return NextResponse.json({ success: true })
   } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Error inesperado' },
-      { status: 500 }
-    )
+    return catchApiError(err)
   }
 }

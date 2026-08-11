@@ -1,22 +1,20 @@
 import { NextResponse } from 'next/server'
-import { createClient, getAuthenticatedUser } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
+import { requireUser, zodErrorResponse, catchApiError, supabaseErrorResponse } from '@/lib/api/helpers'
 import { obraSchema } from '@/lib/validations/obras'
 
 const BUCKET = 'fotos-obra'
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await getAuthenticatedUser()
-    if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    const { user, response } = await requireUser()
+    if (!user) return response
 
     const { id } = await params
     const body = await request.json()
     const parsed = obraSchema.safeParse(body)
 
-    if (!parsed.success) {
-      const mensajes = Object.values(parsed.error.flatten().fieldErrors).flat().join(', ')
-      return NextResponse.json({ error: mensajes || 'Datos inválidos' }, { status: 400 })
-    }
+    if (!parsed.success) return zodErrorResponse(parsed.error)
 
     const supabase = await createClient()
     const { data, error } = await supabase
@@ -27,22 +25,19 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       .single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return supabaseErrorResponse(error)
     }
 
     return NextResponse.json(data)
   } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Error inesperado' },
-      { status: 500 }
-    )
+    return catchApiError(err)
   }
 }
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await getAuthenticatedUser()
-    if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    const { user, response } = await requireUser()
+    if (!user) return response
 
     const { id } = await params
 
@@ -54,28 +49,25 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
       .eq('obra_id', id)
 
     if (fotosError) {
-      return NextResponse.json({ error: fotosError.message }, { status: 500 })
+      return supabaseErrorResponse(fotosError)
     }
 
     const paths = (fotos ?? []).map((foto) => foto.storage_path)
     if (paths.length > 0) {
       const { error: removeError } = await supabase.storage.from(BUCKET).remove(paths)
       if (removeError) {
-        return NextResponse.json({ error: removeError.message }, { status: 500 })
+        return supabaseErrorResponse(removeError)
       }
     }
 
     const { error } = await supabase.from('obras').delete().eq('id', id)
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return supabaseErrorResponse(error)
     }
 
     return NextResponse.json({ success: true })
   } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Error inesperado' },
-      { status: 500 }
-    )
+    return catchApiError(err)
   }
 }
