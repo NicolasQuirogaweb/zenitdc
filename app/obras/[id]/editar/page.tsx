@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import LoadingScreen from '@/components/ui/LoadingScreen'
 import ObraForm from '@/components/forms/ObraForm'
 import type { Obra } from '@/types'
 import type { ObraFormData } from '@/lib/validations/obras'
@@ -41,19 +42,11 @@ export default function EditarObraPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <p className="text-sm text-slate-500">Cargando...</p>
-      </div>
-    )
+    return <LoadingScreen />
   }
 
   if (!obra) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <p className="text-sm text-slate-500">Obra no encontrada</p>
-      </div>
-    )
+    return <LoadingScreen mensaje="Obra no encontrada" />
   }
 
   return (

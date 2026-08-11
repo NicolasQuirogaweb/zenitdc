@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import LoadingScreen from '@/components/ui/LoadingScreen'
+import EstadoObraBadge from '@/components/ui/EstadoObraBadge'
 
 interface ObraConCliente {
   id: string
@@ -15,7 +16,7 @@ interface ObraConCliente {
 export default function ObrasPage() {
   const [obras, setObras] = useState<ObraConCliente[]>([])
   const [loading, setLoading] = useState(true)
-  const router = useRouter()
+  const [error, setError] = useState('')
   const supabase = createClient()
 
   const fetchObras = () => {
@@ -23,8 +24,9 @@ export default function ObrasPage() {
       .from('obras')
       .select('id, nombre, estado, responsable, clientes(nombre)')
       .order('created_at', { ascending: false })
-      .then(({ data }) => {
+      .then(({ data, error }) => {
         if (data) setObras(data as unknown as ObraConCliente[])
+        else if (error) setError('Error al cargar las obras')
         setLoading(false)
       })
   }
@@ -41,11 +43,7 @@ export default function ObrasPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <p className="text-sm text-slate-500">Cargando...</p>
-      </div>
-    )
+    return <LoadingScreen />
   }
 
   return (
@@ -65,6 +63,10 @@ export default function ObrasPage() {
             </a>
           </div>
         </div>
+
+        {error && (
+          <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-alert">{error}</p>
+        )}
 
         {obras.length === 0 ? (
           <div className="mt-8 text-center">
@@ -91,14 +93,7 @@ export default function ObrasPage() {
                     {o.clientes && (
                       <p className="text-sm text-slate-500">{o.clientes.nombre}</p>
                     )}
-                    <span className={`inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-                      o.estado === 'terminada' ? 'bg-green-100 text-green-alert' :
-                      o.estado === 'en_ejecucion' ? 'bg-blue-100 text-blue-accent' :
-                      'bg-yellow-100 text-yellow-700'
-                    }`}>
-                      {o.estado === 'presupuestada' ? 'Presupuestada' :
-                       o.estado === 'en_ejecucion' ? 'En ejecución' : 'Terminada'}
-                    </span>
+                    <EstadoObraBadge estado={o.estado} />
                   </div>
                   <div className="flex gap-2 ml-3">
                     <a

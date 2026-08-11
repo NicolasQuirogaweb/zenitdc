@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 import ClienteForm from "@/components/forms/ClienteForm";
 import type { Cliente } from "@/types";
 import type { ClienteFormData } from "@/lib/validations/clientes";
@@ -46,19 +47,11 @@ export default function EditarClientePage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <p className="text-sm text-slate-500">Cargando...</p>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (!cliente) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <p className="text-sm text-slate-500">Cliente no encontrado</p>
-      </div>
-    );
+    return <LoadingScreen mensaje="Cliente no encontrado" />;
   }
 
   return (

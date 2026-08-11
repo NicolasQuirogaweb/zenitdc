@@ -31,8 +31,9 @@ export default function GastosMaterialesSection({ obraId, onDatosCambiaron }: Pr
       .eq('obra_id', obraId)
       .order('fecha', { ascending: false })
       .order('created_at', { ascending: false })
-      .then(({ data }) => {
+      .then(({ data, error }) => {
         if (data) setGastos(data)
+        else if (error) setError('Error al cargar los gastos de materiales')
       })
   }
 

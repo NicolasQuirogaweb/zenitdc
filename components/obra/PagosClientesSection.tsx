@@ -30,8 +30,9 @@ export default function PagosClientesSection({ obraId, onDatosCambiaron }: Props
       .eq('obra_id', obraId)
       .order('fecha', { ascending: false })
       .order('created_at', { ascending: false })
-      .then(({ data }) => {
+      .then(({ data, error }) => {
         if (data) setPagos(data)
+        else if (error) setError('Error al cargar los pagos')
       })
   }
 

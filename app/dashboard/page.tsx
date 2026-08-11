@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import LoadingScreen from '@/components/ui/LoadingScreen'
 import type { User } from '@supabase/supabase-js'
 
 export default function DashboardPage() {
@@ -28,11 +29,7 @@ export default function DashboardPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <p className="text-sm text-slate-500">Cargando...</p>
-      </div>
-    )
+    return <LoadingScreen />
   }
 
   return (

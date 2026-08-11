@@ -1,15 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import LoadingScreen from '@/components/ui/LoadingScreen'
 import type { Cliente } from '@/types'
 
 export default function ClientesPage() {
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const router = useRouter()
   const supabase = createClient()
 
   const fetchClientes = () => {
@@ -17,8 +16,9 @@ export default function ClientesPage() {
       .from('clientes')
       .select('*')
       .order('created_at', { ascending: false })
-      .then(({ data }) => {
+      .then(({ data, error }) => {
         if (data) setClientes(data)
+        else if (error) setError('Error al cargar los clientes')
         setLoading(false)
       })
   }
@@ -41,11 +41,7 @@ export default function ClientesPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <p className="text-sm text-slate-500">Cargando...</p>
-      </div>
-    )
+    return <LoadingScreen />
   }
 
   return (

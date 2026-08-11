@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import LoadingScreen from '@/components/ui/LoadingScreen'
+import EstadoObraBadge from '@/components/ui/EstadoObraBadge'
 
 interface ObraConDatos {
   id: string
@@ -17,6 +19,7 @@ export default function ObrasDeClientePage() {
   const [obras, setObras] = useState<ObraConDatos[]>([])
   const [cliente, setCliente] = useState<{ nombre: string } | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   const fetchObras = () => {
     const supabase = createClient()
@@ -25,8 +28,9 @@ export default function ObrasDeClientePage() {
       .select('id, nombre, estado, responsable, clientes(nombre)')
       .eq('cliente_id', id)
       .order('created_at', { ascending: false })
-      .then(({ data }) => {
+      .then(({ data, error }) => {
         if (data) setObras(data as unknown as ObraConDatos[])
+        else if (error) setError('Error al cargar las obras')
         setLoading(false)
       })
   }
@@ -52,11 +56,7 @@ export default function ObrasDeClientePage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <p className="text-sm text-slate-500">Cargando...</p>
-      </div>
-    )
+    return <LoadingScreen />
   }
 
   return (
@@ -70,6 +70,10 @@ export default function ObrasDeClientePage() {
         </div>
 
         <p className="mt-1 text-sm text-slate-500">Obras del cliente</p>
+
+        {error && (
+          <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-alert">{error}</p>
+        )}
 
         <div className="mt-6 flex justify-end">
           <a
@@ -99,16 +103,7 @@ export default function ObrasDeClientePage() {
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <p className="font-medium text-slate-800">{o.nombre}</p>
-                    <span
-                      className={`inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-                        o.estado === 'terminada' ? 'bg-green-100 text-green-alert' :
-                        o.estado === 'en_ejecucion' ? 'bg-blue-100 text-blue-accent' :
-                        'bg-yellow-100 text-yellow-700'
-                      }`}
-                    >
-                      {o.estado === 'presupuestada' ? 'Presupuestada' :
-                       o.estado === 'en_ejecucion' ? 'En ejecución' : 'Terminada'}
-                    </span>
+                    <EstadoObraBadge estado={o.estado} />
                   </div>
                   <div className="flex gap-2 ml-3">
                     <a

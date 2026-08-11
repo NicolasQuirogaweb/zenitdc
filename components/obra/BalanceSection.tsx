@@ -49,8 +49,7 @@ export default function BalanceSection({ obraId, refreshKey }: Props) {
     )
   }
 
-  const resultado = balance.total_ingresos - balance.total_egresos
-  const resultadoPositivo = resultado >= 0
+  const resultadoPositivo = balance.resultado >= 0
   const saldoPendiente = balance.total_presupuestado - balance.total_ingresos
   const saldoPendientePositivo = saldoPendiente > 0
 
@@ -105,7 +104,7 @@ export default function BalanceSection({ obraId, refreshKey }: Props) {
               resultadoPositivo ? 'text-green-600' : 'text-red-alert'
             }`}
           >
-            {formatMoney(resultado)}
+            {formatMoney(balance.resultado)}
           </p>
         </div>
       </div>

@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { formatFecha } from '@/lib/utils/formato'
+import LoadingScreen from '@/components/ui/LoadingScreen'
+import EstadoObraBadge from '@/components/ui/EstadoObraBadge'
 import type { Cliente, Obra } from '@/types'
 import PresupuestoSection from '@/components/obra/PresupuestoSection'
 import GastosRealesSection from '@/components/obra/GastosRealesSection'
@@ -19,6 +21,7 @@ export default function DetalleObraPage() {
   const { id } = useParams<{ id: string }>()
   const [obra, setObra] = useState<ObraConCliente | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [refreshKey, setRefreshKey] = useState(0)
 
   const notificarCambio = () => setRefreshKey((k) => k + 1)
@@ -30,26 +33,19 @@ export default function DetalleObraPage() {
       .select('*, clientes(*)')
       .eq('id', id)
       .single()
-      .then(({ data }) => {
+      .then(({ data, error }) => {
         if (data) setObra(data as unknown as ObraConCliente)
+        else if (error) setError('Error al cargar la obra')
         setLoading(false)
       })
   }, [id])
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <p className="text-sm text-slate-500">Cargando...</p>
-      </div>
-    )
+    return <LoadingScreen />
   }
 
   if (!obra) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <p className="text-sm text-slate-500">Obra no encontrada</p>
-      </div>
-    )
+    return <LoadingScreen mensaje={error || 'Obra no encontrada'} />
   }
 
   return (
@@ -93,16 +89,7 @@ export default function DetalleObraPage() {
               <p>
                 <span className="font-semibold text-slate-800">{obra.nombre}</span>
               </p>
-              <span
-                className={`mt-2 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                  obra.estado === 'terminada' ? 'bg-green-100 text-green-alert' :
-                  obra.estado === 'en_ejecucion' ? 'bg-blue-100 text-blue-accent' :
-                  'bg-yellow-100 text-yellow-700'
-                }`}
-              >
-                {obra.estado === 'presupuestada' ? 'Presupuestada' :
-                 obra.estado === 'en_ejecucion' ? 'En ejecución' : 'Terminada'}
-              </span>
+              <EstadoObraBadge estado={obra.estado} />
               {obra.descripcion && <p className="pt-1">{obra.descripcion}</p>}
               {obra.responsable && (
                 <p>Responsable: {obra.responsable}</p>
