@@ -30,8 +30,9 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
       .select('*')
       .eq('obra_id', obraId)
       .order('created_at', { ascending: false })
-      .then(({ data }) => {
+      .then(({ data, error }) => {
         if (data) setItems(data)
+        else if (error) setError('Error al cargar el presupuesto')
       })
   }
 

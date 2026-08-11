@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
-import { createClient, getAuthenticatedUser } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
+import { requireUser, catchApiError } from '@/lib/api/helpers'
 import { getBalanceObra } from '@/lib/utils/balance'
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await getAuthenticatedUser()
-    if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    const { user, response } = await requireUser()
+    if (!user) return response
 
     const { id } = await params
     const supabase = await createClient()
@@ -19,9 +20,6 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     const balance = await getBalanceObra(id)
     return NextResponse.json(balance)
   } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Error inesperado' },
-      { status: 500 }
-    )
+    return catchApiError(err)
   }
 }

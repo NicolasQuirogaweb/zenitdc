@@ -30,8 +30,9 @@ export default function GastosRealesSection({ obraId, onDatosCambiaron }: Props)
       .eq('obra_id', obraId)
       .order('fecha', { ascending: false })
       .order('created_at', { ascending: false })
-      .then(({ data }) => {
+      .then(({ data, error }) => {
         if (data) setGastos(data as GastoGeneral[])
+        else if (error) setError('Error al cargar los gastos generales')
       })
   }
 

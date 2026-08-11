@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { formatFecha } from '@/lib/utils/formato'
+import LoadingScreen from '@/components/ui/LoadingScreen'
 import type { FotoObra } from '@/types'
 
 interface FotoConUrl extends FotoObra {
@@ -24,6 +25,10 @@ export default function FotosPage() {
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setFotos(data)
+        setLoading(false)
+      })
+      .catch(() => {
+        setError('Error al cargar las fotos')
         setLoading(false)
       })
   }
@@ -71,11 +76,7 @@ export default function FotosPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <p className="text-sm text-slate-500">Cargando...</p>
-      </div>
-    )
+    return <LoadingScreen />
   }
 
   return (

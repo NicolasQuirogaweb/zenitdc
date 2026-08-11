@@ -1,19 +1,17 @@
 import { NextResponse } from 'next/server'
-import { createClient, getAuthenticatedUser } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
+import { requireUser, zodErrorResponse, catchApiError, supabaseErrorResponse } from '@/lib/api/helpers'
 import { clienteSchema } from '@/lib/validations/clientes'
 
 export async function POST(request: Request) {
   try {
-    const user = await getAuthenticatedUser()
-    if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    const { user, response } = await requireUser()
+    if (!user) return response
 
     const body = await request.json()
     const parsed = clienteSchema.safeParse(body)
 
-    if (!parsed.success) {
-      const mensajes = Object.values(parsed.error.flatten().fieldErrors).flat().join(', ')
-      return NextResponse.json({ error: mensajes || 'Datos inválidos' }, { status: 400 })
-    }
+    if (!parsed.success) return zodErrorResponse(parsed.error)
 
     const supabase = await createClient()
     const { data, error } = await supabase
@@ -23,14 +21,11 @@ export async function POST(request: Request) {
       .single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return supabaseErrorResponse(error)
     }
 
     return NextResponse.json(data, { status: 201 })
   } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Error inesperado' },
-      { status: 500 }
-    )
+    return catchApiError(err)
   }
 }

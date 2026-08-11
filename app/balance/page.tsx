@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { formatMoney } from '@/lib/utils/formato'
 import CollapsibleCard from '@/components/ui/CollapsibleCard'
+import LoadingScreen from '@/components/ui/LoadingScreen'
 import type { BalanceGeneral } from '@/types'
 
 export default function BalancePage() {
@@ -28,11 +29,7 @@ export default function BalancePage() {
   }, [])
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <p className="text-sm text-slate-500">Cargando...</p>
-      </div>
-    )
+    return <LoadingScreen />
   }
 
   if (error || !balance) {
@@ -54,8 +51,7 @@ export default function BalancePage() {
     )
   }
 
-  const resultado = balance.total_ingresos - balance.total_egresos
-  const resultadoPositivo = resultado >= 0
+  const resultadoPositivo = balance.resultado >= 0
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
@@ -92,7 +88,7 @@ export default function BalancePage() {
                   resultadoPositivo ? 'text-green-600' : 'text-red-alert'
                 }`}
               >
-                {formatMoney(resultado)}
+                {formatMoney(balance.resultado)}
               </p>
             </div>
           </div>

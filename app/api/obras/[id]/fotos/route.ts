@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server'
-import { createClient, getAuthenticatedUser } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
+import { requireUser, zodErrorResponse, catchApiError, supabaseErrorResponse } from '@/lib/api/helpers'
 import { fotoSchema, TIPOS_PERMITIDOS, MAX_FOTO_BYTES, EXTENSIONES } from '@/lib/validations/fotos'
 
 const BUCKET = 'fotos-obra'
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await getAuthenticatedUser()
-    if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    const { user, response } = await requireUser()
+    if (!user) return response
 
     const { id } = await params
 
@@ -20,7 +21,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       .order('created_at', { ascending: false })
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return supabaseErrorResponse(error)
     }
 
     const fotosConUrl = await Promise.all(
@@ -34,17 +35,14 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 
     return NextResponse.json(fotosConUrl)
   } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Error inesperado' },
-      { status: 500 }
-    )
+    return catchApiError(err)
   }
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await getAuthenticatedUser()
-    if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    const { user, response } = await requireUser()
+    if (!user) return response
 
     const { id } = await params
 
@@ -73,10 +71,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       fecha: typeof fecha === 'string' ? fecha : new Date().toISOString().slice(0, 10),
     })
 
-    if (!parsed.success) {
-      const mensajes = Object.values(parsed.error.flatten().fieldErrors).flat().join(', ')
-      return NextResponse.json({ error: mensajes || 'Datos inválidos' }, { status: 400 })
-    }
+    if (!parsed.success) return zodErrorResponse(parsed.error)
 
     const extension = EXTENSIONES[file.type]
     const storagePath = `obra/${id}/${crypto.randomUUID()}.${extension}`
@@ -87,7 +82,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       .upload(storagePath, file, { upsert: false })
 
     if (uploadError) {
-      return NextResponse.json({ error: `Error al subir imagen: ${uploadError.message}` }, { status: 500 })
+      return supabaseErrorResponse(uploadError)
     }
 
     const { data, error: insertError } = await supabase
@@ -103,7 +98,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     if (insertError) {
       await supabase.storage.from(BUCKET).remove([storagePath])
-      return NextResponse.json({ error: insertError.message }, { status: 500 })
+      return supabaseErrorResponse(insertError)
     }
 
     const { data: signed } = await supabase.storage
@@ -112,9 +107,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     return NextResponse.json({ ...data, url: signed?.signedUrl ?? null }, { status: 201 })
   } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Error inesperado' },
-      { status: 500 }
-    )
+    return catchApiError(err)
   }
 }
