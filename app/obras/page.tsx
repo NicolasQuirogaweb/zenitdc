@@ -53,12 +53,17 @@ export default function ObrasPage() {
       <div className="mx-auto max-w-lg">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-slate-800">Obras</h1>
-          <a
-            href="/obras/nuevo"
-            className="rounded-lg bg-blue-accent px-3 py-1.5 text-sm font-semibold text-white"
-          >
-            + Nueva
-          </a>
+          <div className="flex items-center gap-3">
+            <a href="/dashboard" className="text-sm text-blue-accent hover:underline">
+              Volver
+            </a>
+            <a
+              href="/obras/nuevo"
+              className="rounded-lg bg-blue-accent px-3 py-1.5 text-sm font-semibold text-white"
+            >
+              + Nueva
+            </a>
+          </div>
         </div>
 
         {obras.length === 0 ? (
