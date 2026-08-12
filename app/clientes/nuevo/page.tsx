@@ -2,11 +2,13 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ClienteForm from '@/components/forms/ClienteForm'
+import { useToast } from '@/lib/hooks/useToast'
 import type { ClienteFormData } from '@/lib/validations/clientes'
 
 export default function NuevoClientePage() {
   const router = useRouter()
   const [error, setError] = useState('')
+  const { showToast } = useToast()
 
   const handleSubmit = async (data: ClienteFormData) => {
     setError('')
@@ -22,6 +24,7 @@ export default function NuevoClientePage() {
       return
     }
 
+    showToast('success', 'Cliente creado correctamente')
     router.push('/clientes')
     router.refresh()
   }

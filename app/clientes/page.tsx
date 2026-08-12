@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import LoadingScreen from '@/components/ui/LoadingScreen'
+import { SkeletonLista } from '@/components/ui/Skeleton'
+import { useToast } from '@/lib/hooks/useToast'
 import type { Cliente } from '@/types'
 
 export default function ClientesPage() {
@@ -10,6 +11,7 @@ export default function ClientesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const supabase = createClient()
+  const { showToast } = useToast()
 
   const fetchClientes = () => {
     supabase
@@ -33,15 +35,12 @@ export default function ClientesPage() {
     const res = await fetch(`/api/clientes/${id}`, { method: 'DELETE' })
     if (res.ok) {
       setError('')
+      showToast('success', 'Cliente eliminado')
       fetchClientes()
       return
     }
     const err = await res.json()
     setError(typeof err.error === 'string' ? err.error : 'No se pudo eliminar el cliente')
-  }
-
-  if (loading) {
-    return <LoadingScreen />
   }
 
   return (
@@ -66,7 +65,9 @@ export default function ClientesPage() {
           <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-alert">{error}</p>
         )}
 
-        {clientes.length === 0 ? (
+        {loading ? (
+          <SkeletonLista />
+        ) : clientes.length === 0 ? (
           <div className="mt-8 text-center">
             <p className="text-slate-500">No hay clientes aún</p>
             <p className="mt-2">

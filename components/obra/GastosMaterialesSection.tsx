@@ -6,6 +6,7 @@ import { formatMoney, formatFecha } from '@/lib/utils/formato'
 import { MATERIALES } from '@/lib/constantes'
 import SelectConOpciones from '@/components/ui/SelectConOpciones'
 import CollapsibleCard from '@/components/ui/CollapsibleCard'
+import { useToast } from '@/lib/hooks/useToast'
 import type { GastoMaterial } from '@/types'
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
 export default function GastosMaterialesSection({ obraId, onDatosCambiaron }: Props) {
   const [gastos, setGastos] = useState<GastoMaterial[]>([])
   const [error, setError] = useState('')
+  const { showToast } = useToast()
   const [material, setMaterial] = useState('')
   const [cantidad, setCantidad] = useState('')
   const [monto, setMonto] = useState('')
@@ -75,6 +77,7 @@ export default function GastosMaterialesSection({ obraId, onDatosCambiaron }: Pr
     setMonto('')
     setFecha(new Date().toISOString().slice(0, 10))
     setObservaciones('')
+    showToast('success', 'Gasto registrado')
     fetchGastos()
     onDatosCambiaron?.()
   }
@@ -84,6 +87,7 @@ export default function GastosMaterialesSection({ obraId, onDatosCambiaron }: Pr
 
     const res = await fetch(`/api/gastos-materiales/${gastoId}`, { method: 'DELETE' })
     if (res.ok) {
+      showToast('success', 'Gasto eliminado')
       fetchGastos()
       onDatosCambiaron?.()
     }

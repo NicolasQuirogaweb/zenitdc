@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { formatMoney, formatFecha } from '@/lib/utils/formato'
 import SelectConOpciones from '@/components/ui/SelectConOpciones'
 import CollapsibleCard from '@/components/ui/CollapsibleCard'
+import { useToast } from '@/lib/hooks/useToast'
 import type { GastoGeneral } from '@/types'
 
 interface Props {
@@ -33,6 +34,7 @@ export default function GastosRealesSection({
   const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10))
   const [observaciones, setObservaciones] = useState('')
   const [agregando, setAgregando] = useState(false)
+  const { showToast } = useToast()
 
   const fetchGastos = () => {
     const supabase = createClient()
@@ -84,6 +86,7 @@ export default function GastosRealesSection({
     setMonto('')
     setFecha(new Date().toISOString().slice(0, 10))
     setObservaciones('')
+    showToast('success', 'Gasto registrado')
     fetchGastos()
     onDatosCambiaron?.()
   }
@@ -93,6 +96,7 @@ export default function GastosRealesSection({
 
     const res = await fetch(`/api/gastos-generales/${gastoId}`, { method: 'DELETE' })
     if (res.ok) {
+      showToast('success', 'Gasto eliminado')
       fetchGastos()
       onDatosCambiaron?.()
     }

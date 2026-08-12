@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import LoadingScreen from '@/components/ui/LoadingScreen'
+import { SkeletonLista } from '@/components/ui/Skeleton'
 import EstadoObraBadge from '@/components/ui/EstadoObraBadge'
+import { useToast } from '@/lib/hooks/useToast'
 
 interface ObraConCliente {
   id: string
@@ -18,6 +19,7 @@ export default function ObrasPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const supabase = createClient()
+  const { showToast } = useToast()
 
   const fetchObras = () => {
     supabase
@@ -39,11 +41,10 @@ export default function ObrasPage() {
     if (!confirm('¿Eliminar esta obra? También se eliminarán presupuestos, pagos y gastos asociados.')) return
 
     const res = await fetch(`/api/obras/${id}`, { method: 'DELETE' })
-    if (res.ok) fetchObras()
-  }
-
-  if (loading) {
-    return <LoadingScreen />
+    if (res.ok) {
+      showToast('success', 'Obra eliminada')
+      fetchObras()
+    }
   }
 
   return (
@@ -68,7 +69,9 @@ export default function ObrasPage() {
           <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-alert">{error}</p>
         )}
 
-        {obras.length === 0 ? (
+        {loading ? (
+          <SkeletonLista />
+        ) : obras.length === 0 ? (
           <div className="mt-8 text-center">
             <p className="text-slate-500">No hay obras aún</p>
             <p className="mt-2">

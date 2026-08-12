@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import LoadingScreen from '@/components/ui/LoadingScreen'
 import ObraForm from '@/components/forms/ObraForm'
+import { useToast } from '@/lib/hooks/useToast'
 import type { Obra } from '@/types'
 import type { ObraFormData } from '@/lib/validations/obras'
 
@@ -14,6 +15,7 @@ export default function EditarObraPage() {
   const [obra, setObra] = useState<Obra | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const { showToast } = useToast()
 
   useEffect(() => {
     const supabase = createClient()
@@ -37,6 +39,7 @@ export default function EditarObraPage() {
       return
     }
 
+    showToast('success', 'Obra actualizada correctamente')
     router.push('/obras')
     router.refresh()
   }

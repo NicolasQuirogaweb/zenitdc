@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 import ClienteForm from "@/components/forms/ClienteForm";
+import { useToast } from "@/lib/hooks/useToast";
 import type { Cliente } from "@/types";
 import type { ClienteFormData } from "@/lib/validations/clientes";
 
@@ -14,6 +15,7 @@ export default function EditarClientePage() {
   const router = useRouter();
   const [cliente, setCliente] = useState<Cliente | null>(null);
   const [loading, setLoading] = useState(true);
+  const { showToast } = useToast();
 
   useEffect(() => {
     const supabase = createClient();
@@ -42,6 +44,7 @@ export default function EditarClientePage() {
       return;
     }
 
+    showToast("success", "Cliente actualizado correctamente");
     router.push("/clientes");
     router.refresh();
   };

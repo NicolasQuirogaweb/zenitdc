@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import LoadingScreen from '@/components/ui/LoadingScreen'
 import EstadoObraBadge from '@/components/ui/EstadoObraBadge'
+import { useToast } from '@/lib/hooks/useToast'
 
 interface ObraConDatos {
   id: string
@@ -20,6 +21,7 @@ export default function ObrasDeClientePage() {
   const [cliente, setCliente] = useState<{ nombre: string } | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const { showToast } = useToast()
 
   const fetchObras = () => {
     const supabase = createClient()
@@ -52,7 +54,10 @@ export default function ObrasDeClientePage() {
     if (!confirm('¿Eliminar esta obra? También se eliminarán presupuestos, pagos y gastos asociados.')) return
 
     const res = await fetch(`/api/obras/${obraId}`, { method: 'DELETE' })
-    if (res.ok) fetchObras()
+    if (res.ok) {
+      showToast('success', 'Obra eliminada')
+      fetchObras()
+    }
   }
 
   if (loading) {

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { formatFecha } from '@/lib/utils/formato'
 import LoadingScreen from '@/components/ui/LoadingScreen'
+import { useToast } from '@/lib/hooks/useToast'
 import type { FotoObra } from '@/types'
 
 interface FotoConUrl extends FotoObra {
@@ -19,6 +20,7 @@ export default function FotosPage() {
   const [descripcion, setDescripcion] = useState('')
   const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10))
   const [subiendo, setSubiendo] = useState(false)
+  const { showToast } = useToast()
 
   const fetchFotos = () => {
     return fetch(`/api/obras/${id}/fotos`)
@@ -65,6 +67,7 @@ export default function FotosPage() {
     setFecha(new Date().toISOString().slice(0, 10))
     const input = document.getElementById('archivo') as HTMLInputElement | null
     if (input) input.value = ''
+    showToast('success', 'Foto subida')
     fetchFotos()
   }
 
@@ -72,7 +75,10 @@ export default function FotosPage() {
     if (!confirm('¿Eliminar esta foto?')) return
 
     const res = await fetch(`/api/fotos/${fotoId}`, { method: 'DELETE' })
-    if (res.ok) fetchFotos()
+    if (res.ok) {
+      showToast('success', 'Foto eliminada')
+      fetchFotos()
+    }
   }
 
   if (loading) {
