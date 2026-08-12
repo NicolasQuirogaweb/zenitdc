@@ -14,6 +14,10 @@
   --color-blue-light: #60A5FA;
 }
 
+:root {
+  color-scheme: dark;
+}
+
 body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   background-color: var(--color-bg-page);
@@ -29,11 +33,12 @@ input::placeholder, textarea::placeholder {
   opacity: 1;
 }
 
-.bg-blueprint-grid {
-  background-image:
-    linear-gradient(to right, rgba(148, 197, 255, 0.12) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(148, 197, 255, 0.12) 1px, transparent 1px);
-  background-size: 24px 24px;
+.bg-hero-glow {
+  background-image: radial-gradient(
+    ellipse 600px 300px at 50% -10%,
+    rgba(96, 165, 250, 0.18),
+    transparent 70%
+  );
 }
 
 @layer components {
