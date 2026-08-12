@@ -86,6 +86,8 @@ export default function PagosClientesSection({ obraId, onDatosCambiaron }: Props
     }
   }
 
+  const total = pagos.reduce((s, p) => s + Number(p.monto), 0)
+
   return (
     <CollapsibleCard
       titulo="Pagos del cliente"
@@ -181,6 +183,11 @@ export default function PagosClientesSection({ obraId, onDatosCambiaron }: Props
             </div>
           ))
         )}
+      </div>
+
+      <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-3">
+        <p className="font-semibold text-slate-800">Total pagado por el cliente.</p>
+        <p className="font-semibold text-slate-800">{formatMoney(total)}</p>
       </div>
     </CollapsibleCard>
   )

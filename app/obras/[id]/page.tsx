@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { formatFecha } from '@/lib/utils/formato'
+import { CONCEPTOS_COSTOS_DIRECTOS, CONCEPTOS_GASTOS_REALES } from '@/lib/constantes'
 import LoadingScreen from '@/components/ui/LoadingScreen'
 import EstadoObraBadge from '@/components/ui/EstadoObraBadge'
 import type { Cliente, Obra } from '@/types'
@@ -108,9 +109,26 @@ export default function DetalleObraPage() {
           </div>
 
           <PresupuestoSection obraId={id} onDatosCambiaron={notificarCambio} />
-          <GastosRealesSection obraId={id} onDatosCambiaron={notificarCambio} />
+          <GastosRealesSection
+            obraId={id}
+            titulo="Costos directos de obra"
+            subtitulo="Mano de obra, instalación eléctrica y movimiento de suelo"
+            conceptosSugeridos={CONCEPTOS_COSTOS_DIRECTOS}
+            filtro={(c) => CONCEPTOS_COSTOS_DIRECTOS.includes(c)}
+            placeholder="Ej: Cuadrilla de albañilería"
+            onDatosCambiaron={notificarCambio}
+          />
           <GastosMaterialesSection obraId={id} onDatosCambiaron={notificarCambio} />
           <PagosClientesSection obraId={id} onDatosCambiaron={notificarCambio} />
+          <GastosRealesSection
+            obraId={id}
+            titulo="Gastos generales de la obra"
+            subtitulo="Gastos indirectos de la obra (seguros, combustible, etc.)"
+            conceptosSugeridos={CONCEPTOS_GASTOS_REALES}
+            filtro={(c) => !CONCEPTOS_COSTOS_DIRECTOS.includes(c)}
+            placeholder="Ej: Seguro de obra"
+            onDatosCambiaron={notificarCambio}
+          />
           <BalanceSection obraId={id} refreshKey={refreshKey} />
         </div>
       </div>

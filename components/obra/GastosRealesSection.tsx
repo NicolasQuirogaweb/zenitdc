@@ -3,17 +3,29 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatMoney, formatFecha } from '@/lib/utils/formato'
-import { CONCEPTOS_GASTOS_REALES } from '@/lib/constantes'
 import SelectConOpciones from '@/components/ui/SelectConOpciones'
 import CollapsibleCard from '@/components/ui/CollapsibleCard'
 import type { GastoGeneral } from '@/types'
 
 interface Props {
   obraId: string
+  titulo: string
+  subtitulo: string
+  conceptosSugeridos: string[]
+  filtro: (concepto: string) => boolean
+  placeholder?: string
   onDatosCambiaron?: () => void
 }
 
-export default function GastosRealesSection({ obraId, onDatosCambiaron }: Props) {
+export default function GastosRealesSection({
+  obraId,
+  titulo,
+  subtitulo,
+  conceptosSugeridos,
+  filtro,
+  placeholder = 'Escribí el concepto',
+  onDatosCambiaron,
+}: Props) {
   const [gastos, setGastos] = useState<GastoGeneral[]>([])
   const [error, setError] = useState('')
   const [concepto, setConcepto] = useState('')
@@ -31,8 +43,8 @@ export default function GastosRealesSection({ obraId, onDatosCambiaron }: Props)
       .order('fecha', { ascending: false })
       .order('created_at', { ascending: false })
       .then(({ data, error }) => {
-        if (data) setGastos(data as GastoGeneral[])
-        else if (error) setError('Error al cargar los gastos generales')
+        if (data) setGastos((data as GastoGeneral[]).filter((g) => filtro(g.concepto)))
+        else if (error) setError('Error al cargar los gastos')
       })
   }
 
@@ -90,8 +102,8 @@ export default function GastosRealesSection({ obraId, onDatosCambiaron }: Props)
 
   return (
     <CollapsibleCard
-      titulo="Gastos generales de la obra"
-      subtitulo="Gastos indirectos de la obra (seguros, combustible, etc.)"
+      titulo={titulo}
+      subtitulo={subtitulo}
     >
       {error && (
         <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-alert">{error}</p>
@@ -102,10 +114,10 @@ export default function GastosRealesSection({ obraId, onDatosCambiaron }: Props)
           <SelectConOpciones
             label="Concepto"
             id="concepto"
-            opciones={CONCEPTOS_GASTOS_REALES}
+            opciones={conceptosSugeridos}
             value={concepto}
             onChange={setConcepto}
-            placeholder="Ej: Seguro de obra"
+            placeholder={placeholder}
           />
         </div>
         <div>
@@ -152,13 +164,13 @@ export default function GastosRealesSection({ obraId, onDatosCambiaron }: Props)
           disabled={agregando}
           className="col-span-2 rounded-lg bg-blue-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
         >
-          {agregando ? 'Registrando...' : '+ Registrar gasto real'}
+          {agregando ? 'Registrando...' : '+ Registrar gasto'}
         </button>
       </form>
 
       <div className="mt-4 divide-y divide-slate-100">
         {gastos.length === 0 ? (
-          <p className="py-3 text-sm text-slate-500">No hay gastos reales registrados aún</p>
+          <p className="py-3 text-sm text-slate-500">No hay gastos registrados aún</p>
         ) : (
           gastos.map((gasto) => (
             <div key={gasto.id} className="flex items-center justify-between py-2">
@@ -183,7 +195,7 @@ export default function GastosRealesSection({ obraId, onDatosCambiaron }: Props)
       </div>
 
       <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-3">
-        <p className="font-semibold text-slate-800">Total en gastos reales</p>
+        <p className="font-semibold text-slate-800">Total</p>
         <p className="font-semibold text-slate-800">{formatMoney(total)}</p>
       </div>
     </CollapsibleCard>

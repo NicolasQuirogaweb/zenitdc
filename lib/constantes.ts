@@ -7,6 +7,12 @@ export const RUBROS_PRESUPUESTO = [
 
 export const MATERIALES = ['Cemento', 'Arena', 'Ripio', 'Cal']
 
+export const CONCEPTOS_COSTOS_DIRECTOS = [
+  'Movimiento de suelo',
+  'Mano de obra',
+  'Instalación eléctrica',
+]
+
 export const CONCEPTOS_GASTOS_REALES = [
   'Combustible',
   'Seguros vehículos',
