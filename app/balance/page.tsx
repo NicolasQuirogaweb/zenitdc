@@ -81,6 +81,12 @@ export default function BalancePage() {
                 {formatMoney(balance.total_egresos)}
               </p>
             </div>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-slate-500">Gastos generales</p>
+              <p className="font-semibold text-slate-800">
+                {formatMoney(balance.total_gastos_generales)}
+              </p>
+            </div>
             <div className="flex items-center justify-between border-t border-slate-200 pt-3">
               <p className="font-semibold text-slate-800">Resultado</p>
               <p
@@ -131,6 +137,12 @@ export default function BalancePage() {
                           {formatMoney(o.total_egresos)}
                         </p>
                       </div>
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-slate-500">Gastos generales</p>
+                        <p className="text-sm font-medium text-slate-700">
+                          {formatMoney(o.total_gastos_generales)}
+                        </p>
+                      </div>
                       <div className="flex items-center justify-between border-t border-slate-200 pt-2">
                         <p className="text-xs text-slate-500">Resultado</p>
                         <p
@@ -150,8 +162,9 @@ export default function BalancePage() {
         </div>
 
         <p className="mt-3 text-xs text-slate-400">
-          Ingresos = pagos del cliente · Egresos = gastos generales + gastos de materiales de la
-          obra.
+          Ingresos = pagos de clientes · Egresos = costos directos + gastos de materiales de
+          cada obra. Gastos generales (seguros, combustible, etc.) se muestran aparte y no
+          descuentan del resultado.
         </p>
       </div>
     </div>

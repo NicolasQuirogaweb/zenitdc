@@ -90,9 +90,16 @@ export default function BalanceSection({ obraId, refreshKey }: Props) {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-slate-500">Egresos</p>
-            <p className="text-xs text-slate-400">= Gastos generales + Gastos de materiales de la obra</p>
+            <p className="text-xs text-slate-400">= Gastos de materiales + costos directos de la obra</p>
           </div>
           <p className="font-semibold text-slate-800">{formatMoney(balance.total_egresos)}</p>
+        </div>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-slate-500">Gastos generales</p>
+            <p className="text-xs text-slate-400">Seguros, combustible, etc. — no descuenta del resultado</p>
+          </div>
+          <p className="font-semibold text-slate-800">{formatMoney(balance.total_gastos_generales)}</p>
         </div>
         <div className="flex items-center justify-between border-t border-slate-200 pt-3">
           <div>
