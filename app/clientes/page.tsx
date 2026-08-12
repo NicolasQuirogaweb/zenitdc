@@ -92,10 +92,10 @@ export default function ClientesPage() {
                     <p className="text-sm text-slate-500">{c.telefono}</p>
                   )}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
                   <a
                     href={`/clientes/${c.id}/obras`}
-                    className="text-sm font-medium text-blue-accent hover:underline"
+                    className="text-sm text-blue-accent hover:underline"
                   >
                     Ver obras
                   </a>
