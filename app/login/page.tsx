@@ -29,14 +29,14 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-[color:var(--color-bg-page)] px-4">
       <div className="w-full max-w-sm">
-        <h1 className="mb-2 text-2xl font-bold text-slate-800">Zenit DC</h1>
-        <p className="mb-6 text-sm text-slate-500">Iniciar sesión</p>
+        <h1 className="mb-2 text-2xl font-bold text-[color:var(--color-text-primary)]">Zenit DC</h1>
+        <p className="mb-6 text-sm text-[color:var(--color-text-secondary)]">Iniciar sesión</p>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+            <label htmlFor="email" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
               Email
             </label>
             <input
@@ -45,13 +45,13 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 placeholder-slate-400 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+              className="input-field"
               placeholder="correo@ejemplo.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+            <label htmlFor="password" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
               Contraseña
             </label>
             <input
@@ -60,19 +60,19 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 placeholder-slate-400 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+              className="input-field"
               placeholder="••••••••"
             />
           </div>
 
           {error && (
-            <p className="rounded-lg bg-red-50 p-3 text-sm text-red-alert">{error}</p>
+            <p className="rounded-lg bg-red-alert/15 p-3 text-sm text-red-alert">{error}</p>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-blue-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+            className="w-full rounded-lg bg-blue-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50"
           >
             {loading ? 'Ingresando...' : 'Ingresar'}
           </button>

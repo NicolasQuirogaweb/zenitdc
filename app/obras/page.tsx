@@ -48,12 +48,12 @@ export default function ObrasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-[color:var(--color-bg-page)] p-4">
       <div className="mx-auto max-w-lg">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-slate-800">Obras</h1>
+          <h1 className="text-xl font-bold text-[color:var(--color-text-primary)]">Obras</h1>
           <div className="flex items-center gap-3">
-            <a href="/dashboard" className="text-sm text-blue-accent hover:underline">
+            <a href="/dashboard" className="text-sm text-blue-light hover:underline">
               Volver
             </a>
             <a
@@ -66,14 +66,14 @@ export default function ObrasPage() {
         </div>
 
         {error && (
-          <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-alert">{error}</p>
+          <p className="mt-4 rounded-lg bg-red-alert/15 p-3 text-sm text-red-alert">{error}</p>
         )}
 
         {loading ? (
           <SkeletonLista />
         ) : obras.length === 0 ? (
           <div className="mt-8 text-center">
-            <p className="text-slate-500">No hay obras aún</p>
+            <p className="text-[color:var(--color-text-secondary)]">No hay obras aún</p>
             <p className="mt-2">
               <a
                 href="/obras/nuevo"
@@ -88,26 +88,26 @@ export default function ObrasPage() {
             {obras.map((o) => (
               <li
                 key={o.id}
-                className="rounded-lg bg-white p-3 shadow-sm"
+                className="rounded-lg bg-[color:var(--color-bg-surface)] p-3 shadow-sm"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="font-medium text-slate-800">{o.nombre}</p>
+                    <p className="font-medium text-[color:var(--color-text-primary)]">{o.nombre}</p>
                     {o.clientes && (
-                      <p className="text-sm text-slate-500">{o.clientes.nombre}</p>
+                      <p className="text-sm text-[color:var(--color-text-secondary)]">{o.clientes.nombre}</p>
                     )}
                     <EstadoObraBadge estado={o.estado} />
                   </div>
                   <div className="flex items-center gap-2 ml-3">
                     <a
                       href={`/obras/${o.id}`}
-                      className="text-sm text-blue-accent hover:underline"
+                      className="text-sm text-blue-light hover:underline"
                     >
                       Ver
                     </a>
                     <a
                       href={`/obras/${o.id}/editar`}
-                      className="text-sm text-blue-accent hover:underline"
+                      className="text-sm text-blue-light hover:underline"
                     >
                       Editar
                     </a>

@@ -43,14 +43,10 @@ export default function ObraForm({ defaultValues, onSubmit, submitLabel }: Props
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label htmlFor="cliente_id" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="cliente_id" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
           Cliente
         </label>
-        <select
-          id="cliente_id"
-          {...register('cliente_id')}
-          className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
-        >
+        <select id="cliente_id" {...register('cliente_id')} className="input-field">
           <option value="">Seleccionar cliente...</option>
           {clientes.map((c) => (
             <option key={c.id} value={c.id}>
@@ -64,76 +60,49 @@ export default function ObraForm({ defaultValues, onSubmit, submitLabel }: Props
       </div>
 
       <div>
-        <label htmlFor="nombre" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="nombre" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
           Nombre de la obra
         </label>
-        <input
-          id="nombre"
-          {...register('nombre')}
-          className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
-        />
+        <input id="nombre" {...register('nombre')} className="input-field" />
         {errors.nombre && (
           <p className="mt-1 text-sm text-red-alert">{errors.nombre.message}</p>
         )}
       </div>
 
       <div>
-        <label htmlFor="descripcion" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="descripcion" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
           Descripción
         </label>
-        <textarea
-          id="descripcion"
-          rows={3}
-          {...register('descripcion')}
-          className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
-        />
+        <textarea id="descripcion" rows={3} {...register('descripcion')} className="input-field" />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="fecha_inicio" className="block text-sm font-medium text-slate-700">
+          <label htmlFor="fecha_inicio" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
             Fecha inicio
           </label>
-          <input
-            id="fecha_inicio"
-            type="date"
-            {...register('fecha_inicio')}
-            className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
-          />
+          <input id="fecha_inicio" type="date" {...register('fecha_inicio')} className="input-field" />
         </div>
         <div>
-          <label htmlFor="fecha_estimada_fin" className="block text-sm font-medium text-slate-700">
+          <label htmlFor="fecha_estimada_fin" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
             Fecha estimada fin
           </label>
-          <input
-            id="fecha_estimada_fin"
-            type="date"
-            {...register('fecha_estimada_fin')}
-            className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
-          />
+          <input id="fecha_estimada_fin" type="date" {...register('fecha_estimada_fin')} className="input-field" />
         </div>
       </div>
 
       <div>
-        <label htmlFor="responsable" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="responsable" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
           Responsable
         </label>
-        <input
-          id="responsable"
-          {...register('responsable')}
-          className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
-        />
+        <input id="responsable" {...register('responsable')} className="input-field" />
       </div>
 
       <div>
-        <label htmlFor="estado" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="estado" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
           Estado
         </label>
-        <select
-          id="estado"
-          {...register('estado')}
-          className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
-        >
+        <select id="estado" {...register('estado')} className="input-field">
           <option value="presupuestada">Presupuestada</option>
           <option value="en_ejecucion">En ejecución</option>
           <option value="terminada">Terminada</option>
@@ -143,7 +112,7 @@ export default function ObraForm({ defaultValues, onSubmit, submitLabel }: Props
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full rounded-lg bg-blue-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+        className="w-full rounded-lg bg-blue-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50"
       >
         {isSubmitting ? 'Guardando...' : submitLabel}
       </button>

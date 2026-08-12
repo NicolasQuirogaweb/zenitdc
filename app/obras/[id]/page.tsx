@@ -51,45 +51,45 @@ export default function DetalleObraPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-[color:var(--color-bg-page)] p-4">
       <div className="mx-auto max-w-lg">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-slate-800">{obra.nombre}</h1>
+          <h1 className="text-xl font-bold text-[color:var(--color-text-primary)]">{obra.nombre}</h1>
           <a
             href={`/clientes/${obra.cliente_id}/obras`}
-            className="text-sm text-blue-accent hover:underline"
+            className="text-sm text-blue-light hover:underline"
           >
             Volver
           </a>
         </div>
 
         <div className="mt-4 space-y-4">
-          <div className="rounded-lg bg-white p-4 shadow-sm">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+          <div className="rounded-lg bg-[color:var(--color-bg-surface)] p-4 shadow-sm">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--color-text-secondary)]">
               Cliente
             </h2>
             {obra.clientes ? (
               <div className="mt-2 text-sm">
-                <p className="font-semibold text-slate-800">{obra.clientes.nombre}</p>
+                <p className="font-semibold text-[color:var(--color-text-primary)]">{obra.clientes.nombre}</p>
                 {obra.clientes.telefono && (
-                  <p className="mt-1 text-slate-600">Tel: {obra.clientes.telefono}</p>
+                  <p className="mt-1 text-[color:var(--color-text-secondary)]">Tel: {obra.clientes.telefono}</p>
                 )}
                 {obra.clientes.direccion && (
-                  <p className="mt-1 text-slate-600">Dir: {obra.clientes.direccion}</p>
+                  <p className="mt-1 text-[color:var(--color-text-secondary)]">Dir: {obra.clientes.direccion}</p>
                 )}
               </div>
             ) : (
-              <p className="mt-2 text-sm text-slate-500">Sin cliente asociado</p>
+              <p className="mt-2 text-sm text-[color:var(--color-text-secondary)]">Sin cliente asociado</p>
             )}
           </div>
 
-          <div className="rounded-lg bg-white p-4 shadow-sm">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+          <div className="rounded-lg bg-[color:var(--color-bg-surface)] p-4 shadow-sm">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--color-text-secondary)]">
               Obra
             </h2>
-            <div className="mt-2 space-y-1 text-sm text-slate-600">
+            <div className="mt-2 space-y-1 text-sm text-[color:var(--color-text-secondary)]">
               <p>
-                <span className="font-semibold text-slate-800">{obra.nombre}</span>
+                <span className="font-semibold text-[color:var(--color-text-primary)]">{obra.nombre}</span>
               </p>
               <EstadoObraBadge estado={obra.estado} />
               {obra.descripcion && <p className="pt-1">{obra.descripcion}</p>}

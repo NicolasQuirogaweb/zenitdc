@@ -58,16 +58,16 @@ export default function EditarClientePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-[color:var(--color-bg-page)] p-4">
       <div className="mx-auto max-w-lg">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-slate-800">Editar Cliente</h1>
-          <a href="/clientes" className="text-sm text-blue-accent hover:underline">
+          <h1 className="text-xl font-bold text-[color:var(--color-text-primary)]">Editar Cliente</h1>
+          <a href="/clientes" className="text-sm text-blue-light hover:underline">
             Volver
           </a>
         </div>
         {error && (
-          <p className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-alert">
+          <p className="mb-4 rounded-lg bg-red-alert/15 p-3 text-sm text-red-alert">
             {error}
           </p>
         )}

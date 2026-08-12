@@ -34,19 +34,19 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-blueprint-grid relative overflow-hidden bg-blue-50 px-4 pt-10 pb-12 sm:pt-14 sm:pb-16">
+    <div className="min-h-screen bg-[color:var(--color-bg-page)]">
+      <div className="bg-blueprint-grid relative overflow-hidden bg-blue-accent/10 px-4 pt-10 pb-12 sm:pt-14 sm:pb-16">
         <button
           onClick={handleLogout}
-          className="absolute top-4 right-4 text-xs text-slate-500 underline hover:text-slate-700"
+          className="absolute top-4 right-4 text-xs text-[color:var(--color-text-secondary)] underline hover:text-[color:var(--color-text-primary)]"
         >
           Cerrar sesión
         </button>
         <div className="relative mx-auto max-w-2xl text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+          <h1 className="text-3xl font-bold tracking-tight text-[color:var(--color-text-primary)] sm:text-4xl">
             Zenit DC
           </h1>
-          <p className="mt-2 text-sm text-slate-600">Bienvenido, {user?.email}</p>
+          <p className="mt-2 text-sm text-[color:var(--color-text-secondary)]">Bienvenido, {user?.email}</p>
         </div>
       </div>
 
@@ -54,26 +54,26 @@ export default function DashboardPage() {
         <div className="grid gap-3 sm:grid-cols-2">
           <a
             href="/clientes"
-            className="flex flex-col items-center rounded-xl bg-white p-6 text-center shadow-sm transition hover:shadow-md"
+            className="flex flex-col items-center rounded-xl bg-[color:var(--color-bg-surface)] p-6 text-center shadow-sm transition hover:shadow-md"
           >
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-accent">
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-accent/15 text-blue-light">
               <Users className="h-6 w-6" />
             </span>
-            <h2 className="mt-3 font-semibold text-slate-800">Clientes y obras</h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <h2 className="mt-3 font-semibold text-[color:var(--color-text-primary)]">Clientes y obras</h2>
+            <p className="mt-1 text-sm text-[color:var(--color-text-secondary)]">
               Administrá clientes, proyectos y presupuestos
             </p>
           </a>
 
           <a
             href="/balance"
-            className="flex flex-col items-center rounded-xl bg-white p-6 text-center shadow-sm transition hover:shadow-md"
+            className="flex flex-col items-center rounded-xl bg-[color:var(--color-bg-surface)] p-6 text-center shadow-sm transition hover:shadow-md"
           >
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-accent">
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-accent/15 text-blue-light">
               <Wallet className="h-6 w-6" />
             </span>
-            <h2 className="mt-3 font-semibold text-slate-800">Balance general</h2>
-            <p className="mt-1 text-sm text-slate-500">Ingresos, egresos y resultado</p>
+            <h2 className="mt-3 font-semibold text-[color:var(--color-text-primary)]">Balance general</h2>
+            <p className="mt-1 text-sm text-[color:var(--color-text-secondary)]">Ingresos, egresos y resultado</p>
           </a>
         </div>
       </div>

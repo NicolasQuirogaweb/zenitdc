@@ -86,25 +86,25 @@ export default function FotosPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-[color:var(--color-bg-page)] p-4">
       <div className="mx-auto max-w-lg">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-slate-800">Fotos de la obra</h1>
-          <a href={`/obras/${id}`} className="text-sm text-blue-accent hover:underline">
+          <h1 className="text-xl font-bold text-[color:var(--color-text-primary)]">Fotos de la obra</h1>
+          <a href={`/obras/${id}`} className="text-sm text-blue-light hover:underline">
             Volver
           </a>
         </div>
 
-        <div className="mt-6 rounded-lg bg-white p-4 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-800">Subir foto</h2>
+        <div className="mt-6 rounded-lg bg-[color:var(--color-bg-surface)] p-4 shadow-sm">
+          <h2 className="text-lg font-semibold text-[color:var(--color-text-primary)]">Subir foto</h2>
 
           {error && (
-            <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-alert">{error}</p>
+            <p className="mt-3 rounded-lg bg-red-alert/15 p-3 text-sm text-red-alert">{error}</p>
           )}
 
           <form onSubmit={handleAgregar} className="mt-4 grid grid-cols-1 gap-3">
             <div>
-              <label htmlFor="archivo" className="block text-sm font-medium text-slate-700">
+              <label htmlFor="archivo" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
                 Imagen
               </label>
               <input
@@ -113,11 +113,11 @@ export default function FotosPage() {
                 accept="image/jpeg,image/png,image/webp,image/gif"
                 capture="environment"
                 onChange={(e) => setArchivo(e.target.files?.[0] ?? null)}
-                className="mt-1 block w-full text-sm text-slate-700"
+                className="mt-1 block w-full text-sm text-[color:var(--color-text-secondary)]"
               />
             </div>
             <div>
-              <label htmlFor="fecha" className="block text-sm font-medium text-slate-700">
+              <label htmlFor="fecha" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
                 Fecha
               </label>
               <input
@@ -125,11 +125,11 @@ export default function FotosPage() {
                 type="date"
                 value={fecha}
                 onChange={(e) => setFecha(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+                className="input-field"
               />
             </div>
             <div>
-              <label htmlFor="descripcion" className="block text-sm font-medium text-slate-700">
+              <label htmlFor="descripcion" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
                 Descripción (opcional)
               </label>
               <input
@@ -137,13 +137,13 @@ export default function FotosPage() {
                 value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
                 placeholder="Ej: Avance de obra"
-                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+                className="input-field"
               />
             </div>
             <button
               type="submit"
               disabled={subiendo}
-              className="rounded-lg bg-blue-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+              className="rounded-lg bg-blue-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50"
             >
               {subiendo ? 'Subiendo...' : '+ Subir foto'}
             </button>
@@ -152,8 +152,8 @@ export default function FotosPage() {
 
         <div className="mt-4">
           {fotos.length === 0 ? (
-            <div className="rounded-lg bg-white p-4 text-center shadow-sm">
-              <p className="text-sm text-slate-500">No hay fotos aún</p>
+            <div className="rounded-lg bg-[color:var(--color-bg-surface)] p-4 text-center shadow-sm">
+              <p className="text-sm text-[color:var(--color-text-secondary)]">No hay fotos aún</p>
               <button
                 type="button"
                 onClick={() => document.getElementById('archivo')?.focus()}
@@ -165,19 +165,19 @@ export default function FotosPage() {
           ) : (
             <div className="grid grid-cols-2 gap-3">
               {fotos.map((foto) => (
-                <div key={foto.id} className="overflow-hidden rounded-lg bg-white shadow-sm">
+                <div key={foto.id} className="overflow-hidden rounded-lg bg-[color:var(--color-bg-surface)] shadow-sm">
                   {foto.url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={foto.url} alt={foto.descripcion ?? 'Foto de obra'} className="h-40 w-full object-cover" />
                   ) : (
-                    <div className="flex h-40 w-full items-center justify-center bg-slate-100 text-xs text-slate-400">
+                    <div className="flex h-40 w-full items-center justify-center bg-[color:var(--color-bg-page)] text-xs text-[color:var(--color-text-muted)]">
                       Sin vista previa
                     </div>
                   )}
                   <div className="p-2">
-                    <p className="text-xs text-slate-500">{formatFecha(foto.fecha)}</p>
+                    <p className="text-xs text-[color:var(--color-text-secondary)]">{formatFecha(foto.fecha)}</p>
                     {foto.descripcion && (
-                      <p className="mt-0.5 text-sm text-slate-700">{foto.descripcion}</p>
+                      <p className="mt-0.5 text-sm text-[color:var(--color-text-secondary)]">{foto.descripcion}</p>
                     )}
                     <button
                       onClick={() => handleEliminar(foto.id)}
