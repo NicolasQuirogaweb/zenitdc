@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#2563EB",
+  themeColor: "#0B1526",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -43,7 +43,7 @@ export default function RootLayout({
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-white text-slate-800">
+      <body className="min-h-full bg-[color:var(--color-bg-page)] text-[color:var(--color-text-primary)]">
         <ToastProvider>
           <AppShell>{children}</AppShell>
         </ToastProvider>

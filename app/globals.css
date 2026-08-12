@@ -4,19 +4,43 @@
   --color-blue-accent: #2563EB;
   --color-green-alert: #16a34a;
   --color-red-alert: #dc2626;
+
+  --color-bg-page: #0B1526;
+  --color-bg-surface: #152238;
+  --color-border: #28344A;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #CBD5E1;
+  --color-text-muted: #94A3B8;
+  --color-blue-light: #60A5FA;
 }
 
 body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  background-color: var(--color-bg-page);
+  color: var(--color-text-primary);
 }
 
 input, textarea, select {
   font-size: 16px;
 }
 
+input::placeholder, textarea::placeholder {
+  color: var(--color-text-muted);
+  opacity: 1;
+}
+
 .bg-blueprint-grid {
   background-image:
-    linear-gradient(to right, rgba(37, 99, 235, 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(37, 99, 235, 0.08) 1px, transparent 1px);
+    linear-gradient(to right, rgba(148, 197, 255, 0.12) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 197, 255, 0.12) 1px, transparent 1px);
   background-size: 24px 24px;
+}
+
+@layer components {
+  .input-field {
+    @apply mt-1 block w-full rounded-lg border px-3 py-2 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent;
+    border-color: var(--color-border);
+    background-color: var(--color-bg-page);
+    color: var(--color-text-primary);
+  }
 }
