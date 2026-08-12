@@ -98,7 +98,7 @@ export default function ObrasPage() {
                     )}
                     <EstadoObraBadge estado={o.estado} />
                   </div>
-                  <div className="flex gap-2 ml-3">
+                  <div className="flex items-center gap-2 ml-3">
                     <a
                       href={`/obras/${o.id}`}
                       className="text-sm text-blue-accent hover:underline"

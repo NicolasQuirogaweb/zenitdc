@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import LoadingScreen from '@/components/ui/LoadingScreen'
+import { SkeletonLista } from '@/components/ui/Skeleton'
 import EstadoObraBadge from '@/components/ui/EstadoObraBadge'
 import { useToast } from '@/lib/hooks/useToast'
 
@@ -60,10 +60,6 @@ export default function ObrasDeClientePage() {
     }
   }
 
-  if (loading) {
-    return <LoadingScreen />
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="mx-auto max-w-lg">
@@ -89,7 +85,9 @@ export default function ObrasDeClientePage() {
           </a>
         </div>
 
-        {obras.length === 0 ? (
+        {loading ? (
+          <SkeletonLista />
+        ) : obras.length === 0 ? (
           <div className="mt-8 text-center">
             <p className="text-slate-500">No hay obras para este cliente aún</p>
             <p className="mt-2">
@@ -110,7 +108,7 @@ export default function ObrasDeClientePage() {
                     <p className="font-medium text-slate-800">{o.nombre}</p>
                     <EstadoObraBadge estado={o.estado} />
                   </div>
-                  <div className="flex gap-2 ml-3">
+                  <div className="flex items-center gap-2 ml-3">
                     <a
                       href={`/obras/${o.id}`}
                       className="text-sm text-blue-accent hover:underline"
