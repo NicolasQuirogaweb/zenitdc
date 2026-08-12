@@ -152,9 +152,16 @@ export default function FotosPage() {
 
         <div className="mt-4">
           {fotos.length === 0 ? (
-            <p className="rounded-lg bg-white p-4 text-center text-sm text-slate-500 shadow-sm">
-              No hay fotos aún. Subí la primera.
-            </p>
+            <div className="rounded-lg bg-white p-4 text-center shadow-sm">
+              <p className="text-sm text-slate-500">No hay fotos aún</p>
+              <button
+                type="button"
+                onClick={() => document.getElementById('archivo')?.focus()}
+                className="mt-2 inline-block rounded-lg bg-blue-accent px-4 py-2 text-sm font-semibold text-white"
+              >
+                Subir primera foto
+              </button>
+            </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
               {fotos.map((foto) => (
@@ -174,7 +181,7 @@ export default function FotosPage() {
                     )}
                     <button
                       onClick={() => handleEliminar(foto.id)}
-                      className="mt-1 text-xs text-red-alert hover:underline"
+                      className="mt-1 text-sm text-red-alert hover:underline"
                     >
                       Eliminar
                     </button>
