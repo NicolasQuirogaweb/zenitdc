@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import AppShell from "@/components/layout/AppShell";
 import { ToastProvider } from "@/lib/hooks/useToast";
+import { ConfirmProvider } from "@/lib/hooks/useConfirm";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -45,7 +46,9 @@ export default function RootLayout({
     >
       <body className="min-h-full bg-[color:var(--color-bg-page)] text-[color:var(--color-text-primary)]">
         <ToastProvider>
-          <AppShell>{children}</AppShell>
+          <ConfirmProvider>
+            <AppShell>{children}</AppShell>
+          </ConfirmProvider>
         </ToastProvider>
         <ServiceWorkerRegister />
       </body>

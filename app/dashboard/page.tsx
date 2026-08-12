@@ -35,7 +35,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[color:var(--color-bg-page)]">
-      <div className="bg-blueprint-grid relative overflow-hidden bg-blue-accent/10 px-4 pt-10 pb-12 sm:pt-14 sm:pb-16">
+      <div className="bg-hero-glow relative overflow-hidden bg-blue-accent/10 px-4 pt-10 pb-12 sm:pt-14 sm:pb-16">
         <button
           onClick={handleLogout}
           className="absolute top-4 right-4 text-xs text-[color:var(--color-text-secondary)] underline hover:text-[color:var(--color-text-primary)]"

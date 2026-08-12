@@ -7,6 +7,7 @@ import { MATERIALES } from '@/lib/constantes'
 import SelectConOpciones from '@/components/ui/SelectConOpciones'
 import CollapsibleCard from '@/components/ui/CollapsibleCard'
 import { useToast } from '@/lib/hooks/useToast'
+import { useConfirm } from '@/lib/hooks/useConfirm'
 import type { GastoMaterial } from '@/types'
 
 interface Props {
@@ -18,6 +19,7 @@ export default function GastosMaterialesSection({ obraId, onDatosCambiaron }: Pr
   const [gastos, setGastos] = useState<GastoMaterial[]>([])
   const [error, setError] = useState('')
   const { showToast } = useToast()
+  const confirm = useConfirm()
   const [material, setMaterial] = useState('')
   const [cantidad, setCantidad] = useState('')
   const [monto, setMonto] = useState('')
@@ -83,7 +85,7 @@ export default function GastosMaterialesSection({ obraId, onDatosCambiaron }: Pr
   }
 
   const handleEliminar = async (gastoId: string, gastoMonto: number) => {
-    if (!confirm(`¿Eliminar el gasto de ${formatMoney(gastoMonto)}?`)) return
+    if (!(await confirm(`¿Eliminar el gasto de ${formatMoney(gastoMonto)}?`))) return
 
     const res = await fetch(`/api/gastos-materiales/${gastoId}`, { method: 'DELETE' })
     if (res.ok) {

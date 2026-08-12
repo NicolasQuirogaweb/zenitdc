@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { SkeletonLista } from '@/components/ui/Skeleton'
 import EstadoObraBadge from '@/components/ui/EstadoObraBadge'
 import { useToast } from '@/lib/hooks/useToast'
+import { useConfirm } from '@/lib/hooks/useConfirm'
 
 interface ObraConCliente {
   id: string
@@ -20,6 +21,7 @@ export default function ObrasPage() {
   const [error, setError] = useState('')
   const supabase = createClient()
   const { showToast } = useToast()
+  const confirm = useConfirm()
 
   const fetchObras = () => {
     supabase
@@ -38,7 +40,7 @@ export default function ObrasPage() {
   }, [])
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Eliminar esta obra? También se eliminarán presupuestos, pagos y gastos asociados.')) return
+    if (!(await confirm('¿Eliminar esta obra? También se eliminarán presupuestos, pagos y gastos asociados.'))) return
 
     const res = await fetch(`/api/obras/${id}`, { method: 'DELETE' })
     if (res.ok) {
