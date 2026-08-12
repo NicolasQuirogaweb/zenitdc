@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { SkeletonLista } from '@/components/ui/Skeleton'
 import { useToast } from '@/lib/hooks/useToast'
+import { useConfirm } from '@/lib/hooks/useConfirm'
 import type { Cliente } from '@/types'
 
 export default function ClientesPage() {
@@ -12,6 +13,7 @@ export default function ClientesPage() {
   const [error, setError] = useState('')
   const supabase = createClient()
   const { showToast } = useToast()
+  const confirm = useConfirm()
 
   const fetchClientes = () => {
     supabase
@@ -30,7 +32,7 @@ export default function ClientesPage() {
   }, [])
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Eliminar este cliente?')) return
+    if (!(await confirm('¿Eliminar este cliente?'))) return
 
     const res = await fetch(`/api/clientes/${id}`, { method: 'DELETE' })
     if (res.ok) {

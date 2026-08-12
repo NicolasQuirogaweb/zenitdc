@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import { formatFecha } from '@/lib/utils/formato'
 import LoadingScreen from '@/components/ui/LoadingScreen'
 import { useToast } from '@/lib/hooks/useToast'
+import { useConfirm } from '@/lib/hooks/useConfirm'
 import type { FotoObra } from '@/types'
 
 interface FotoConUrl extends FotoObra {
@@ -21,6 +22,7 @@ export default function FotosPage() {
   const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10))
   const [subiendo, setSubiendo] = useState(false)
   const { showToast } = useToast()
+  const confirm = useConfirm()
 
   const fetchFotos = () => {
     return fetch(`/api/obras/${id}/fotos`)
@@ -72,7 +74,7 @@ export default function FotosPage() {
   }
 
   const handleEliminar = async (fotoId: string) => {
-    if (!confirm('¿Eliminar esta foto?')) return
+    if (!(await confirm('¿Eliminar esta foto?'))) return
 
     const res = await fetch(`/api/fotos/${fotoId}`, { method: 'DELETE' })
     if (res.ok) {

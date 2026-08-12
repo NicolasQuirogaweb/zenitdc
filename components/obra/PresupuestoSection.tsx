@@ -7,6 +7,7 @@ import { RUBROS_PRESUPUESTO } from '@/lib/constantes'
 import SelectConOpciones from '@/components/ui/SelectConOpciones'
 import CollapsibleCard from '@/components/ui/CollapsibleCard'
 import { useToast } from '@/lib/hooks/useToast'
+import { useConfirm } from '@/lib/hooks/useConfirm'
 import type { PresupuestoItem } from '@/types'
 
 interface Props {
@@ -18,6 +19,7 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
   const [items, setItems] = useState<PresupuestoItem[]>([])
   const [error, setError] = useState('')
   const { showToast } = useToast()
+  const confirm = useConfirm()
   const [rubro, setRubro] = useState('')
   const [monto, setMonto] = useState('')
   const [agregando, setAgregando] = useState(false)
@@ -81,7 +83,7 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
   }
 
   const handleEliminar = async (itemId: string, itemRubro: string) => {
-    if (!confirm(`¿Eliminar el rubro "${itemRubro}"?`)) return
+    if (!(await confirm(`¿Eliminar el rubro "${itemRubro}"?`))) return
 
     const res = await fetch(`/api/presupuesto/${itemId}`, { method: 'DELETE' })
     if (res.ok) {
