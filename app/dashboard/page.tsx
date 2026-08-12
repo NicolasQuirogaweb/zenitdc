@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Users, Wallet } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import LoadingScreen from '@/components/ui/LoadingScreen'
 import type { User } from '@supabase/supabase-js'
@@ -33,36 +34,45 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="mx-auto max-w-lg">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-slate-800">Zenit DC</h1>
-          <button
-            onClick={handleLogout}
-            className="text-sm text-slate-500 underline hover:text-slate-700"
-          >
-            Cerrar sesión
-          </button>
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-blueprint-grid relative overflow-hidden bg-blue-50 px-4 pt-10 pb-12 sm:pt-14 sm:pb-16">
+        <button
+          onClick={handleLogout}
+          className="absolute top-4 right-4 text-xs text-slate-500 underline hover:text-slate-700"
+        >
+          Cerrar sesión
+        </button>
+        <div className="relative mx-auto max-w-2xl text-center">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            Zenit DC
+          </h1>
+          <p className="mt-2 text-sm text-slate-600">Bienvenido, {user?.email}</p>
         </div>
+      </div>
 
-        <p className="mt-1 text-sm text-slate-500">
-          Bienvenido, {user?.email}
-        </p>
-
-        <div className="mt-8 space-y-3">
+      <div className="mx-auto -mt-6 max-w-2xl px-4 pb-8">
+        <div className="grid gap-3 sm:grid-cols-2">
           <a
             href="/clientes"
-            className="block rounded-lg bg-white p-4 shadow-sm transition hover:shadow-md"
+            className="flex flex-col items-center rounded-xl bg-white p-6 text-center shadow-sm transition hover:shadow-md"
           >
-            <h2 className="font-semibold text-slate-800">Administrar clientes y sus obras</h2>
-            <p className="mt-1 text-sm text-slate-500">Clientes, proyectos y presupuestos</p>
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-accent">
+              <Users className="h-6 w-6" />
+            </span>
+            <h2 className="mt-3 font-semibold text-slate-800">Clientes y obras</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Administrá clientes, proyectos y presupuestos
+            </p>
           </a>
 
           <a
             href="/balance"
-            className="block rounded-lg bg-white p-4 shadow-sm transition hover:shadow-md"
+            className="flex flex-col items-center rounded-xl bg-white p-6 text-center shadow-sm transition hover:shadow-md"
           >
-            <h2 className="font-semibold text-slate-800">Resumen financiero general</h2>
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-accent">
+              <Wallet className="h-6 w-6" />
+            </span>
+            <h2 className="mt-3 font-semibold text-slate-800">Balance general</h2>
             <p className="mt-1 text-sm text-slate-500">Ingresos, egresos y resultado</p>
           </a>
         </div>
