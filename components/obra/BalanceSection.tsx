@@ -33,17 +33,17 @@ export default function BalanceSection({ obraId, refreshKey }: Props) {
 
   if (loading) {
     return (
-      <div className="rounded-lg bg-white p-4 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-800">Balance de la obra</h2>
-        <p className="mt-3 text-sm text-slate-500">Cargando...</p>
+      <div className="rounded-lg bg-[color:var(--color-bg-surface)] p-4 shadow-sm">
+        <h2 className="text-lg font-semibold text-[color:var(--color-text-primary)]">Balance de la obra</h2>
+        <p className="mt-3 text-sm text-[color:var(--color-text-secondary)]">Cargando...</p>
       </div>
     )
   }
 
   if (error || !balance) {
     return (
-      <div className="rounded-lg bg-white p-4 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-800">Balance de la obra</h2>
+      <div className="rounded-lg bg-[color:var(--color-bg-surface)] p-4 shadow-sm">
+        <h2 className="text-lg font-semibold text-[color:var(--color-text-primary)]">Balance de la obra</h2>
         <p className="mt-3 text-sm text-red-alert">{error || 'No disponible'}</p>
       </div>
     )
@@ -54,30 +54,30 @@ export default function BalanceSection({ obraId, refreshKey }: Props) {
   const saldoPendientePositivo = saldoPendiente > 0
 
   return (
-    <div className="rounded-lg bg-white p-4 shadow-sm">
-      <h2 className="text-lg font-semibold text-slate-800">Balance de la obra</h2>
+    <div className="rounded-lg bg-[color:var(--color-bg-surface)] p-4 shadow-sm">
+      <h2 className="text-lg font-semibold text-[color:var(--color-text-primary)]">Balance de la obra</h2>
 
       <div className="mt-4 space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-slate-500">Presupuesto aprobado</p>
-            <p className="text-xs text-slate-400">Monto total aprobado por el cliente, por rubro</p>
+            <p className="text-sm text-[color:var(--color-text-secondary)]">Presupuesto aprobado</p>
+            <p className="text-xs text-[color:var(--color-text-muted)]">Monto total aprobado por el cliente, por rubro</p>
           </div>
-          <p className="font-semibold text-slate-800">
+          <p className="font-semibold text-[color:var(--color-text-primary)]">
             {formatMoney(balance.total_presupuestado)}
           </p>
         </div>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-slate-500">Pagos del cliente</p>
-            <p className="text-xs text-slate-400">Suma de todos los pagos registrados</p>
+            <p className="text-sm text-[color:var(--color-text-secondary)]">Pagos del cliente</p>
+            <p className="text-xs text-[color:var(--color-text-muted)]">Suma de todos los pagos registrados</p>
           </div>
           <p className="font-semibold text-green-600">{formatMoney(balance.total_ingresos)}</p>
         </div>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-slate-500">Saldo pendiente del cliente</p>
-            <p className="text-xs text-slate-400">= Presupuesto aprobado − Pagos del cliente</p>
+            <p className="text-sm text-[color:var(--color-text-secondary)]">Saldo pendiente del cliente</p>
+            <p className="text-xs text-[color:var(--color-text-muted)]">= Presupuesto aprobado − Pagos del cliente</p>
           </div>
           <p
             className={`font-bold ${
@@ -89,22 +89,22 @@ export default function BalanceSection({ obraId, refreshKey }: Props) {
         </div>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-slate-500">Egresos</p>
-            <p className="text-xs text-slate-400">= Gastos de materiales + costos directos de la obra</p>
+            <p className="text-sm text-[color:var(--color-text-secondary)]">Egresos</p>
+            <p className="text-xs text-[color:var(--color-text-muted)]">= Gastos de materiales + costos directos de la obra</p>
           </div>
-          <p className="font-semibold text-slate-800">{formatMoney(balance.total_egresos)}</p>
+          <p className="font-semibold text-[color:var(--color-text-primary)]">{formatMoney(balance.total_egresos)}</p>
         </div>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-slate-500">Gastos generales</p>
-            <p className="text-xs text-slate-400">Seguros, combustible, etc. — no descuenta del resultado</p>
+            <p className="text-sm text-[color:var(--color-text-secondary)]">Gastos generales</p>
+            <p className="text-xs text-[color:var(--color-text-muted)]">Seguros, combustible, etc. — no descuenta del resultado</p>
           </div>
-          <p className="font-semibold text-slate-800">{formatMoney(balance.total_gastos_generales)}</p>
+          <p className="font-semibold text-[color:var(--color-text-primary)]">{formatMoney(balance.total_gastos_generales)}</p>
         </div>
-        <div className="flex items-center justify-between border-t border-slate-200 pt-3">
+        <div className="flex items-center justify-between border-t border-[color:var(--color-border)] pt-3">
           <div>
-            <p className="text-sm font-semibold text-slate-800">Resultado</p>
-            <p className="text-xs text-slate-400">= Pagos del cliente − Egresos</p>
+            <p className="text-sm font-semibold text-[color:var(--color-text-primary)]">Resultado</p>
+            <p className="text-xs text-[color:var(--color-text-muted)]">= Pagos del cliente − Egresos</p>
           </div>
           <p
             className={`font-bold ${

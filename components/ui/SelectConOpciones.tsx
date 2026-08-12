@@ -17,7 +17,7 @@ export default function SelectConOpciones({ label, id, opciones, value, onChange
 
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium text-slate-700">
+      <label htmlFor={id} className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
         {label}
       </label>
       <select
@@ -33,7 +33,7 @@ export default function SelectConOpciones({ label, id, opciones, value, onChange
             onChange(elegido)
           }
         }}
-        className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+        className="input-field"
       >
         <option value="">Seleccionar...</option>
         {opciones.map((opcion) => (
@@ -49,7 +49,7 @@ export default function SelectConOpciones({ label, id, opciones, value, onChange
           value={value === OPCION_OTRO ? '' : value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder ?? 'Escribí otra opción'}
-          className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+          className="input-field"
         />
       )}
     </div>

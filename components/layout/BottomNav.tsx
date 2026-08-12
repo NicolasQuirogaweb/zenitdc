@@ -8,7 +8,7 @@ export default function BottomNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-slate-200 bg-white md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-[color:var(--color-border)] bg-[color:var(--color-bg-surface)] md:hidden">
       {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
         const activo = pathname === href || pathname.startsWith(`${href}/`)
         return (
@@ -16,7 +16,7 @@ export default function BottomNav() {
             key={href}
             href={href}
             className={`flex flex-1 flex-col items-center gap-1 py-2 text-xs ${
-              activo ? 'text-blue-accent' : 'text-slate-500'
+              activo ? 'text-blue-light' : 'text-[color:var(--color-text-secondary)]'
             }`}
           >
             <Icon className="h-5 w-5" />

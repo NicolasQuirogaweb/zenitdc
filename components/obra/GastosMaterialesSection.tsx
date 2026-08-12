@@ -101,7 +101,7 @@ export default function GastosMaterialesSection({ obraId, onDatosCambiaron }: Pr
       subtitulo="Cargá los materiales comprados para la obra"
     >
       {error && (
-        <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-alert">{error}</p>
+        <p className="mt-3 rounded-lg bg-red-alert/15 p-3 text-sm text-red-alert">{error}</p>
       )}
 
       <form onSubmit={handleAgregar} className="mt-4 grid grid-cols-2 gap-3">
@@ -116,7 +116,7 @@ export default function GastosMaterialesSection({ obraId, onDatosCambiaron }: Pr
           />
         </div>
         <div>
-          <label htmlFor="cantidad" className="block text-sm font-medium text-slate-700">
+          <label htmlFor="cantidad" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
             Cantidad
           </label>
           <input
@@ -124,11 +124,11 @@ export default function GastosMaterialesSection({ obraId, onDatosCambiaron }: Pr
             value={cantidad}
             onChange={(e) => setCantidad(e.target.value)}
             placeholder="Ej: 10 bolsas"
-            className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+            className="input-field"
           />
         </div>
         <div>
-          <label htmlFor="monto" className="block text-sm font-medium text-slate-700">
+          <label htmlFor="monto" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
             Monto
           </label>
           <input
@@ -140,11 +140,11 @@ export default function GastosMaterialesSection({ obraId, onDatosCambiaron }: Pr
             value={monto}
             onChange={(e) => setMonto(e.target.value)}
             placeholder="0,00"
-            className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+            className="input-field"
           />
         </div>
         <div>
-          <label htmlFor="fecha" className="block text-sm font-medium text-slate-700">
+          <label htmlFor="fecha" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
             Fecha
           </label>
           <input
@@ -152,45 +152,45 @@ export default function GastosMaterialesSection({ obraId, onDatosCambiaron }: Pr
             type="date"
             value={fecha}
             onChange={(e) => setFecha(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+            className="input-field"
           />
         </div>
         <div className="col-span-2">
-          <label htmlFor="observaciones" className="block text-sm font-medium text-slate-700">
+          <label htmlFor="observaciones" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
             Observaciones
           </label>
           <input
             id="observaciones"
             value={observaciones}
             onChange={(e) => setObservaciones(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+            className="input-field"
           />
         </div>
         <button
           type="submit"
           disabled={agregando}
-          className="col-span-2 rounded-lg bg-blue-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+          className="col-span-2 rounded-lg bg-blue-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50"
         >
           {agregando ? 'Registrando...' : '+ Registrar gasto de material'}
         </button>
       </form>
 
-      <div className="mt-4 divide-y divide-slate-100">
+      <div className="mt-4 divide-y divide-[color:var(--color-border)]">
         {gastos.length === 0 ? (
-          <p className="py-3 text-sm text-slate-500">No hay gastos de materiales registrados aún</p>
+          <p className="py-3 text-sm text-[color:var(--color-text-secondary)]">No hay gastos de materiales registrados aún</p>
         ) : (
           gastos.map((gasto) => (
             <div key={gasto.id} className="flex items-center justify-between py-2">
               <div>
-                <p className="font-medium text-slate-800">
+                <p className="font-medium text-[color:var(--color-text-primary)]">
                   {gasto.material}
-                  {gasto.cantidad && <span className="text-slate-500"> · {gasto.cantidad}</span>}
+                  {gasto.cantidad && <span className="text-[color:var(--color-text-secondary)]"> · {gasto.cantidad}</span>}
                 </p>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-[color:var(--color-text-secondary)]">
                   {formatMoney(Number(gasto.monto))} · {formatFecha(gasto.fecha)}
                 </p>
                 {gasto.observaciones && (
-                  <p className="text-xs text-slate-400">{gasto.observaciones}</p>
+                  <p className="text-xs text-[color:var(--color-text-muted)]">{gasto.observaciones}</p>
                 )}
               </div>
               <button
@@ -204,9 +204,9 @@ export default function GastosMaterialesSection({ obraId, onDatosCambiaron }: Pr
         )}
       </div>
 
-      <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-3">
-        <p className="font-semibold text-slate-800">Total en materiales</p>
-        <p className="font-semibold text-slate-800">{formatMoney(total)}</p>
+      <div className="mt-4 flex items-center justify-between border-t border-[color:var(--color-border)] pt-3">
+        <p className="font-semibold text-[color:var(--color-text-primary)]">Total en materiales</p>
+        <p className="font-semibold text-[color:var(--color-text-primary)]">{formatMoney(total)}</p>
       </div>
     </CollapsibleCard>
   )

@@ -152,7 +152,7 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
       abiertoInicial
     >
       {error && (
-        <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-alert">{error}</p>
+        <p className="mt-3 rounded-lg bg-red-alert/15 p-3 text-sm text-red-alert">{error}</p>
       )}
 
       <form onSubmit={handleAgregar} className="mt-4 grid grid-cols-2 gap-3">
@@ -167,7 +167,7 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
           />
         </div>
         <div>
-          <label htmlFor="monto" className="block text-sm font-medium text-slate-700">
+          <label htmlFor="monto" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
             Monto
           </label>
           <input
@@ -179,21 +179,21 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
             value={monto}
             onChange={(e) => setMonto(e.target.value)}
             placeholder="0,00"
-            className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+            className="input-field"
           />
         </div>
         <button
           type="submit"
           disabled={agregando}
-          className="col-span-2 rounded-lg bg-blue-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+          className="col-span-2 rounded-lg bg-blue-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50"
         >
           {agregando ? 'Agregando...' : '+ Agregar rubro'}
         </button>
       </form>
 
-      <div className="mt-4 divide-y divide-slate-100">
+      <div className="mt-4 divide-y divide-[color:var(--color-border)]">
         {items.length === 0 ? (
-          <p className="py-3 text-sm text-slate-500">No hay rubros cargados aún</p>
+          <p className="py-3 text-sm text-[color:var(--color-text-secondary)]">No hay rubros cargados aún</p>
         ) : (
           items.map((item) => {
             const editando = item.id === editandoId
@@ -204,7 +204,7 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
                     <div>
                       <label
                         htmlFor={`edit-rubro-${item.id}`}
-                        className="block text-xs font-medium text-slate-500"
+                        className="block text-xs font-medium text-[color:var(--color-text-secondary)]"
                       >
                         Rubro
                       </label>
@@ -212,13 +212,13 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
                         id={`edit-rubro-${item.id}`}
                         value={editRubro}
                         onChange={(e) => setEditRubro(e.target.value)}
-                        className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+                        className="input-field py-1.5 text-sm"
                       />
                     </div>
                     <div>
                       <label
                         htmlFor={`edit-monto-${item.id}`}
-                        className="block text-xs font-medium text-slate-500"
+                        className="block text-xs font-medium text-[color:var(--color-text-secondary)]"
                       >
                         Monto
                       </label>
@@ -230,20 +230,20 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
                         step="0.01"
                         value={editMonto}
                         onChange={(e) => setEditMonto(e.target.value)}
-                        className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+                        className="input-field py-1.5 text-sm"
                       />
                     </div>
                     <div className="flex gap-2">
                       <button
                         type="submit"
-                        className="flex-1 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-green-700"
+                        className="flex-1 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-green-500"
                       >
                         Guardar
                       </button>
                       <button
                         type="button"
                         onClick={cancelarEdicion}
-                        className="flex-1 rounded-lg bg-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-300"
+                        className="flex-1 rounded-lg bg-[color:var(--color-border)] px-3 py-1.5 text-sm font-semibold text-[color:var(--color-text-primary)] hover:opacity-80"
                       >
                         Cancelar
                       </button>
@@ -252,13 +252,13 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
                 ) : (
                   <>
                     <div>
-                      <p className="font-medium text-slate-800">{item.rubro}</p>
-                      <p className="text-sm text-slate-500">{formatMoney(Number(item.monto))}</p>
+                      <p className="font-medium text-[color:var(--color-text-primary)]">{item.rubro}</p>
+                      <p className="text-sm text-[color:var(--color-text-secondary)]">{formatMoney(Number(item.monto))}</p>
                     </div>
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => iniciarEdicion(item)}
-                        className="text-sm text-blue-accent hover:underline"
+                        className="text-sm text-blue-light hover:underline"
                       >
                         Editar
                       </button>
@@ -277,9 +277,9 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
         )}
       </div>
 
-      <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-3">
-        <p className="font-semibold text-slate-800">Total presupuesto aprobado</p>
-        <p className="font-semibold text-slate-800">{formatMoney(total)}</p>
+      <div className="mt-4 flex items-center justify-between border-t border-[color:var(--color-border)] pt-3">
+        <p className="font-semibold text-[color:var(--color-text-primary)]">Total presupuesto aprobado</p>
+        <p className="font-semibold text-[color:var(--color-text-primary)]">{formatMoney(total)}</p>
       </div>
     </CollapsibleCard>
   )
