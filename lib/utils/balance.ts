@@ -1,27 +1,38 @@
 import { createClient } from '@/lib/supabase/server'
+import { CONCEPTOS_COSTOS_DIRECTOS } from '@/lib/constantes'
 import type { BalanceGeneral, BalanceObra, BalancePorObra } from '@/types'
 
 export async function getBalanceObra(obraId: string): Promise<BalanceObra> {
   const supabase = await createClient()
 
-  const [presupuesto, ingresos, egresosGen, egresosMat] = await Promise.all([
+  const [presupuesto, ingresos, gastosGenerales, egresosMat] = await Promise.all([
     supabase.from('presupuesto_items').select('monto').eq('obra_id', obraId),
     supabase.from('pagos_clientes').select('monto').eq('obra_id', obraId),
-    supabase.from('gastos_generales').select('monto').eq('obra_id', obraId),
+    supabase.from('gastos_generales').select('concepto, monto').eq('obra_id', obraId),
     supabase.from('gastos_materiales').select('monto').eq('obra_id', obraId),
   ])
 
   const totalPresupuestado = presupuesto.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0
   const totalIngresos = ingresos.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0
+
+  const costosDirectos =
+    gastosGenerales.data
+      ?.filter((g) => CONCEPTOS_COSTOS_DIRECTOS.includes(g.concepto))
+      .reduce((s, i) => s + Number(i.monto), 0) ?? 0
+  const totalGastosGenerales =
+    gastosGenerales.data
+      ?.filter((g) => !CONCEPTOS_COSTOS_DIRECTOS.includes(g.concepto))
+      .reduce((s, i) => s + Number(i.monto), 0) ?? 0
+
   const totalEgresos =
-    (egresosGen.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0) +
-    (egresosMat.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0)
+    costosDirectos + (egresosMat.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0)
 
   return {
     obra_id: obraId,
     total_presupuestado: totalPresupuestado,
     total_ingresos: totalIngresos,
     total_egresos: totalEgresos,
+    total_gastos_generales: totalGastosGenerales,
     resultado: totalIngresos - totalEgresos,
     diferencia_vs_presupuesto: totalIngresos - totalEgresos - totalPresupuestado,
   }
@@ -59,15 +70,18 @@ export async function getBalanceGeneral(): Promise<BalanceGeneral> {
     cliente_nombre: o.cliente_nombre,
     total_ingresos: balances[i].total_ingresos,
     total_egresos: balances[i].total_egresos,
+    total_gastos_generales: balances[i].total_gastos_generales,
     resultado: balances[i].resultado,
   }))
 
   const totalIngresosEmpresa = balances.reduce((s, b) => s + b.total_ingresos, 0)
   const totalEgresosEmpresa = balances.reduce((s, b) => s + b.total_egresos, 0)
+  const totalGastosGeneralesEmpresa = balances.reduce((s, b) => s + b.total_gastos_generales, 0)
 
   return {
     total_ingresos: totalIngresosEmpresa,
     total_egresos: totalEgresosEmpresa,
+    total_gastos_generales: totalGastosGeneralesEmpresa,
     resultado: totalIngresosEmpresa - totalEgresosEmpresa,
     por_obra: porObra,
   }
