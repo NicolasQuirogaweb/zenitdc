@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { ChevronDown } from 'lucide-react'
 
 interface Props {
   titulo: string
@@ -31,7 +32,11 @@ export default function CollapsibleCard({
             <h2 className="text-lg font-semibold text-slate-800">{titulo}</h2>
             {subtitulo && <p className="mt-1 text-sm text-slate-500">{subtitulo}</p>}
           </div>
-          <span className="ml-3 shrink-0 text-sm text-slate-400">{abierto ? '▲' : '▼'}</span>
+          <ChevronDown
+            className={`ml-3 h-5 w-5 shrink-0 text-slate-400 transition-transform ${
+              abierto ? 'rotate-180' : ''
+            }`}
+          />
         </button>
         {headerRight}
       </div>
