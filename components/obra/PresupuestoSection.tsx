@@ -200,34 +200,54 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
             return (
               <div key={item.id} className="flex items-center justify-between py-2">
                 {editando ? (
-                  <form onSubmit={guardarEdicion} className="flex w-full items-center gap-2">
-                    <input
-                      value={editRubro}
-                      onChange={(e) => setEditRubro(e.target.value)}
-                      className="block w-full min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
-                    />
-                    <input
-                      type="number"
-                      inputMode="decimal"
-                      min="0.01"
-                      step="0.01"
-                      value={editMonto}
-                      onChange={(e) => setEditMonto(e.target.value)}
-                      className="block w-28 rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
-                    />
-                    <button
-                      type="submit"
-                      className="rounded-lg bg-green-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-green-700"
-                    >
-                      Guardar
-                    </button>
-                    <button
-                      type="button"
-                      onClick={cancelarEdicion}
-                      className="rounded-lg bg-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-300"
-                    >
-                      Cancelar
-                    </button>
+                  <form onSubmit={guardarEdicion} className="w-full space-y-2">
+                    <div>
+                      <label
+                        htmlFor={`edit-rubro-${item.id}`}
+                        className="block text-xs font-medium text-slate-500"
+                      >
+                        Rubro
+                      </label>
+                      <input
+                        id={`edit-rubro-${item.id}`}
+                        value={editRubro}
+                        onChange={(e) => setEditRubro(e.target.value)}
+                        className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor={`edit-monto-${item.id}`}
+                        className="block text-xs font-medium text-slate-500"
+                      >
+                        Monto
+                      </label>
+                      <input
+                        id={`edit-monto-${item.id}`}
+                        type="number"
+                        inputMode="decimal"
+                        min="0.01"
+                        step="0.01"
+                        value={editMonto}
+                        onChange={(e) => setEditMonto(e.target.value)}
+                        className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-800 outline-none focus:border-blue-accent focus:ring-1 focus:ring-blue-accent"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="submit"
+                        className="flex-1 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-green-700"
+                      >
+                        Guardar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={cancelarEdicion}
+                        className="flex-1 rounded-lg bg-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-300"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
                   </form>
                 ) : (
                   <>
