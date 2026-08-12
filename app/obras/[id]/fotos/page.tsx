@@ -21,6 +21,7 @@ export default function FotosPage() {
   const [descripcion, setDescripcion] = useState('')
   const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10))
   const [subiendo, setSubiendo] = useState(false)
+  const [fotoAmpliada, setFotoAmpliada] = useState<FotoConUrl | null>(null)
   const { showToast } = useToast()
   const confirm = useConfirm()
 
@@ -169,8 +170,14 @@ export default function FotosPage() {
               {fotos.map((foto) => (
                 <div key={foto.id} className="overflow-hidden rounded-lg bg-[color:var(--color-bg-surface)] shadow-sm">
                   {foto.url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={foto.url} alt={foto.descripcion ?? 'Foto de obra'} className="h-40 w-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setFotoAmpliada(foto)}
+                      className="block w-full"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={foto.url} alt={foto.descripcion ?? 'Foto de obra'} className="h-40 w-full object-cover" />
+                    </button>
                   ) : (
                     <div className="flex h-40 w-full items-center justify-center bg-[color:var(--color-bg-page)] text-xs text-[color:var(--color-text-muted)]">
                       Sin vista previa
@@ -194,6 +201,31 @@ export default function FotosPage() {
           )}
         </div>
       </div>
+
+      {fotoAmpliada?.url && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-black/80 p-4"
+          onClick={() => setFotoAmpliada(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setFotoAmpliada(null)}
+            className="absolute top-4 right-4 text-sm text-white underline"
+          >
+            Cerrar
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={fotoAmpliada.url}
+            alt={fotoAmpliada.descripcion ?? 'Foto de obra'}
+            className="max-h-[85vh] max-w-full rounded-lg object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+          {fotoAmpliada.descripcion && (
+            <p className="text-sm text-[color:var(--color-text-secondary)]">{fotoAmpliada.descripcion}</p>
+          )}
+        </div>
+      )}
     </div>
   )
 }
