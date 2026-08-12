@@ -3,6 +3,7 @@
 import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ObraForm from '@/components/forms/ObraForm'
+import { useToast } from '@/lib/hooks/useToast'
 import type { ObraFormData } from '@/lib/validations/obras'
 import type { Obra } from '@/types'
 
@@ -11,6 +12,7 @@ function NuevaObraContent() {
   const searchParams = useSearchParams()
   const clienteId = searchParams.get('cliente_id') ?? ''
   const [error, setError] = useState('')
+  const { showToast } = useToast()
 
   const handleSubmit = async (data: ObraFormData) => {
     setError('')
@@ -26,6 +28,7 @@ function NuevaObraContent() {
       return
     }
 
+    showToast('success', 'Obra creada correctamente')
     if (clienteId) {
       router.push(`/clientes/${clienteId}/obras`)
     } else {

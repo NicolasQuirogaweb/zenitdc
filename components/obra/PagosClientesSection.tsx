@@ -6,6 +6,7 @@ import { formatMoney, formatFecha } from '@/lib/utils/formato'
 import { METODOS_PAGO } from '@/lib/constantes'
 import SelectConOpciones from '@/components/ui/SelectConOpciones'
 import CollapsibleCard from '@/components/ui/CollapsibleCard'
+import { useToast } from '@/lib/hooks/useToast'
 import type { PagoCliente } from '@/types'
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
 export default function PagosClientesSection({ obraId, onDatosCambiaron }: Props) {
   const [pagos, setPagos] = useState<PagoCliente[]>([])
   const [error, setError] = useState('')
+  const { showToast } = useToast()
   const [monto, setMonto] = useState('')
   const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10))
   const [metodoPago, setMetodoPago] = useState('')
@@ -72,6 +74,7 @@ export default function PagosClientesSection({ obraId, onDatosCambiaron }: Props
     setFecha(new Date().toISOString().slice(0, 10))
     setMetodoPago('')
     setObservaciones('')
+    showToast('success', 'Pago registrado')
     fetchPagos()
     onDatosCambiaron?.()
   }
@@ -81,6 +84,7 @@ export default function PagosClientesSection({ obraId, onDatosCambiaron }: Props
 
     const res = await fetch(`/api/pagos/${pagoId}`, { method: 'DELETE' })
     if (res.ok) {
+      showToast('success', 'Pago eliminado')
       fetchPagos()
       onDatosCambiaron?.()
     }

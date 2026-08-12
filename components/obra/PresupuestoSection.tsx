@@ -6,6 +6,7 @@ import { formatMoney } from '@/lib/utils/formato'
 import { RUBROS_PRESUPUESTO } from '@/lib/constantes'
 import SelectConOpciones from '@/components/ui/SelectConOpciones'
 import CollapsibleCard from '@/components/ui/CollapsibleCard'
+import { useToast } from '@/lib/hooks/useToast'
 import type { PresupuestoItem } from '@/types'
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
 export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) {
   const [items, setItems] = useState<PresupuestoItem[]>([])
   const [error, setError] = useState('')
+  const { showToast } = useToast()
   const [rubro, setRubro] = useState('')
   const [monto, setMonto] = useState('')
   const [agregando, setAgregando] = useState(false)
@@ -73,6 +75,7 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
 
     setRubro('')
     setMonto('')
+    showToast('success', 'Rubro agregado')
     fetchItems()
     onDatosCambiaron?.()
   }
@@ -82,6 +85,7 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
 
     const res = await fetch(`/api/presupuesto/${itemId}`, { method: 'DELETE' })
     if (res.ok) {
+      showToast('success', 'Rubro eliminado')
       fetchItems()
       onDatosCambiaron?.()
     }
@@ -134,6 +138,7 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
     }
 
     cancelarEdicion()
+    showToast('success', 'Cambios guardados')
     fetchItems()
     onDatosCambiaron?.()
   }

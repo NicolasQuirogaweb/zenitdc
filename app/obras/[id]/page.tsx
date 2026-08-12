@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { formatFecha } from '@/lib/utils/formato'
 import { CONCEPTOS_COSTOS_DIRECTOS, CONCEPTOS_GASTOS_REALES } from '@/lib/constantes'
 import LoadingScreen from '@/components/ui/LoadingScreen'
+import { SkeletonDetalleObra } from '@/components/ui/Skeleton'
 import EstadoObraBadge from '@/components/ui/EstadoObraBadge'
 import type { Cliente, Obra } from '@/types'
 import PresupuestoSection from '@/components/obra/PresupuestoSection'
@@ -42,7 +43,7 @@ export default function DetalleObraPage() {
   }, [id])
 
   if (loading) {
-    return <LoadingScreen />
+    return <SkeletonDetalleObra />
   }
 
   if (!obra) {
