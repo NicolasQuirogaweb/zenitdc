@@ -37,7 +37,15 @@ function NuevaObraContent() {
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="mx-auto max-w-lg">
-        <h1 className="mb-6 text-xl font-bold text-slate-800">Nueva Obra</h1>
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-xl font-bold text-slate-800">Nueva Obra</h1>
+          <a
+            href={clienteId ? `/clientes/${clienteId}/obras` : '/obras'}
+            className="text-sm text-blue-accent hover:underline"
+          >
+            Volver
+          </a>
+        </div>
         {error && (
           <p className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-alert">{error}</p>
         )}
