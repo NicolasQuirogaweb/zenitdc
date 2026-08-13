@@ -149,6 +149,7 @@ export default function GastosRealesSection({
           <input
             id="fecha"
             type="date"
+            lang="es-AR"
             value={fecha}
             onChange={(e) => setFecha(e.target.value)}
             className="input-field"
