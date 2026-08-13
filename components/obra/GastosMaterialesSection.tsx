@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { formatMoney, formatFecha } from '@/lib/utils/formato'
 import { MATERIALES } from '@/lib/constantes'
 import SelectConOpciones from '@/components/ui/SelectConOpciones'
+import FechaInput from '@/components/ui/FechaInput'
 import CollapsibleCard from '@/components/ui/CollapsibleCard'
 import { useToast } from '@/lib/hooks/useToast'
 import { useConfirm } from '@/lib/hooks/useConfirm'
@@ -149,14 +150,7 @@ export default function GastosMaterialesSection({ obraId, onDatosCambiaron }: Pr
           <label htmlFor="fecha" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
             Fecha
           </label>
-          <input
-            id="fecha"
-            type="date"
-            lang="es-AR"
-            value={fecha}
-            onChange={(e) => setFecha(e.target.value)}
-            className="input-field"
-          />
+          <FechaInput id="fecha" value={fecha} onChange={setFecha} />
         </div>
         <div className="col-span-2">
           <label htmlFor="observaciones" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">

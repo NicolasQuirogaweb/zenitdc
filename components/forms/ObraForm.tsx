@@ -1,10 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createClient } from '@/lib/supabase/client'
 import { obraSchema, type ObraFormData } from '@/lib/validations/obras'
+import FechaInput from '@/components/ui/FechaInput'
 import type { Obra, Cliente } from '@/types'
 
 interface Props {
@@ -26,6 +27,7 @@ export default function ObraForm({ defaultValues, onSubmit, submitLabel }: Props
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<ObraFormData>({
     resolver: zodResolver(obraSchema),
@@ -81,13 +83,25 @@ export default function ObraForm({ defaultValues, onSubmit, submitLabel }: Props
           <label htmlFor="fecha_inicio" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
             Fecha inicio
           </label>
-          <input id="fecha_inicio" type="date" lang="es-AR" {...register('fecha_inicio')} className="input-field" />
+          <Controller
+            name="fecha_inicio"
+            control={control}
+            render={({ field }) => (
+              <FechaInput id="fecha_inicio" value={field.value ?? ''} onChange={field.onChange} />
+            )}
+          />
         </div>
         <div>
           <label htmlFor="fecha_estimada_fin" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
             Fecha estimada fin
           </label>
-          <input id="fecha_estimada_fin" type="date" lang="es-AR" {...register('fecha_estimada_fin')} className="input-field" />
+          <Controller
+            name="fecha_estimada_fin"
+            control={control}
+            render={({ field }) => (
+              <FechaInput id="fecha_estimada_fin" value={field.value ?? ''} onChange={field.onChange} />
+            )}
+          />
         </div>
       </div>
 

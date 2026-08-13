@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { formatFecha } from '@/lib/utils/formato'
 import LoadingScreen from '@/components/ui/LoadingScreen'
+import FechaInput from '@/components/ui/FechaInput'
 import { useToast } from '@/lib/hooks/useToast'
 import { useConfirm } from '@/lib/hooks/useConfirm'
 import type { FotoObra } from '@/types'
@@ -123,14 +124,7 @@ export default function FotosPage() {
               <label htmlFor="fecha" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
                 Fecha
               </label>
-              <input
-                id="fecha"
-                type="date"
-                lang="es-AR"
-                value={fecha}
-                onChange={(e) => setFecha(e.target.value)}
-                className="input-field"
-              />
+              <FechaInput id="fecha" value={fecha} onChange={setFecha} />
             </div>
             <div>
               <label htmlFor="descripcion" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
