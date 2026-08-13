@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface Props {
@@ -14,6 +15,7 @@ const MESES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
 ]
+const MARGEN = 8
 
 function pad(n: number) {
   return String(n).padStart(2, '0')
@@ -33,6 +35,7 @@ function parseIso(iso: string): { anio: number; mes: number; dia: number } | nul
 
 export default function FechaInput({ id, value, onChange }: Props) {
   const [abierto, setAbierto] = useState(false)
+  const [posicion, setPosicion] = useState<{ top: number; left: number } | null>(null)
   const seleccionado = parseIso(value)
   const hoy = new Date()
   const [mesVisible, setMesVisible] = useState(() =>
@@ -40,17 +43,65 @@ export default function FechaInput({ id, value, onChange }: Props) {
       ? new Date(seleccionado.anio, seleccionado.mes - 1, 1)
       : new Date(hoy.getFullYear(), hoy.getMonth(), 1)
   )
-  const contenedorRef = useRef<HTMLDivElement>(null)
+  const botonRef = useRef<HTMLButtonElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!abierto) return
+
+    const reposicionar = () => {
+      const boton = botonRef.current
+      const panel = panelRef.current
+      if (!boton) return
+      const rectBoton = boton.getBoundingClientRect()
+      const anchoPanel = panel?.offsetWidth ?? 260
+      const altoPanel = panel?.offsetHeight ?? 320
+
+      let left = rectBoton.left
+      if (left + anchoPanel > window.innerWidth - MARGEN) {
+        left = rectBoton.right - anchoPanel
+      }
+      left = Math.max(MARGEN, Math.min(left, window.innerWidth - anchoPanel - MARGEN))
+
+      let top = rectBoton.bottom + 4
+      if (top + altoPanel > window.innerHeight - MARGEN) {
+        const arriba = rectBoton.top - 4 - altoPanel
+        top = arriba >= MARGEN ? arriba : Math.max(MARGEN, window.innerHeight - altoPanel - MARGEN)
+      }
+
+      setPosicion({ top, left })
+    }
+
+    reposicionar()
+    window.addEventListener('resize', reposicionar)
+    window.addEventListener('scroll', reposicionar, true)
+    return () => {
+      window.removeEventListener('resize', reposicionar)
+      window.removeEventListener('scroll', reposicionar, true)
+    }
+  }, [abierto, mesVisible])
+
+  useLayoutEffect(() => {
+    if (!abierto) return
+
     const handleClick = (e: MouseEvent) => {
-      if (contenedorRef.current && !contenedorRef.current.contains(e.target as Node)) {
+      const target = e.target as Node
+      const dentroBoton = botonRef.current?.contains(target)
+      const dentroPanel = panelRef.current?.contains(target)
+      if (!dentroBoton && !dentroPanel) {
         setAbierto(false)
       }
     }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setAbierto(false)
+    }
+
     document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleClick)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
   }, [abierto])
 
   const abrir = () => {
@@ -85,8 +136,9 @@ export default function FechaInput({ id, value, onChange }: Props) {
     hoy.getFullYear() === anio && hoy.getMonth() === mes && hoy.getDate() === dia
 
   return (
-    <div ref={contenedorRef} className="relative">
+    <>
       <button
+        ref={botonRef}
         id={id}
         type="button"
         onClick={abrir}
@@ -98,8 +150,17 @@ export default function FechaInput({ id, value, onChange }: Props) {
         <Calendar className="h-4 w-4 shrink-0 text-[color:var(--color-text-muted)]" />
       </button>
 
-      {abierto && (
-        <div className="absolute z-20 mt-1 w-64 rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-bg-surface)] p-3 shadow-lg">
+      {abierto && typeof document !== 'undefined' && createPortal(
+        <div
+          ref={panelRef}
+          style={{
+            position: 'fixed',
+            top: posicion?.top ?? -9999,
+            left: posicion?.left ?? -9999,
+            visibility: posicion ? 'visible' : 'hidden',
+          }}
+          className="z-50 w-64 rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-bg-surface)] p-3 shadow-lg"
+        >
           <div className="flex items-center justify-between">
             <button
               type="button"
@@ -161,8 +222,9 @@ export default function FechaInput({ id, value, onChange }: Props) {
               Limpiar
             </button>
           )}
-        </div>
+        </div>,
+        document.body
       )}
-    </div>
+    </>
   )
 }
