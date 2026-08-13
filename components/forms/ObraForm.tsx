@@ -81,13 +81,13 @@ export default function ObraForm({ defaultValues, onSubmit, submitLabel }: Props
           <label htmlFor="fecha_inicio" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
             Fecha inicio
           </label>
-          <input id="fecha_inicio" type="date" {...register('fecha_inicio')} className="input-field" />
+          <input id="fecha_inicio" type="date" lang="es-AR" {...register('fecha_inicio')} className="input-field" />
         </div>
         <div>
           <label htmlFor="fecha_estimada_fin" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
             Fecha estimada fin
           </label>
-          <input id="fecha_estimada_fin" type="date" {...register('fecha_estimada_fin')} className="input-field" />
+          <input id="fecha_estimada_fin" type="date" lang="es-AR" {...register('fecha_estimada_fin')} className="input-field" />
         </div>
       </div>
 
