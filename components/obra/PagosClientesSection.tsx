@@ -23,6 +23,7 @@ export default function PagosClientesSection({ obraId, onDatosCambiaron }: Props
   const confirm = useConfirm()
   const [monto, setMonto] = useState('')
   const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10))
+  const [numeroEtapa, setNumeroEtapa] = useState('')
   const [metodoPago, setMetodoPago] = useState('')
   const [observaciones, setObservaciones] = useState('')
   const [agregando, setAgregando] = useState(false)
@@ -61,6 +62,7 @@ export default function PagosClientesSection({ obraId, onDatosCambiaron }: Props
       body: JSON.stringify({
         monto: montoNum,
         fecha,
+        numero_etapa: numeroEtapa.trim() ? Number(numeroEtapa) : null,
         metodo_pago: metodoPago.trim() || null,
         observaciones: observaciones.trim() || null,
       }),
@@ -75,6 +77,7 @@ export default function PagosClientesSection({ obraId, onDatosCambiaron }: Props
 
     setMonto('')
     setFecha(new Date().toISOString().slice(0, 10))
+    setNumeroEtapa('')
     setMetodoPago('')
     setObservaciones('')
     showToast('success', 'Pago registrado')
@@ -127,6 +130,22 @@ export default function PagosClientesSection({ obraId, onDatosCambiaron }: Props
           </label>
           <FechaInput id="fecha" value={fecha} onChange={setFecha} />
         </div>
+        <div>
+          <label htmlFor="numeroEtapa" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
+            N° de etapa (opcional)
+          </label>
+          <input
+            id="numeroEtapa"
+            type="number"
+            inputMode="numeric"
+            min="1"
+            step="1"
+            value={numeroEtapa}
+            onChange={(e) => setNumeroEtapa(e.target.value)}
+            placeholder="1, 2, 3..."
+            className="input-field"
+          />
+        </div>
         <div className="col-span-2">
           <SelectConOpciones
             label="Método de pago"
@@ -169,6 +188,7 @@ export default function PagosClientesSection({ obraId, onDatosCambiaron }: Props
                 </p>
                 <p className="text-sm text-[color:var(--color-text-secondary)]">
                   {formatFecha(pago.fecha)}
+                  {pago.numero_etapa && ` · Etapa ${pago.numero_etapa}`}
                   {pago.metodo_pago && ` · ${pago.metodo_pago}`}
                 </p>
                 {pago.observaciones && (

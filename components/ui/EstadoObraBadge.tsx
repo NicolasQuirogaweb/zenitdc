@@ -3,14 +3,17 @@ interface Props {
 }
 
 const CLASES: Record<string, string> = {
-  terminada: 'bg-green-alert/15 text-green-alert',
-  en_ejecucion: 'bg-blue-accent/15 text-blue-light',
+  pendiente: 'bg-yellow-500/15 text-yellow-400',
+  cotizada: 'bg-blue-accent/15 text-blue-light',
+  en_proceso: 'bg-blue-accent/15 text-blue-light',
+  finalizada: 'bg-green-alert/15 text-green-alert',
 }
 
 const LABELS: Record<string, string> = {
-  presupuestada: 'Presupuestada',
-  en_ejecucion: 'En ejecución',
-  terminada: 'Terminada',
+  pendiente: 'Pendiente',
+  cotizada: 'Cotizada',
+  en_proceso: 'En proceso',
+  finalizada: 'Finalizada',
 }
 
 export default function EstadoObraBadge({ estado }: Props) {
@@ -20,7 +23,7 @@ export default function EstadoObraBadge({ estado }: Props) {
         CLASES[estado] ?? 'bg-yellow-500/15 text-yellow-400'
       }`}
     >
-      {LABELS[estado] ?? 'Terminada'}
+      {LABELS[estado] ?? estado}
     </span>
   )
 }

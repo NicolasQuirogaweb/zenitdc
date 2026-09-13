@@ -35,9 +35,10 @@ export default function ObraForm({ defaultValues, onSubmit, submitLabel }: Props
       cliente_id: defaultValues?.cliente_id ?? '',
       nombre: defaultValues?.nombre ?? '',
       descripcion: defaultValues?.descripcion ?? '',
+      direccion: defaultValues?.direccion ?? '',
       fecha_inicio: defaultValues?.fecha_inicio ?? '',
       fecha_estimada_fin: defaultValues?.fecha_estimada_fin ?? '',
-      estado: defaultValues?.estado ?? 'presupuestada',
+      estado: defaultValues?.estado ?? 'pendiente',
       responsable: defaultValues?.responsable ?? '',
     },
   })
@@ -76,6 +77,13 @@ export default function ObraForm({ defaultValues, onSubmit, submitLabel }: Props
           Descripción
         </label>
         <textarea id="descripcion" rows={3} {...register('descripcion')} className="input-field" />
+      </div>
+
+      <div>
+        <label htmlFor="direccion" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
+          Dirección de la obra
+        </label>
+        <input id="direccion" {...register('direccion')} className="input-field" />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -117,9 +125,10 @@ export default function ObraForm({ defaultValues, onSubmit, submitLabel }: Props
           Estado
         </label>
         <select id="estado" {...register('estado')} className="input-field">
-          <option value="presupuestada">Presupuestada</option>
-          <option value="en_ejecucion">En ejecución</option>
-          <option value="terminada">Terminada</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="cotizada">Cotizada</option>
+          <option value="en_proceso">En proceso</option>
+          <option value="finalizada">Finalizada</option>
         </select>
       </div>
 

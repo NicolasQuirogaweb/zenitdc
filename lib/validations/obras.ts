@@ -11,9 +11,10 @@ export const obraSchema = z.object({
   cliente_id: z.string().uuid('Seleccioná un cliente'),
   nombre: z.string().min(1, 'El nombre es requerido').max(200),
   descripcion: textoOpcional(),
+  direccion: textoOpcional(),
   fecha_inicio: textoOpcional(),
   fecha_estimada_fin: textoOpcional(),
-  estado: z.enum(['presupuestada', 'en_ejecucion', 'terminada']),
+  estado: z.enum(['pendiente', 'cotizada', 'en_proceso', 'finalizada']),
   responsable: textoOpcional(),
 })
 
