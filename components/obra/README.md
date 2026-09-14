@@ -14,7 +14,9 @@ misma pantalla, cada una dentro de un `CollapsibleCard`.
   `concepto` contra `CONCEPTOS_COSTOS_DIRECTOS` (ver
   `lib/utils/README.md`). Si hay que tocar el comportamiento de una sola
   de las dos, hay que hacerlo vía props, no bifurcando el componente en
-  dos.
+  dos — ya existe `mostrarProveedor` (default `true`) como ejemplo: en
+  "costos directos" se pasa `false` (Rodri no quiere ese campo ahí), en
+  "gastos generales" queda con el default.
 - **`GastosMaterialesSection.tsx`** — gastos de materiales (tabla
   separada, `gastos_materiales`).
 - **`PagosClientesSection.tsx`** — pagos que el cliente le hizo a Zenit
