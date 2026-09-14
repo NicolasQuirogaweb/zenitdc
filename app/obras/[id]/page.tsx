@@ -10,8 +10,6 @@ import { SkeletonDetalleObra } from '@/components/ui/Skeleton'
 import EstadoObraBadge from '@/components/ui/EstadoObraBadge'
 import type { Cliente, Obra } from '@/types'
 import PresupuestoSection from '@/components/obra/PresupuestoSection'
-import ManoDeObraSection from '@/components/obra/ManoDeObraSection'
-import PersonalSection from '@/components/obra/PersonalSection'
 import GastosRealesSection from '@/components/obra/GastosRealesSection'
 import GastosMaterialesSection from '@/components/obra/GastosMaterialesSection'
 import PagosClientesSection from '@/components/obra/PagosClientesSection'
@@ -121,8 +119,6 @@ export default function DetalleObraPage() {
             placeholder="Ej: Cuadrilla de albañilería"
             onDatosCambiaron={notificarCambio}
           />
-          <ManoDeObraSection obraId={id} onDatosCambiaron={notificarCambio} />
-          <PersonalSection obraId={id} onDatosCambiaron={notificarCambio} />
           <GastosMaterialesSection obraId={id} onDatosCambiaron={notificarCambio} />
           <PagosClientesSection obraId={id} onDatosCambiaron={notificarCambio} />
           <GastosRealesSection

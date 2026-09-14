@@ -30,9 +30,9 @@ export function supabaseErrorResponse(error: { message: string }, status = 500) 
 /**
  * Chequea si existe alguna fila relacionada antes de borrar un registro
  * "padre" — necesario para las tablas hijas con `on delete cascade`
- * (empleados_tercerizados, presupuesto/pagos_mano_obra, pagos_personal,
- * etc.): ahí Postgres nunca tira un error de foreign key al borrar, borra
- * en cascada en silencio, así que hay que chequear a mano antes.
+ * (pagos_personal, pagos_personal_tercerizado, etc.): ahí Postgres nunca
+ * tira un error de foreign key al borrar, borra en cascada en silencio,
+ * así que hay que chequear a mano antes.
  */
 export async function hasRelatedRows(
   supabase: Awaited<ReturnType<typeof createClient>>,

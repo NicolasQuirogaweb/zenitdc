@@ -6,16 +6,6 @@ export interface Proveedor {
   created_at: string
 }
 
-export interface EmpleadoTercerizado {
-  id: string
-  proveedor_id: string
-  nombre: string
-  oficio: string | null
-  dni: string | null
-  telefono: string | null
-  created_at: string
-}
-
 export interface PersonalEmpresa {
   id: string
   nombre: string
@@ -27,28 +17,28 @@ export interface PersonalEmpresa {
 export interface PagoPersonal {
   id: string
   personal_id: string
-  obra_id: string
+  obra_id: string | null
   monto: number
   fecha: string
-  observaciones: string | null
+  motivo: string
   created_at: string
 }
 
-export interface PresupuestoManoObra {
+export interface PersonalTercerizado {
   id: string
-  obra_id: string
-  proveedor_id: string
-  monto: number
+  nombre: string
+  oficio: string | null
+  telefono: string | null
   created_at: string
 }
 
-export interface PagoManoObra {
+export interface PagoPersonalTercerizado {
   id: string
+  personal_tercerizado_id: string
   obra_id: string
-  proveedor_id: string
   monto: number
   fecha: string
-  observaciones: string | null
+  motivo: string
   created_at: string
 }
 
@@ -167,6 +157,7 @@ export interface BalanceGeneral {
   total_egresos: number
   total_gastos_generales: number
   total_gastos_empresa: number
+  total_personal_sin_obra: number
   resultado: number
   por_obra: BalancePorObra[]
 }

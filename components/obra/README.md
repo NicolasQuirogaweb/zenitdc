@@ -17,18 +17,6 @@ misma pantalla, cada una dentro de un `CollapsibleCard`.
   dos.
 - **`GastosMaterialesSection.tsx`** — gastos de materiales (tabla
   separada, `gastos_materiales`).
-- **`ManoDeObraSection.tsx`** — cuenta corriente con cada proveedor de
-  mano de obra tercerizada en esta obra puntual (`presupuesto_mano_obra`
-  + `pagos_mano_obra`, separadas por conveniencia — presupuestado vs.
-  efectivamente pagado). El acumulado de un proveedor sumando todas sus
-  obras vive en `components/proveedor/CuentaCorrienteSection.tsx`, no acá.
-- **`PersonalSection.tsx`** — pagos a personal propio de la empresa (en
-  relación de dependencia, no tercerizado) por esta obra puntual
-  (`pagos_personal`). A diferencia de `ManoDeObraSection.tsx`, no hay
-  presupuesto ni cuenta corriente — es solo un historial de pagos, porque
-  el personal en relación de dependencia no se presupuesta por obra. El
-  historial agregado de un empleado sumando todas sus obras vive en
-  `components/personal/HistorialPagosSection.tsx`, no acá.
 - **`PagosClientesSection.tsx`** — pagos que el cliente le hizo a Zenit
   DC por esta obra.
 - **`BalanceSection.tsx`** — muestra el resultado calculado por
@@ -37,3 +25,10 @@ misma pantalla, cada una dentro de un `CollapsibleCard`.
 Todas siguen el mismo patrón interno: estado local con `useState` +
 `fetch` a su ruta de API correspondiente + `useToast` para feedback +
 `useConfirm` antes de eliminar un ítem.
+
+**A propósito NO hay acá** una sección de mano de obra tercerizada ni de
+personal de la empresa — Rodri pidió simplificar esta pantalla. El alta
+de pagos a esas personas vive en su propia ficha
+(`components/personal/HistorialPagosSection.tsx` y
+`components/personal-tercerizado/HistorialPagosSection.tsx`), eligiendo
+la obra desde ahí, no al revés.

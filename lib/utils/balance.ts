@@ -16,7 +16,7 @@ interface FilasBalanceObra {
   ingresos: FilaMonto[]
   gastosGenerales: FilaGastoGeneral[]
   gastosMateriales: FilaMonto[]
-  pagosManoObra: FilaMonto[]
+  pagosPersonalTercerizado: FilaMonto[]
   pagosPersonal: FilaMonto[]
 }
 
@@ -37,7 +37,7 @@ function calcularBalanceDesdeFilas(obraId: string, filas: FilasBalanceObra): Bal
     filas.gastosGenerales.filter((g) => !CONCEPTOS_COSTOS_DIRECTOS.includes(g.concepto))
   )
   const totalGastosMateriales = sumMonto(filas.gastosMateriales)
-  const totalManoObra = sumMonto(filas.pagosManoObra)
+  const totalManoObra = sumMonto(filas.pagosPersonalTercerizado)
   const totalPersonal = sumMonto(filas.pagosPersonal)
 
   const totalEgresos =
@@ -59,13 +59,15 @@ function calcularBalanceDesdeFilas(obraId: string, filas: FilasBalanceObra): Bal
 export async function getBalanceObra(obraId: string): Promise<BalanceObra> {
   const supabase = await createClient()
 
-  const [presupuesto, ingresos, gastosGenerales, gastosMateriales, pagosManoObra, pagosPersonal] =
+  const [presupuesto, ingresos, gastosGenerales, gastosMateriales, pagosPersonalTercerizado, pagosPersonal] =
     await Promise.all([
       supabase.from('presupuesto_items').select('monto').eq('obra_id', obraId),
       supabase.from('pagos_clientes').select('monto').eq('obra_id', obraId),
       supabase.from('gastos_generales').select('concepto, monto').eq('obra_id', obraId),
       supabase.from('gastos_materiales').select('monto').eq('obra_id', obraId),
-      supabase.from('pagos_mano_obra').select('monto').eq('obra_id', obraId),
+      supabase.from('pagos_personal_tercerizado').select('monto').eq('obra_id', obraId),
+      // los pagos a personal SIN obra_id (sueldos fijos) quedan afuera acá
+      // a propósito: no son un egreso de esta obra puntual.
       supabase.from('pagos_personal').select('monto').eq('obra_id', obraId),
     ])
 
@@ -74,7 +76,7 @@ export async function getBalanceObra(obraId: string): Promise<BalanceObra> {
     ingresos: ingresos.data ?? [],
     gastosGenerales: gastosGenerales.data ?? [],
     gastosMateriales: gastosMateriales.data ?? [],
-    pagosManoObra: pagosManoObra.data ?? [],
+    pagosPersonalTercerizado: pagosPersonalTercerizado.data ?? [],
     pagosPersonal: pagosPersonal.data ?? [],
   })
 }
@@ -102,7 +104,7 @@ export async function getBalanceGeneral(): Promise<BalanceGeneral> {
     ingresos,
     gastosGenerales,
     gastosMateriales,
-    pagosManoObra,
+    pagosPersonalTercerizado,
     pagosPersonal,
     gastosEmpresa,
   ] = await Promise.all([
@@ -114,7 +116,10 @@ export async function getBalanceGeneral(): Promise<BalanceGeneral> {
     supabase.from('pagos_clientes').select('obra_id, monto'),
     supabase.from('gastos_generales').select('obra_id, concepto, monto'),
     supabase.from('gastos_materiales').select('obra_id, monto'),
-    supabase.from('pagos_mano_obra').select('obra_id, monto'),
+    supabase.from('pagos_personal_tercerizado').select('obra_id, monto'),
+    // sin filtrar: trae tanto los pagos con obra como los que no tienen
+    // (sueldos fijos, ej. redes/IT) — se separan en memoria más abajo, no
+    // hace falta una segunda consulta a la misma tabla.
     supabase.from('pagos_personal').select('obra_id, monto'),
     supabase.from('gastos_empresa').select('monto'),
   ])
@@ -137,7 +142,7 @@ export async function getBalanceGeneral(): Promise<BalanceGeneral> {
   const ingresosPorObra = agruparPorObra(ingresos.data)
   const gastosGeneralesPorObra = agruparPorObra(gastosGenerales.data)
   const gastosMaterialesPorObra = agruparPorObra(gastosMateriales.data)
-  const pagosManoObraPorObra = agruparPorObra(pagosManoObra.data)
+  const pagosPersonalTercerizadoPorObra = agruparPorObra(pagosPersonalTercerizado.data)
   const pagosPersonalPorObra = agruparPorObra(pagosPersonal.data)
 
   const balances = obrasNormalizadas.map((o) =>
@@ -146,7 +151,7 @@ export async function getBalanceGeneral(): Promise<BalanceGeneral> {
       ingresos: ingresosPorObra.get(o.id) ?? [],
       gastosGenerales: gastosGeneralesPorObra.get(o.id) ?? [],
       gastosMateriales: gastosMaterialesPorObra.get(o.id) ?? [],
-      pagosManoObra: pagosManoObraPorObra.get(o.id) ?? [],
+      pagosPersonalTercerizado: pagosPersonalTercerizadoPorObra.get(o.id) ?? [],
       pagosPersonal: pagosPersonalPorObra.get(o.id) ?? [],
     })
   )
@@ -167,13 +172,17 @@ export async function getBalanceGeneral(): Promise<BalanceGeneral> {
   const totalEgresosEmpresa = balances.reduce((s, b) => s + b.total_egresos, 0)
   const totalGastosGeneralesEmpresa = balances.reduce((s, b) => s + b.total_gastos_generales, 0)
   const totalGastosEmpresa = sumMonto(gastosEmpresa.data)
+  const totalPersonalSinObra = sumMonto(
+    (pagosPersonal.data ?? []).filter((p: { obra_id: string | null }) => p.obra_id === null)
+  )
 
   return {
     total_ingresos: totalIngresosEmpresa,
     total_egresos: totalEgresosEmpresa,
     total_gastos_generales: totalGastosGeneralesEmpresa,
     total_gastos_empresa: totalGastosEmpresa,
-    resultado: totalIngresosEmpresa - totalEgresosEmpresa - totalGastosEmpresa,
+    total_personal_sin_obra: totalPersonalSinObra,
+    resultado: totalIngresosEmpresa - totalEgresosEmpresa - totalGastosEmpresa - totalPersonalSinObra,
     por_obra: porObra,
   }
 }

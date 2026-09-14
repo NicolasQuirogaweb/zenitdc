@@ -101,9 +101,9 @@ CI:             GitHub Actions (.github/workflows/ci.yml) — tsc + lint + build
 /app
   /login                        → login
   /dashboard                    → home con resumen y accesos rápidos (grid
-                                  de 5 cards: Clientes y obras, Balance
-                                  general, Proveedores, Personal, Gastos
-                                  empresa)
+                                  de 6 cards: Clientes y obras, Balance
+                                  general, Proveedores, Personal, Personal
+                                  tercerizado, Gastos empresa)
   /clientes                     → listado + alta de clientes
   /clientes/nuevo
   /clientes/[id]/editar
@@ -111,38 +111,50 @@ CI:             GitHub Actions (.github/workflows/ci.yml) — tsc + lint + build
   /obras                        → listado + alta de obras
   /obras/nuevo
   /obras/[id]                   → detalle de obra: acá viven presupuesto,
-                                  costos directos, mano de obra tercerizada,
-                                  personal de la empresa, gastos de
-                                  materiales, pagos del cliente, gastos
-                                  generales y balance, todo como secciones
-                                  dentro de esta misma pantalla (no rutas
-                                  separadas)
+                                  costos directos, gastos de materiales,
+                                  gastos generales, pagos del cliente y
+                                  balance, todo como secciones dentro de
+                                  esta misma pantalla (no rutas separadas).
+                                  A propósito NO viven acá los pagos a
+                                  personal/personal tercerizado — ver más
+                                  abajo.
   /obras/[id]/editar
   /obras/[id]/fotos             → galería de fotos de la obra
   /balance                      → balance general de la empresa
-  /proveedores                  → listado + alta de proveedores (materiales
-                                  y mano de obra tercerizada)
-  /proveedores/[id]             → detalle: datos + cuenta corriente de mano
-                                  de obra (todas las obras) + empleados
+  /proveedores                  → listado + alta de proveedores — SOLO
+                                  materiales (ver "Personal tercerizado"
+                                  para mano de obra subcontratada)
+  /proveedores/[id]             → detalle: solo datos de contacto + editar,
+                                  sin secciones extra
   /proveedores/[id]/editar
   /proveedores/nuevo
   /personal                     → listado + alta de personal propio
   /personal/[id]                → detalle: datos + historial de pagos
-                                  (todas las obras)
+                                  (todas las obras) + alta de pago nuevo
+                                  desde acá (con obra OPCIONAL — ver
+                                  esquema de base de datos)
   /personal/[id]/editar
   /personal/nuevo
+  /personal-tercerizado         → listado + alta de personal tercerizado
+                                  (mano de obra subcontratada, ej. Marcelo/
+                                  cuadrilla de albañilería, Clisman/herrería)
+  /personal-tercerizado/[id]    → detalle: datos + historial de pagos
+                                  (todas las obras) + alta de pago nuevo
+                                  desde acá (acá la obra es OBLIGATORIA)
+  /personal-tercerizado/[id]/editar
+  /personal-tercerizado/nuevo
   /gastos-empresa               → alta + historial de gastos de la empresa
                                   sin obra asociada (una sola pantalla,
                                   sin páginas separadas de alta/edición)
   /api                          → rutas de API (server-side, ver app/api/README.md)
 
 /components
-  /ui        → ver components/ui/README.md
-  /forms     → ver components/forms/README.md
-  /layout    → ver components/layout/README.md
-  /obra      → ver components/obra/README.md
-  /proveedor → ver components/proveedor/README.md
-  /personal  → ver components/personal/README.md
+  /ui                   → ver components/ui/README.md
+  /forms                → ver components/forms/README.md
+  /layout               → ver components/layout/README.md
+  /obra                 → ver components/obra/README.md
+  /personal             → ver components/personal/README.md
+  /personal-tercerizado → ver components/personal-tercerizado/README.md
 
 /lib
   /supabase     → ver lib/supabase/README.md
@@ -162,10 +174,20 @@ CI:             GitHub Actions (.github/workflows/ci.yml) — tsc + lint + build
 
 **Ya NO existen** (removidos del alcance real): `/obras/[id]/proveedores`
 (pagos a proveedores, versión vieja), `/gastos-generales` como sección
-global independiente. Los "gastos generales" (`gastos_generales`, la
-tabla) son siempre por obra — `gastos_empresa` es una tabla DISTINTA,
-sin `obra_id`, para gastos de la empresa que no pertenecen a ninguna obra
-puntual (alquiler, impuestos, contador, etc.).
+global independiente, `empleados_tercerizados` (lista de contactos de la
+cuadrilla de un proveedor), `presupuesto_mano_obra`/`pagos_mano_obra`
+(cuenta corriente de mano de obra a nivel proveedor). Los "gastos
+generales" (`gastos_generales`, la tabla) son siempre por obra —
+`gastos_empresa` es una tabla DISTINTA, sin `obra_id`, para gastos de la
+empresa que no pertenecen a ninguna obra puntual (alquiler, impuestos,
+contador, etc.).
+
+**"Proveedores" y "Personal tercerizado" son conceptos DISTINTOS** (no
+confundir, es un error que ya se cometió una vez): `proveedores` es
+solo para materiales (quien vende cemento, arena, etc.). La mano de obra
+subcontratada (Marcelo/albañilería, Clisman/herrería) vive en
+`personal_tercerizado`, sin ninguna relación en la base con
+`proveedores`.
 
 ---
 
@@ -207,8 +229,11 @@ create table obras (
   updated_at        timestamptz default now()
 );
 
--- PROVEEDORES (materiales y/o mano de obra tercerizada) — se define acá
--- porque gastos_materiales y gastos_generales la referencian
+-- PROVEEDORES — SOLO materiales (quien vende cemento, arena, etc.). NO
+-- confundir con mano de obra subcontratada, que es personal_tercerizado
+-- (ver más abajo) — son conceptos separados a propósito, sin relación en
+-- la base. Se define acá porque gastos_materiales y gastos_generales la
+-- referencian.
 create table proveedores (
   id         uuid primary key default gen_random_uuid(),
   nombre     text not null,
@@ -282,39 +307,6 @@ create table fotos_obra (
   created_at  timestamptz default now()
 );
 
--- EMPLEADOS TERCERIZADOS — solo referencia/contacto (la cuadrilla de un
--- proveedor). La plata se maneja a nivel del proveedor, no del empleado.
-create table empleados_tercerizados (
-  id           uuid primary key default gen_random_uuid(),
-  proveedor_id uuid not null references proveedores(id) on delete cascade,
-  nombre       text not null,
-  oficio       text,
-  dni          text,
-  telefono     text,
-  created_at   timestamptz default now()
-);
-
--- MANO DE OBRA TERCERIZADA: presupuesto (upsert 1 fila por obra+proveedor)
-create table presupuesto_mano_obra (
-  id           uuid primary key default gen_random_uuid(),
-  obra_id      uuid not null references obras(id) on delete cascade,
-  proveedor_id uuid not null references proveedores(id) on delete cascade,
-  monto        numeric(12,2) not null default 0,
-  created_at   timestamptz default now(),
-  unique (obra_id, proveedor_id)
-);
-
--- MANO DE OBRA TERCERIZADA: pagos (histórico, muchas filas por obra+proveedor)
-create table pagos_mano_obra (
-  id           uuid primary key default gen_random_uuid(),
-  obra_id      uuid not null references obras(id) on delete cascade,
-  proveedor_id uuid not null references proveedores(id) on delete cascade,
-  monto        numeric(12,2) not null,
-  fecha        date not null default current_date,
-  observaciones text,
-  created_at   timestamptz default now()
-);
-
 -- PERSONAL DE LA EMPRESA (en relación de dependencia, no tercerizado)
 create table personal_empresa (
   id         uuid primary key default gen_random_uuid(),
@@ -324,16 +316,46 @@ create table personal_empresa (
   created_at timestamptz default now()
 );
 
--- PAGOS A PERSONAL — siempre por obra (a diferencia de mano de obra
--- tercerizada, NO hay presupuesto/cuenta corriente: es solo historial).
+-- PAGOS A PERSONAL — obra OPCIONAL: hay personal con sueldo fijo sin
+-- ligar a ninguna obra puntual (ej. redes/IT), y otro que cobra por obra
+-- (ej. arquitecto, chofer). Sin presupuesto/cuenta corriente: es solo
+-- historial. "motivo" es OBLIGATORIO (ex "observaciones") — todo pago
+-- queda con una razón asentada.
 create table pagos_personal (
-  id            uuid primary key default gen_random_uuid(),
-  personal_id   uuid not null references personal_empresa(id) on delete cascade,
-  obra_id       uuid not null references obras(id) on delete cascade,
-  monto         numeric(12,2) not null,
-  fecha         date not null default current_date,
-  observaciones text,
-  created_at    timestamptz default now()
+  id          uuid primary key default gen_random_uuid(),
+  personal_id uuid not null references personal_empresa(id) on delete cascade,
+  obra_id     uuid references obras(id) on delete cascade,
+  monto       numeric(12,2) not null,
+  fecha       date not null default current_date,
+  motivo      text not null,
+  created_at  timestamptz default now()
+);
+
+-- PERSONAL TERCERIZADO — mano de obra subcontratada (Marcelo/cuadrilla de
+-- albañilería, Clisman/herrería). Concepto DISTINTO de proveedores, sin
+-- relación en la base. Rodri le paga un monto global a esta persona por
+-- el trabajo hecho en una obra puntual; ella reparte puertas adentro con
+-- su gente si aplica — no se trackea a cada trabajador individual.
+create table personal_tercerizado (
+  id         uuid primary key default gen_random_uuid(),
+  nombre     text not null,
+  oficio     text,
+  telefono   text,
+  created_at timestamptz default now()
+);
+
+-- PAGOS A PERSONAL TERCERIZADO — a diferencia de pagos_personal, acá la
+-- obra es SIEMPRE obligatoria (se cobra por trabajo hecho en una obra
+-- puntual, nunca un sueldo fijo). Sin presupuesto/cuenta corriente,
+-- "motivo" obligatorio, mismo criterio que pagos_personal.
+create table pagos_personal_tercerizado (
+  id                      uuid primary key default gen_random_uuid(),
+  personal_tercerizado_id uuid not null references personal_tercerizado(id) on delete cascade,
+  obra_id                 uuid not null references obras(id) on delete cascade,
+  monto                   numeric(12,2) not null,
+  fecha                   date not null default current_date,
+  motivo                  text not null,
+  created_at              timestamptz default now()
 );
 
 -- GASTOS DE LA EMPRESA — sin obra_id. Únicos gastos que no pertenecen a
@@ -394,6 +416,13 @@ este proyecto, tratarla con cuidado extra.
 gastos generales de la obra, así que ahora SÍ restan — ver el historial
 de módulos si hace falta el detalle de por qué cambió dos veces.
 
+**Pendiente — Rodri no está seguro de que esta fórmula (qué resta del
+resultado y qué no) coincida 100% con cómo arma el balance en la
+práctica.** Queda explícitamente para revisar a fondo en otra sesión —
+el cambio que separó "Personal tercerizado" de "Proveedores" solo
+repuntó las tablas para mantener la fórmula consistente con el esquema
+nuevo, no la revisó de fondo.
+
 ### Balance por obra
 
 `gastos_generales` (la tabla) contiene DOS conceptos distintos, separados
@@ -412,12 +441,15 @@ total_gastos_generales   = SUM(gastos_generales.monto) WHERE obra_id = X
                            AND concepto NOT IN CONCEPTOS_COSTOS_DIRECTOS
                            -- "Combustible", "Seguros vehículos/personal" —
                            -- overhead/indirecto
-total_mano_obra          = SUM(pagos_mano_obra.monto) WHERE obra_id = X
-                           -- pagos a proveedores de mano de obra
-                           -- tercerizada (distinto del "Mano de obra"
-                           -- manual de gastos_generales, ver arriba)
+total_mano_obra          = SUM(pagos_personal_tercerizado.monto) WHERE obra_id = X
+                           -- pagos a personal tercerizado (Marcelo,
+                           -- Clisman) — distinto del "Mano de obra"
+                           -- manual de gastos_generales, ver arriba, y
+                           -- distinto de "proveedores" (solo materiales)
 total_personal           = SUM(pagos_personal.monto) WHERE obra_id = X
-                           -- pagos a personal propio de la empresa
+                           -- pagos a personal propio de la empresa CON
+                           -- obra asociada (los que no tienen obra_id se
+                           -- restan a nivel empresa, ver más abajo)
 
 total_egresos            = costos_directos
                            + SUM(gastos_materiales.monto) WHERE obra_id = X
@@ -444,17 +476,19 @@ total_egresos_empresa          = SUM de total_egresos de TODAS las obras
 total_gastos_generales_empresa = SUM de total_gastos_generales de TODAS las
                                   obras (informativo, ya incluido arriba)
 total_gastos_empresa           = SUM(gastos_empresa.monto)
-                                  -- el único gasto sin obra_id: alquiler,
-                                  -- impuestos, contador, etc.
+                                  -- alquiler, impuestos, contador, etc.
+total_personal_sin_obra        = SUM(pagos_personal.monto) WHERE obra_id IS NULL
+                                  -- sueldos fijos sin ligar a ninguna obra
+                                  -- puntual (ej. redes/IT)
 
 resultado_empresa = total_ingresos_empresa - total_egresos_empresa
-                     - total_gastos_empresa
+                     - total_gastos_empresa - total_personal_sin_obra
 ```
 
-`total_gastos_empresa` es el ÚNICO monto que se resta a nivel empresa sin
-pasar por ninguna obra puntual — todo lo demás ya se agregó obra por
-obra. Los cálculos son funciones puras en `lib/utils/balance.ts`, se
-llaman desde `app/api/balance/route.ts` y
+`total_gastos_empresa` y `total_personal_sin_obra` son los ÚNICOS montos
+que se restan a nivel empresa sin pasar por ninguna obra puntual — todo
+lo demás ya se agregó obra por obra. Los cálculos son funciones puras en
+`lib/utils/balance.ts`, se llaman desde `app/api/balance/route.ts` y
 `app/api/obras/[id]/balance/route.ts` — nunca se recalculan en el
 frontend (los componentes usan directamente `balance.resultado`).
 
@@ -538,9 +572,9 @@ debajo de los 500MB del plan Free incluso con cientos de obras.
   redimensionar. Unos cientos de fotos llenan el 1GB.
 - **Egress (5GB/mes en Free).** Cada apertura de la galería redescarga
   las imágenes completas, sin caché ni miniaturas.
-- **`getBalanceGeneral()`** trae todas las obras y hace 6 consultas
-  separadas por cada una en paralelo (`getBalanceObra`). Con cientos de
-  obras empieza a sentirse más lento.
+- ~~`getBalanceGeneral()` hacía 6 consultas por cada obra~~ → resuelto:
+  ahora agrupa en memoria, son 8 consultas totales sin importar cuántas
+  obras haya (ver `lib/utils/README.md`).
 - **Listas de Obras/Clientes sin paginar.**
 
 **Mejoras futuras, en orden de impacto/costo (ninguna necesaria hoy):**
@@ -589,7 +623,18 @@ balance → Supabase Pro si el volumen lo justifica.
 20. Fase 3 — campos nuevos (CUIT/email, dirección, estados de obra,
     cobros por etapa), proveedores, empleados tercerizados, mano de
     obra tercerizada (presupuesto + pagos), personal de la empresa,
-    gastos de empresa, e integración de todo al cálculo de balance     ✅ (este cambio)
+    gastos de empresa, e integración de todo al cálculo de balance     ✅
+21. Correcciones post-Fase-3: bloqueo de borrado en cascada silencioso
+    (proveedores/personal), helpers compartidos (sumMonto, parsearMonto,
+    hasRelatedRows), getBalanceGeneral sin 6N+1 consultas               ✅
+22. Personal tercerizado separado de Proveedores: se elimina el modelo
+    viejo de mano de obra tercerizada (presupuesto_mano_obra,
+    pagos_mano_obra, empleados_tercerizados) y se reemplaza por una
+    entidad propia en paralelo a Personal de la empresa. Obra pasa a ser
+    opcional en pagos_personal (sueldos fijos sin obra puntual) y
+    obligatoria en pagos_personal_tercerizado. "Motivo" reemplaza a
+    "observaciones" en ambos, obligatorio. Se simplifica el detalle de
+    obra sacando esas dos cards                                        ✅ (este cambio)
 ```
 
 ---

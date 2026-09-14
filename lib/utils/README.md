@@ -10,11 +10,19 @@
   se llaman desde el frontend directamente — solo desde las rutas de API
   de balance. `getBalanceObra` agrega 6 tablas en paralelo (presupuesto,
   pagos de cliente, gastos generales, gastos de materiales, pagos de
-  mano de obra tercerizada, pagos de personal) — al agregar una tabla
-  nueva que sea un egreso de obra, sumarla ahí, no en un lugar aparte.
-  `getBalanceGeneral` además resta `gastos_empresa` (sin `obra_id`) del
-  resultado de la empresa — es el único gasto que no pertenece a
-  ninguna obra puntual.
+  personal tercerizado — `pagos_personal_tercerizado` — y pagos de
+  personal de la empresa) — al agregar una tabla nueva que sea un egreso
+  de obra, sumarla ahí, no en un lugar aparte. `getBalanceGeneral`
+  además resta de `resultado`: `gastos_empresa` (sin `obra_id`) y los
+  `pagos_personal` que tampoco tienen `obra_id` (sueldos fijos, ej.
+  redes/IT) — son los dos únicos gastos que no pertenecen a ninguna obra
+  puntual.
+
+  **Pendiente:** confirmar con Rodri que esta fórmula (qué resta del
+  resultado y qué no) coincide con cómo arma el balance en la
+  práctica — no se revisó a fondo en el cambio que separó personal
+  tercerizado de proveedores, solo se repuntaron las tablas para que
+  siguiera siendo consistente con el esquema nuevo.
 
   **Importante para escalabilidad:** `getBalanceGeneral` NO llama a
   `getBalanceObra` en un loop por cada obra (eso sería 6N+1 consultas con
