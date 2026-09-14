@@ -22,6 +22,13 @@ misma pantalla, cada una dentro de un `CollapsibleCard`.
   + `pagos_mano_obra`, separadas por conveniencia — presupuestado vs.
   efectivamente pagado). El acumulado de un proveedor sumando todas sus
   obras vive en `components/proveedor/CuentaCorrienteSection.tsx`, no acá.
+- **`PersonalSection.tsx`** — pagos a personal propio de la empresa (en
+  relación de dependencia, no tercerizado) por esta obra puntual
+  (`pagos_personal`). A diferencia de `ManoDeObraSection.tsx`, no hay
+  presupuesto ni cuenta corriente — es solo un historial de pagos, porque
+  el personal en relación de dependencia no se presupuesta por obra. El
+  historial agregado de un empleado sumando todas sus obras vive en
+  `components/personal/HistorialPagosSection.tsx`, no acá.
 - **`PagosClientesSection.tsx`** — pagos que el cliente le hizo a Zenit
   DC por esta obra.
 - **`BalanceSection.tsx`** — muestra el resultado calculado por

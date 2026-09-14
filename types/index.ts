@@ -16,6 +16,24 @@ export interface EmpleadoTercerizado {
   created_at: string
 }
 
+export interface PersonalEmpresa {
+  id: string
+  nombre: string
+  rol: string | null
+  telefono: string | null
+  created_at: string
+}
+
+export interface PagoPersonal {
+  id: string
+  personal_id: string
+  obra_id: string
+  monto: number
+  fecha: string
+  observaciones: string | null
+  created_at: string
+}
+
 export interface PresupuestoManoObra {
   id: string
   obra_id: string
