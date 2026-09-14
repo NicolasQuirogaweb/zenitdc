@@ -6,6 +6,16 @@ export interface Proveedor {
   created_at: string
 }
 
+export interface EmpleadoTercerizado {
+  id: string
+  proveedor_id: string
+  nombre: string
+  oficio: string | null
+  dni: string | null
+  telefono: string | null
+  created_at: string
+}
+
 export interface Cliente {
   id: string
   nombre: string

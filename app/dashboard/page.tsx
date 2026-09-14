@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Users, Wallet, Truck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -76,7 +77,7 @@ export default function DashboardPage() {
             <p className="mt-1 text-sm text-[color:var(--color-text-secondary)]">Ingresos, egresos y resultado</p>
           </a>
 
-          <a
+          <Link
             href="/proveedores"
             className="flex flex-col items-center rounded-xl bg-[color:var(--color-bg-surface)] p-6 text-center shadow-sm transition hover:shadow-md"
           >
@@ -85,7 +86,7 @@ export default function DashboardPage() {
             </span>
             <h2 className="mt-3 font-semibold text-[color:var(--color-text-primary)]">Proveedores</h2>
             <p className="mt-1 text-sm text-[color:var(--color-text-secondary)]">Materiales y mano de obra tercerizada</p>
-          </a>
+          </Link>
         </div>
       </div>
     </div>

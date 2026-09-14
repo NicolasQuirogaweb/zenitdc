@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import LoadingScreen from '@/components/ui/LoadingScreen'
@@ -57,9 +58,9 @@ export default function EditarObraPage() {
       <div className="mx-auto max-w-lg">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-bold text-[color:var(--color-text-primary)]">Editar Obra</h1>
-          <a href="/obras" className="text-sm text-blue-light hover:underline">
+          <Link href="/obras" className="text-sm text-blue-light hover:underline">
             Volver
-          </a>
+          </Link>
         </div>
         {error && (
           <p className="mb-4 rounded-lg bg-red-alert/15 p-3 text-sm text-red-alert">{error}</p>

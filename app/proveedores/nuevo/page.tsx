@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import ProveedorForm from '@/components/forms/ProveedorForm'
 import { useToast } from '@/lib/hooks/useToast'
@@ -35,9 +36,9 @@ export default function NuevoProveedorPage() {
       <div className="mx-auto max-w-lg">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-[color:var(--color-text-primary)]">Nuevo Proveedor</h1>
-          <a href="/proveedores" className="text-sm text-blue-light hover:underline">
+          <Link href="/proveedores" className="text-sm text-blue-light hover:underline">
             Volver
-          </a>
+          </Link>
         </div>
         {error && (
           <p className="mb-4 rounded-lg bg-red-alert/15 p-3 text-sm text-red-alert">{error}</p>
