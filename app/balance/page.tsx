@@ -149,6 +149,18 @@ export default function BalancePage() {
                           {formatMoney(o.total_gastos_generales)}
                         </p>
                       </div>
+                      <div className="flex items-center justify-between pl-3">
+                        <p className="text-xs text-[color:var(--color-text-secondary)]">↳ Mano de obra tercerizada</p>
+                        <p className="text-sm font-medium text-[color:var(--color-text-secondary)]">
+                          {formatMoney(o.total_mano_obra)}
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between pl-3">
+                        <p className="text-xs text-[color:var(--color-text-secondary)]">↳ Personal de la empresa</p>
+                        <p className="text-sm font-medium text-[color:var(--color-text-secondary)]">
+                          {formatMoney(o.total_personal)}
+                        </p>
+                      </div>
                       <div className="flex items-center justify-between border-t border-[color:var(--color-border)] pt-2">
                         <p className="text-xs text-[color:var(--color-text-secondary)]">Resultado</p>
                         <p

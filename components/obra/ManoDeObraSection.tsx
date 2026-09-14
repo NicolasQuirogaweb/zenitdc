@@ -73,7 +73,7 @@ export default function ManoDeObraSection({ obraId, onDatosCambiaron }: Props) {
   const handlePresupuestar = async (e: React.FormEvent) => {
     e.preventDefault()
     const montoNum = Number(montoPresupuesto)
-    if (!proveedorPresupuesto || montoPresupuesto === '' || montoNum < 0) {
+    if (!proveedorPresupuesto || montoPresupuesto === '' || Number.isNaN(montoNum) || montoNum < 0) {
       setError('Seleccioná un proveedor y un monto válido')
       return
     }

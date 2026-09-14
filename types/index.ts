@@ -52,14 +52,6 @@ export interface PagoManoObra {
   created_at: string
 }
 
-export interface CuentaCorrienteProveedor {
-  proveedor_id: string
-  proveedor_nombre: string
-  presupuestado: number
-  pagado: number
-  saldo: number
-}
-
 export interface Cliente {
   id: string
   nombre: string
@@ -165,6 +157,8 @@ export interface BalancePorObra {
   total_ingresos: number
   total_egresos: number
   total_gastos_generales: number
+  total_mano_obra: number
+  total_personal: number
   resultado: number
 }
 

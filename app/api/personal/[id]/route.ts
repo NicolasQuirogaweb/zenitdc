@@ -40,18 +40,26 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     const { id } = await params
 
     const supabase = await createClient()
+
+    // pagos_personal es "on delete cascade" desde personal_empresa: Postgres
+    // nunca tira un error de foreign key al borrar, borra en cascada en
+    // silencio. Por eso hay que chequear a mano si hay pagos antes de
+    // dejar borrar.
+    const { count } = await supabase
+      .from('pagos_personal')
+      .select('id', { count: 'exact', head: true })
+      .eq('personal_id', id)
+
+    if ((count ?? 0) > 0) {
+      return NextResponse.json(
+        { error: 'No se puede eliminar: el empleado tiene pagos registrados. Borralos primero.' },
+        { status: 409 }
+      )
+    }
+
     const { error } = await supabase.from('personal_empresa').delete().eq('id', id)
 
     if (error) {
-      if (
-        error.message.includes('foreign key constraint') ||
-        error.message.includes('violates foreign key')
-      ) {
-        return NextResponse.json(
-          { error: 'No se puede eliminar: el empleado tiene pagos registrados' },
-          { status: 409 }
-        )
-      }
       return supabaseErrorResponse(error)
     }
 
