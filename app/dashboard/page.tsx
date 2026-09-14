@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Users, Wallet, Truck, HardHat, Receipt, Wrench } from 'lucide-react'
+import { Users, Wallet, Truck, HardHat, Receipt, Wrench, History } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import LoadingScreen from '@/components/ui/LoadingScreen'
 import type { User } from '@supabase/supabase-js'
@@ -108,6 +108,17 @@ export default function DashboardPage() {
             </span>
             <h2 className="mt-3 font-semibold text-[color:var(--color-text-primary)]">Gastos empresa</h2>
             <p className="mt-1 text-sm text-[color:var(--color-text-secondary)]">Gastos generales sin obra asociada</p>
+          </Link>
+
+          <Link
+            href="/pagos"
+            className="flex flex-col items-center rounded-xl bg-[color:var(--color-bg-surface)] p-6 text-center shadow-sm transition hover:shadow-md"
+          >
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-accent/15 text-blue-light">
+              <History className="h-6 w-6" />
+            </span>
+            <h2 className="mt-3 font-semibold text-[color:var(--color-text-primary)]">Pagos</h2>
+            <p className="mt-1 text-sm text-[color:var(--color-text-secondary)]">Historial de todo lo que se va pagando</p>
           </Link>
 
           <a
