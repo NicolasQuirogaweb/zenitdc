@@ -121,6 +121,12 @@ CI:             GitHub Actions (.github/workflows/ci.yml) — tsc + lint + build
                                   abajo.
   /obras/[id]/editar
   /obras/[id]/fotos             → galería de fotos de la obra
+  /personal-hub                 → hub de navegación: 2 cards, Personal de
+                                  la empresa / Personal tercerizado (no
+                                  hace fetch, solo son 2 links)
+  /finanzas                     → hub de navegación: 2 cards, Balance
+                                  general / Pagos (no hace fetch, solo
+                                  son 2 links)
   /balance                      → balance general de la empresa
   /proveedores                  → listado + alta de proveedores — SOLO
                                   materiales (ver "Personal tercerizado"
@@ -507,8 +513,11 @@ frontend (los componentes usan directamente `balance.resultado`).
 
 ## UI/UX — decisiones tomadas
 
-- Bottom nav (mobile) y Sidebar (desktop) con 4 accesos: Dashboard,
-  Clientes, Obras, Balance.
+- Bottom nav (mobile) y Sidebar (desktop) con 5 accesos: Dashboard,
+  Obras, Clientes, Personal, Finanzas. Los últimos 2 son páginas "hub"
+  (`/personal-hub`, `/finanzas`) con 2 cards cada una — 5-6 destinos
+  reales sin superar el límite cómodo de íconos en una bottom nav
+  mobile (ver `components/layout/README.md`).
 - Sin FAB (botón flotante) — se usa un botón "+ Nueva/Nuevo" fijo arriba
   de cada lista.
 - Tipografía mínima 16px en inputs (evita zoom automático en iOS).
