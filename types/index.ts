@@ -3,6 +3,8 @@ export interface Cliente {
   nombre: string
   telefono: string | null
   direccion: string | null
+  cuit: string | null
+  email: string | null
   estado: 'activo' | 'inactivo'
   created_at: string
   updated_at: string
@@ -13,9 +15,10 @@ export interface Obra {
   cliente_id: string
   nombre: string
   descripcion: string | null
+  direccion: string | null
   fecha_inicio: string | null
   fecha_estimada_fin: string | null
-  estado: 'presupuestada' | 'en_ejecucion' | 'terminada'
+  estado: 'pendiente' | 'cotizada' | 'en_proceso' | 'finalizada'
   responsable: string | null
   created_at: string
   updated_at: string
@@ -34,6 +37,7 @@ export interface PagoCliente {
   obra_id: string
   monto: number
   fecha: string
+  numero_etapa: number | null
   metodo_pago: string | null
   observaciones: string | null
   created_at: string

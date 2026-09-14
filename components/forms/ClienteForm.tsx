@@ -22,6 +22,8 @@ export default function ClienteForm({ defaultValues, onSubmit, submitLabel }: Pr
       nombre: defaultValues?.nombre ?? '',
       telefono: defaultValues?.telefono ?? '',
       direccion: defaultValues?.direccion ?? '',
+      cuit: defaultValues?.cuit ?? '',
+      email: defaultValues?.email ?? '',
       estado: defaultValues?.estado ?? 'activo',
     },
   })
@@ -50,6 +52,23 @@ export default function ClienteForm({ defaultValues, onSubmit, submitLabel }: Pr
           Dirección
         </label>
         <input id="direccion" {...register('direccion')} className="input-field" />
+      </div>
+
+      <div>
+        <label htmlFor="cuit" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
+          CUIT
+        </label>
+        <input id="cuit" {...register('cuit')} className="input-field" />
+      </div>
+
+      <div>
+        <label htmlFor="email" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
+          Email
+        </label>
+        <input id="email" type="email" {...register('email')} className="input-field" />
+        {errors.email && (
+          <p className="mt-1 text-sm text-red-alert">{errors.email.message}</p>
+        )}
       </div>
 
       <div>
