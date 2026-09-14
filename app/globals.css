@@ -16,6 +16,11 @@
 
 :root {
   color-scheme: dark;
+  /* Achica toda la tipografía y el espaciado de la app (basados en rem)
+     de forma proporcional, sin tocar clases de Tailwind por archivo.
+     Los inputs quedan afuera a propósito: su font-size está fijo en
+     16px en píxeles más abajo, para que iOS no haga zoom automático. */
+  font-size: 15px;
 }
 
 body {
