@@ -66,17 +66,6 @@ export default function DashboardPage() {
             </p>
           </a>
 
-          <a
-            href="/balance"
-            className="flex flex-col items-center rounded-xl bg-[color:var(--color-bg-surface)] p-6 text-center shadow-sm transition hover:shadow-md"
-          >
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-accent/15 text-blue-light">
-              <Wallet className="h-6 w-6" />
-            </span>
-            <h2 className="mt-3 font-semibold text-[color:var(--color-text-primary)]">Balance general</h2>
-            <p className="mt-1 text-sm text-[color:var(--color-text-secondary)]">Ingresos, egresos y resultado</p>
-          </a>
-
           <Link
             href="/proveedores"
             className="flex flex-col items-center rounded-xl bg-[color:var(--color-bg-surface)] p-6 text-center shadow-sm transition hover:shadow-md"
@@ -120,6 +109,17 @@ export default function DashboardPage() {
             <h2 className="mt-3 font-semibold text-[color:var(--color-text-primary)]">Gastos empresa</h2>
             <p className="mt-1 text-sm text-[color:var(--color-text-secondary)]">Gastos generales sin obra asociada</p>
           </Link>
+
+          <a
+            href="/balance"
+            className="flex flex-col items-center rounded-xl bg-[color:var(--color-bg-surface)] p-6 text-center shadow-sm transition hover:shadow-md"
+          >
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-accent/15 text-blue-light">
+              <Wallet className="h-6 w-6" />
+            </span>
+            <h2 className="mt-3 font-semibold text-[color:var(--color-text-primary)]">Balance general</h2>
+            <p className="mt-1 text-sm text-[color:var(--color-text-secondary)]">Ingresos, egresos y resultado</p>
+          </a>
         </div>
       </div>
     </div>
