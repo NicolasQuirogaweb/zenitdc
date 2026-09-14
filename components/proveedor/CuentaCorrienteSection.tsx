@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatMoney } from '@/lib/utils/formato'
+import { sumMonto } from '@/lib/utils/numeros'
 import CollapsibleCard from '@/components/ui/CollapsibleCard'
 
 interface Props {
@@ -20,8 +21,8 @@ export default function CuentaCorrienteSection({ proveedorId }: Props) {
       supabase.from('presupuesto_mano_obra').select('monto').eq('proveedor_id', proveedorId),
       supabase.from('pagos_mano_obra').select('monto').eq('proveedor_id', proveedorId),
     ]).then(([presupuestos, pagos]) => {
-      setPresupuestado(presupuestos.data?.reduce((s, p) => s + Number(p.monto), 0) ?? 0)
-      setPagado(pagos.data?.reduce((s, p) => s + Number(p.monto), 0) ?? 0)
+      setPresupuestado(sumMonto(presupuestos.data))
+      setPagado(sumMonto(pagos.data))
       setCargando(false)
     })
   }, [proveedorId])

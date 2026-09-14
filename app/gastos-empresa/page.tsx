@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { formatMoney, formatFecha } from '@/lib/utils/formato'
+import { sumMonto, parsearMonto } from '@/lib/utils/numeros'
 import { CONCEPTOS_GASTOS_EMPRESA } from '@/lib/constantes'
 import SelectConOpciones from '@/components/ui/SelectConOpciones'
 import FechaInput from '@/components/ui/FechaInput'
@@ -44,8 +45,8 @@ export default function GastosEmpresaPage() {
 
   const handleAgregar = async (e: React.FormEvent) => {
     e.preventDefault()
-    const montoNum = Number(monto)
-    if (!concepto.trim() || !montoNum || montoNum <= 0 || !fecha) {
+    const montoNum = parsearMonto(monto)
+    if (!concepto.trim() || montoNum === null || !fecha) {
       setError('Completá el concepto, un monto mayor a 0 y la fecha')
       return
     }
@@ -88,7 +89,7 @@ export default function GastosEmpresaPage() {
     }
   }
 
-  const total = gastos.reduce((s, g) => s + Number(g.monto), 0)
+  const total = sumMonto(gastos)
 
   return (
     <div className="min-h-screen bg-[color:var(--color-bg-page)] p-4">

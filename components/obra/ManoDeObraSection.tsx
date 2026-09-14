@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatMoney, formatFecha } from '@/lib/utils/formato'
+import { sumMonto, parsearMonto } from '@/lib/utils/numeros'
 import FechaInput from '@/components/ui/FechaInput'
 import CollapsibleCard from '@/components/ui/CollapsibleCard'
 import { useToast } from '@/lib/hooks/useToast'
@@ -72,8 +73,8 @@ export default function ManoDeObraSection({ obraId, onDatosCambiaron }: Props) {
 
   const handlePresupuestar = async (e: React.FormEvent) => {
     e.preventDefault()
-    const montoNum = Number(montoPresupuesto)
-    if (!proveedorPresupuesto || montoPresupuesto === '' || Number.isNaN(montoNum) || montoNum < 0) {
+    const montoNum = parsearMonto(montoPresupuesto, 0)
+    if (!proveedorPresupuesto || montoNum === null) {
       setError('Seleccioná un proveedor y un monto válido')
       return
     }
@@ -102,8 +103,8 @@ export default function ManoDeObraSection({ obraId, onDatosCambiaron }: Props) {
 
   const handlePagar = async (e: React.FormEvent) => {
     e.preventDefault()
-    const montoNum = Number(montoPago)
-    if (!proveedorPago || !montoNum || montoNum <= 0 || !fechaPago) {
+    const montoNum = parsearMonto(montoPago)
+    if (!proveedorPago || montoNum === null || !fechaPago) {
       setError('Completá proveedor, un monto mayor a 0 y la fecha')
       return
     }
@@ -157,9 +158,7 @@ export default function ManoDeObraSection({ obraId, onDatosCambiaron }: Props) {
     const presupuestado = Number(
       presupuestos.find((p) => p.proveedor_id === proveedorId)?.monto ?? 0
     )
-    const pagado = pagos
-      .filter((p) => p.proveedor_id === proveedorId)
-      .reduce((s, p) => s + Number(p.monto), 0)
+    const pagado = sumMonto(pagos.filter((p) => p.proveedor_id === proveedorId))
     return {
       proveedorId,
       nombre: proveedor?.nombre ?? 'Proveedor',

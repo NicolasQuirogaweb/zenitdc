@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatMoney, formatFecha } from '@/lib/utils/formato'
+import { sumMonto, parsearMonto } from '@/lib/utils/numeros'
 import { MATERIALES } from '@/lib/constantes'
 import SelectConOpciones from '@/components/ui/SelectConOpciones'
 import FechaInput from '@/components/ui/FechaInput'
@@ -58,8 +59,8 @@ export default function GastosMaterialesSection({ obraId, onDatosCambiaron }: Pr
 
   const handleAgregar = async (e: React.FormEvent) => {
     e.preventDefault()
-    const montoNum = Number(monto)
-    if (!material.trim() || !montoNum || montoNum <= 0 || !fecha) {
+    const montoNum = parsearMonto(monto)
+    if (!material.trim() || montoNum === null || !fecha) {
       setError('Completá el material, un monto mayor a 0 y la fecha')
       return
     }
@@ -108,7 +109,7 @@ export default function GastosMaterialesSection({ obraId, onDatosCambiaron }: Pr
     }
   }
 
-  const total = gastos.reduce((s, g) => s + Number(g.monto), 0)
+  const total = sumMonto(gastos)
 
   return (
     <CollapsibleCard

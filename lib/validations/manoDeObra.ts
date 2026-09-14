@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { montoPositivo, fechaISO, observacionesOpcionales } from './comun'
 
 export const presupuestoManoObraSchema = z.object({
   proveedor_id: z.string().uuid('Seleccioná un proveedor'),
@@ -9,9 +10,9 @@ export type PresupuestoManoObraFormData = z.infer<typeof presupuestoManoObraSche
 
 export const pagoManoObraSchema = z.object({
   proveedor_id: z.string().uuid('Seleccioná un proveedor'),
-  monto: z.number().positive('El monto debe ser mayor a 0'),
-  fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha inválida'),
-  observaciones: z.string().max(500).nullable().optional(),
+  monto: montoPositivo,
+  fecha: fechaISO,
+  observaciones: observacionesOpcionales,
 })
 
 export type PagoManoObraFormData = z.infer<typeof pagoManoObraSchema>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatMoney, formatFecha } from '@/lib/utils/formato'
+import { sumMonto, parsearMonto } from '@/lib/utils/numeros'
 import FechaInput from '@/components/ui/FechaInput'
 import CollapsibleCard from '@/components/ui/CollapsibleCard'
 import { useToast } from '@/lib/hooks/useToast'
@@ -54,8 +55,8 @@ export default function PersonalSection({ obraId, onDatosCambiaron }: Props) {
 
   const handlePagar = async (e: React.FormEvent) => {
     e.preventDefault()
-    const montoNum = Number(montoPago)
-    if (!personalPago || !montoNum || montoNum <= 0 || !fechaPago) {
+    const montoNum = parsearMonto(montoPago)
+    if (!personalPago || montoNum === null || !fechaPago) {
       setError('Completá el empleado, un monto mayor a 0 y la fecha')
       return
     }
@@ -100,7 +101,7 @@ export default function PersonalSection({ obraId, onDatosCambiaron }: Props) {
     }
   }
 
-  const totalPagado = pagos.reduce((s, p) => s + Number(p.monto), 0)
+  const totalPagado = sumMonto(pagos)
 
   return (
     <CollapsibleCard

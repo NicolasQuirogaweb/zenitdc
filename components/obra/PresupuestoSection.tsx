@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatMoney } from '@/lib/utils/formato'
+import { sumMonto, parsearMonto } from '@/lib/utils/numeros'
 import { RUBROS_PRESUPUESTO } from '@/lib/constantes'
 import SelectConOpciones from '@/components/ui/SelectConOpciones'
 import CollapsibleCard from '@/components/ui/CollapsibleCard'
@@ -46,8 +47,8 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
 
   const handleAgregar = async (e: React.FormEvent) => {
     e.preventDefault()
-    const montoNum = Number(monto)
-    if (!rubro.trim() || !montoNum || montoNum <= 0) {
+    const montoNum = parsearMonto(monto)
+    if (!rubro.trim() || montoNum === null) {
       setError('Completá el rubro y un monto mayor a 0')
       return
     }
@@ -110,8 +111,8 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
   const guardarEdicion = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!editandoId) return
-    const montoNum = Number(editMonto)
-    if (!editRubro.trim() || !montoNum || montoNum <= 0) {
+    const montoNum = parsearMonto(editMonto)
+    if (!editRubro.trim() || montoNum === null) {
       setError('Completá el rubro y un monto mayor a 0')
       return
     }
@@ -145,7 +146,7 @@ export default function PresupuestoSection({ obraId, onDatosCambiaron }: Props) 
     onDatosCambiaron?.()
   }
 
-  const total = items.reduce((s, i) => s + Number(i.monto), 0)
+  const total = sumMonto(items)
 
   return (
     <CollapsibleCard

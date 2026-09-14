@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { requireUser, zodErrorResponse, catchApiError, supabaseErrorResponse } from '@/lib/api/helpers'
+import { requireUser, zodErrorResponse, catchApiError, supabaseErrorResponse, hasRelatedRows } from '@/lib/api/helpers'
 import { proveedorSchema } from '@/lib/validations/proveedores'
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -45,13 +45,13 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     // "on delete cascade" desde proveedores: Postgres nunca tira un error
     // de foreign key al borrar, borra en cascada en silencio. Por eso hay
     // que chequear a mano si hay historial antes de dejar borrar.
-    const [presupuesto, pagos, empleados] = await Promise.all([
-      supabase.from('presupuesto_mano_obra').select('id', { count: 'exact', head: true }).eq('proveedor_id', id),
-      supabase.from('pagos_mano_obra').select('id', { count: 'exact', head: true }).eq('proveedor_id', id),
-      supabase.from('empleados_tercerizados').select('id', { count: 'exact', head: true }).eq('proveedor_id', id),
+    const tieneHistorial = await hasRelatedRows(supabase, [
+      { tabla: 'presupuesto_mano_obra', columna: 'proveedor_id', valor: id },
+      { tabla: 'pagos_mano_obra', columna: 'proveedor_id', valor: id },
+      { tabla: 'empleados_tercerizados', columna: 'proveedor_id', valor: id },
     ])
 
-    if ((presupuesto.count ?? 0) > 0 || (pagos.count ?? 0) > 0 || (empleados.count ?? 0) > 0) {
+    if (tieneHistorial) {
       return NextResponse.json(
         {
           error:

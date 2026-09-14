@@ -52,9 +52,9 @@ export default function ProveedoresPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-[color:var(--color-text-primary)]">Proveedores</h1>
           <div className="flex items-center gap-3">
-            <a href="/dashboard" className="text-sm text-blue-light hover:underline">
+            <Link href="/dashboard" className="text-sm text-blue-light hover:underline">
               Volver
-            </a>
+            </Link>
             <Link
               href="/proveedores/nuevo"
               className="rounded-lg bg-blue-accent px-3 py-1.5 text-sm font-semibold text-white"
@@ -99,18 +99,18 @@ export default function ProveedoresPage() {
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <a
+                  <Link
                     href={`/proveedores/${p.id}`}
                     className="text-sm text-blue-light hover:underline"
                   >
                     Ver
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     href={`/proveedores/${p.id}/editar`}
                     className="text-sm text-blue-light hover:underline"
                   >
                     Editar
-                  </a>
+                  </Link>
                   <button
                     onClick={() => handleDelete(p.id)}
                     className="text-sm text-red-alert hover:underline"
