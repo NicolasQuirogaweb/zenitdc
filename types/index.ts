@@ -137,12 +137,23 @@ export interface FotoObra {
   created_at: string
 }
 
+export interface GastoEmpresa {
+  id: string
+  concepto: string
+  monto: number
+  fecha: string
+  observaciones: string | null
+  created_at: string
+}
+
 export interface BalanceObra {
   obra_id: string
   total_presupuestado: number
   total_ingresos: number
   total_egresos: number
   total_gastos_generales: number
+  total_mano_obra: number
+  total_personal: number
   resultado: number
   diferencia_vs_presupuesto: number
 }
@@ -161,6 +172,7 @@ export interface BalanceGeneral {
   total_ingresos: number
   total_egresos: number
   total_gastos_generales: number
+  total_gastos_empresa: number
   resultado: number
   por_obra: BalancePorObra[]
 }

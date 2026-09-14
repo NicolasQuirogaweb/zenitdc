@@ -5,6 +5,7 @@ type FilaGenerica = { monto: number; concepto?: string }
 
 interface Fixtures {
   obras?: Array<{ id: string; nombre: string; clientes: { nombre: string } | null }>
+  gastosEmpresa?: FilaGenerica[]
   porObra: Record<
     string,
     {
@@ -12,6 +13,8 @@ interface Fixtures {
       pagos_clientes?: FilaGenerica[]
       gastos_generales?: FilaGenerica[]
       gastos_materiales?: FilaGenerica[]
+      pagos_mano_obra?: FilaGenerica[]
+      pagos_personal?: FilaGenerica[]
     }
   >
 }
@@ -35,6 +38,10 @@ function crearSupabaseMock(fixtures: Fixtures) {
         then: (resolve) => {
           if (tabla === 'obras') {
             resolve({ data: fixtures.obras ?? [], error: null })
+            return
+          }
+          if (tabla === 'gastos_empresa') {
+            resolve({ data: fixtures.gastosEmpresa ?? [], error: null })
             return
           }
           const datosObra = obraId ? fixtures.porObra[obraId] : undefined
@@ -64,7 +71,7 @@ beforeEach(() => {
 })
 
 describe('getBalanceObra', () => {
-  it('separa costos directos de gastos generales, y estos últimos no restan del resultado', async () => {
+  it('suma costos directos, gastos de materiales, gastos generales, mano de obra y personal en el total de egresos', async () => {
     mockearSupabase({
       porObra: {
         'obra-1': {
@@ -75,6 +82,8 @@ describe('getBalanceObra', () => {
             { concepto: 'Combustible', monto: 300 },
           ],
           gastos_materiales: [{ monto: 500 }],
+          pagos_mano_obra: [{ monto: 800 }],
+          pagos_personal: [{ monto: 200 }],
         },
       },
     })
@@ -83,11 +92,12 @@ describe('getBalanceObra', () => {
 
     expect(balance.total_presupuestado).toBe(10000)
     expect(balance.total_ingresos).toBe(7000)
-    // costos directos (Mano de obra, 1000) + gastos_materiales (500) = 1500
-    expect(balance.total_egresos).toBe(1500)
-    // Combustible es indirecto: se informa aparte, no entra en total_egresos
+    // costos directos (1000) + materiales (500) + gastos generales (300) + mano de obra (800) + personal (200)
+    expect(balance.total_egresos).toBe(2800)
     expect(balance.total_gastos_generales).toBe(300)
-    expect(balance.resultado).toBe(7000 - 1500)
+    expect(balance.total_mano_obra).toBe(800)
+    expect(balance.total_personal).toBe(200)
+    expect(balance.resultado).toBe(7000 - 2800)
     expect(balance.diferencia_vs_presupuesto).toBe(balance.resultado - 10000)
   })
 
@@ -102,6 +112,8 @@ describe('getBalanceObra', () => {
       total_ingresos: 0,
       total_egresos: 0,
       total_gastos_generales: 0,
+      total_mano_obra: 0,
+      total_personal: 0,
       resultado: 0,
       diferencia_vs_presupuesto: 0,
     })
@@ -122,18 +134,20 @@ describe('getBalanceObra', () => {
 
     const balance = await getBalanceObra('obra-2')
 
-    expect(balance.total_egresos).toBe(350) // 200 + 150, indirectos
+    // 200 + 150 (costos directos) + 80 (gastos generales, ahora también resta)
+    expect(balance.total_egresos).toBe(430)
     expect(balance.total_gastos_generales).toBe(80)
   })
 })
 
 describe('getBalanceGeneral', () => {
-  it('agrega el balance de todas las obras y suma los gastos generales aparte, sin restarlos del resultado', async () => {
+  it('agrega el balance de todas las obras y resta los gastos de empresa (sin obra) del resultado', async () => {
     mockearSupabase({
       obras: [
         { id: 'obra-1', nombre: 'Casa Pérez', clientes: { nombre: 'Pérez' } },
         { id: 'obra-2', nombre: 'Galpón Gómez', clientes: { nombre: 'Gómez' } },
       ],
+      gastosEmpresa: [{ monto: 400 }],
       porObra: {
         'obra-1': {
           pagos_clientes: [{ monto: 5000 }],
@@ -150,9 +164,11 @@ describe('getBalanceGeneral', () => {
     const balance = await getBalanceGeneral()
 
     expect(balance.total_ingresos).toBe(8000)
-    expect(balance.total_egresos).toBe(1000) // solo gastos_materiales de obra-2, nada es costo directo acá
-    expect(balance.total_gastos_generales).toBe(150) // 100 + 50, informativo
-    expect(balance.resultado).toBe(8000 - 1000) // gastos generales NO se restan
+    // gastos_materiales (1000) + gastos generales de ambas obras (100 + 50)
+    expect(balance.total_egresos).toBe(1150)
+    expect(balance.total_gastos_generales).toBe(150)
+    expect(balance.total_gastos_empresa).toBe(400)
+    expect(balance.resultado).toBe(8000 - 1150 - 400)
     expect(balance.por_obra).toHaveLength(2)
     expect(balance.por_obra[0]).toMatchObject({
       obra_id: 'obra-1',
@@ -161,14 +177,15 @@ describe('getBalanceGeneral', () => {
     })
   })
 
-  it('devuelve un balance vacío cuando no hay obras cargadas', async () => {
-    mockearSupabase({ obras: [], porObra: {} })
+  it('devuelve un balance vacío cuando no hay obras ni gastos de empresa cargados', async () => {
+    mockearSupabase({ obras: [], gastosEmpresa: [], porObra: {} })
 
     const balance = await getBalanceGeneral()
 
     expect(balance.total_ingresos).toBe(0)
     expect(balance.total_egresos).toBe(0)
     expect(balance.total_gastos_generales).toBe(0)
+    expect(balance.total_gastos_empresa).toBe(0)
     expect(balance.resultado).toBe(0)
     expect(balance.por_obra).toEqual([])
   })

@@ -4,7 +4,7 @@
 > en este repo. Reemplaza a `prompt_senior_zenitdc.md` (borrado — este
 > archivo es ahora la única fuente de verdad).
 >
-> **Actualizado 2026-09-13.**
+> **Actualizado 2026-09-14.**
 > **Recordatorio:** actualizar este archivo apenas se termine un cambio
 > grande de arquitectura o de UI — es lo que desactualizó a la versión
 > anterior más de una vez (quedó con la fórmula de balance vieja varias
@@ -100,7 +100,10 @@ CI:             GitHub Actions (.github/workflows/ci.yml) — tsc + lint + build
 ```
 /app
   /login                        → login
-  /dashboard                    → home con resumen y accesos rápidos
+  /dashboard                    → home con resumen y accesos rápidos (grid
+                                  de 5 cards: Clientes y obras, Balance
+                                  general, Proveedores, Personal, Gastos
+                                  empresa)
   /clientes                     → listado + alta de clientes
   /clientes/nuevo
   /clientes/[id]/editar
@@ -108,20 +111,38 @@ CI:             GitHub Actions (.github/workflows/ci.yml) — tsc + lint + build
   /obras                        → listado + alta de obras
   /obras/nuevo
   /obras/[id]                   → detalle de obra: acá viven presupuesto,
-                                  costos directos, gastos de materiales,
-                                  pagos del cliente, gastos generales y
-                                  balance, todo como secciones dentro de
-                                  esta misma pantalla (no rutas separadas)
+                                  costos directos, mano de obra tercerizada,
+                                  personal de la empresa, gastos de
+                                  materiales, pagos del cliente, gastos
+                                  generales y balance, todo como secciones
+                                  dentro de esta misma pantalla (no rutas
+                                  separadas)
   /obras/[id]/editar
   /obras/[id]/fotos             → galería de fotos de la obra
   /balance                      → balance general de la empresa
+  /proveedores                  → listado + alta de proveedores (materiales
+                                  y mano de obra tercerizada)
+  /proveedores/[id]             → detalle: datos + cuenta corriente de mano
+                                  de obra (todas las obras) + empleados
+  /proveedores/[id]/editar
+  /proveedores/nuevo
+  /personal                     → listado + alta de personal propio
+  /personal/[id]                → detalle: datos + historial de pagos
+                                  (todas las obras)
+  /personal/[id]/editar
+  /personal/nuevo
+  /gastos-empresa               → alta + historial de gastos de la empresa
+                                  sin obra asociada (una sola pantalla,
+                                  sin páginas separadas de alta/edición)
   /api                          → rutas de API (server-side, ver app/api/README.md)
 
 /components
-  /ui       → ver components/ui/README.md
-  /forms    → ver components/forms/README.md
-  /layout   → ver components/layout/README.md
-  /obra     → ver components/obra/README.md
+  /ui        → ver components/ui/README.md
+  /forms     → ver components/forms/README.md
+  /layout    → ver components/layout/README.md
+  /obra      → ver components/obra/README.md
+  /proveedor → ver components/proveedor/README.md
+  /personal  → ver components/personal/README.md
 
 /lib
   /supabase     → ver lib/supabase/README.md
@@ -141,19 +162,20 @@ CI:             GitHub Actions (.github/workflows/ci.yml) — tsc + lint + build
 
 **Ya NO existen** (removidos del alcance real): `/obras/[id]/proveedores`
 (pagos a proveedores, versión vieja), `/gastos-generales` como sección
-global independiente. Los "gastos generales" son siempre por obra (la
-Fase 3 en curso agrega un concepto NUEVO y distinto: gastos de empresa
-sin obra asociada — ver más abajo cuando esa fase esté documentada).
+global independiente. Los "gastos generales" (`gastos_generales`, la
+tabla) son siempre por obra — `gastos_empresa` es una tabla DISTINTA,
+sin `obra_id`, para gastos de la empresa que no pertenecen a ninguna obra
+puntual (alquiler, impuestos, contador, etc.).
 
 ---
 
 ## Esquema de base de datos — estado real
 
-RLS habilitado y verificado en las 7 tablas (política `Solo autenticados`,
-`to public using (auth.role() = 'authenticated')` — es el patrón estándar
-de Supabase, funcionalmente equivalente a restringir por rol
-`authenticated`). Cualquier tabla nueva debe repetir este mismo patrón de
-RLS (ver skill `scaffold-entidad`).
+RLS habilitado y verificado en todas las tablas (política `Solo
+autenticados`, `to public using (auth.role() = 'authenticated')` — es el
+patrón estándar de Supabase, funcionalmente equivalente a restringir por
+rol `authenticated`). Cualquier tabla nueva debe repetir este mismo
+patrón de RLS (ver skill `scaffold-entidad`).
 
 ```sql
 -- CLIENTES
@@ -162,6 +184,8 @@ create table clientes (
   nombre      text not null,
   telefono    text,
   direccion   text,
+  cuit        text,
+  email       text,
   estado      text not null default 'activo' check (estado in ('activo','inactivo')),
   created_at  timestamptz default now(),
   updated_at  timestamptz default now()
@@ -173,13 +197,24 @@ create table obras (
   cliente_id        uuid references clientes(id) on delete restrict,
   nombre            text not null,
   descripcion       text,
+  direccion         text,
   fecha_inicio      date,
   fecha_estimada_fin date,
-  estado            text not null default 'presupuestada'
-                    check (estado in ('presupuestada','en_ejecucion','terminada')),
+  estado            text not null default 'pendiente'
+                    check (estado in ('pendiente','cotizada','en_proceso','finalizada')),
   responsable       text,
   created_at        timestamptz default now(),
   updated_at        timestamptz default now()
+);
+
+-- PROVEEDORES (materiales y/o mano de obra tercerizada) — se define acá
+-- porque gastos_materiales y gastos_generales la referencian
+create table proveedores (
+  id         uuid primary key default gen_random_uuid(),
+  nombre     text not null,
+  telefono   text,
+  contacto   text,
+  created_at timestamptz default now()
 );
 
 -- PRESUPUESTO POR RUBROS (vinculado a una obra)
@@ -199,6 +234,7 @@ create table pagos_clientes (
   obra_id     uuid references obras(id) on delete cascade,
   monto       numeric(12,2) not null,
   fecha       date not null default current_date,
+  numero_etapa integer,  -- opcional, para pagos por hito/etapa de la obra
   metodo_pago text,
   observaciones text,
   created_at  timestamptz default now()
@@ -212,6 +248,7 @@ create table gastos_materiales (
   cantidad    text,
   monto       numeric(12,2) not null,
   fecha       date not null default current_date,
+  proveedor_id uuid references proveedores(id) on delete set null,
   observaciones text,
   created_at  timestamptz default now()
 );
@@ -221,12 +258,16 @@ create table gastos_materiales (
 -- por el texto de "concepto" (ver CONCEPTOS_COSTOS_DIRECTOS en constantes.ts):
 --   - Costos directos: movimiento de suelo, mano de obra, instalación eléctrica
 --   - Gastos indirectos/overhead: combustible, seguros
+-- "Mano de obra" acá es la carga MANUAL, legacy (sin proveedor ni cuenta
+-- corriente) — sigue existiendo a propósito para changas puntuales, en
+-- paralelo al circuito de mano de obra tercerizada de abajo.
 create table gastos_generales (
   id          uuid primary key default gen_random_uuid(),
   obra_id     uuid references obras(id) on delete cascade,
   concepto    text not null,
   monto       numeric(12,2) not null,
   fecha       date not null default current_date,
+  proveedor_id uuid references proveedores(id) on delete set null,
   observaciones text,
   created_at  timestamptz default now()
 );
@@ -240,17 +281,83 @@ create table fotos_obra (
   fecha       date not null default current_date,
   created_at  timestamptz default now()
 );
+
+-- EMPLEADOS TERCERIZADOS — solo referencia/contacto (la cuadrilla de un
+-- proveedor). La plata se maneja a nivel del proveedor, no del empleado.
+create table empleados_tercerizados (
+  id           uuid primary key default gen_random_uuid(),
+  proveedor_id uuid not null references proveedores(id) on delete cascade,
+  nombre       text not null,
+  oficio       text,
+  dni          text,
+  telefono     text,
+  created_at   timestamptz default now()
+);
+
+-- MANO DE OBRA TERCERIZADA: presupuesto (upsert 1 fila por obra+proveedor)
+create table presupuesto_mano_obra (
+  id           uuid primary key default gen_random_uuid(),
+  obra_id      uuid not null references obras(id) on delete cascade,
+  proveedor_id uuid not null references proveedores(id) on delete cascade,
+  monto        numeric(12,2) not null default 0,
+  created_at   timestamptz default now(),
+  unique (obra_id, proveedor_id)
+);
+
+-- MANO DE OBRA TERCERIZADA: pagos (histórico, muchas filas por obra+proveedor)
+create table pagos_mano_obra (
+  id           uuid primary key default gen_random_uuid(),
+  obra_id      uuid not null references obras(id) on delete cascade,
+  proveedor_id uuid not null references proveedores(id) on delete cascade,
+  monto        numeric(12,2) not null,
+  fecha        date not null default current_date,
+  observaciones text,
+  created_at   timestamptz default now()
+);
+
+-- PERSONAL DE LA EMPRESA (en relación de dependencia, no tercerizado)
+create table personal_empresa (
+  id         uuid primary key default gen_random_uuid(),
+  nombre     text not null,
+  rol        text,
+  telefono   text,
+  created_at timestamptz default now()
+);
+
+-- PAGOS A PERSONAL — siempre por obra (a diferencia de mano de obra
+-- tercerizada, NO hay presupuesto/cuenta corriente: es solo historial).
+create table pagos_personal (
+  id            uuid primary key default gen_random_uuid(),
+  personal_id   uuid not null references personal_empresa(id) on delete cascade,
+  obra_id       uuid not null references obras(id) on delete cascade,
+  monto         numeric(12,2) not null,
+  fecha         date not null default current_date,
+  observaciones text,
+  created_at    timestamptz default now()
+);
+
+-- GASTOS DE LA EMPRESA — sin obra_id. Únicos gastos que no pertenecen a
+-- ninguna obra puntual (alquiler, impuestos, contador, etc.).
+create table gastos_empresa (
+  id            uuid primary key default gen_random_uuid(),
+  concepto      text not null,
+  monto         numeric(12,2) not null,
+  fecha         date not null default current_date,
+  observaciones text,
+  created_at    timestamptz default now()
+);
 ```
 
 ---
 
 ## Seguridad — estado real
 
-1. **RLS (Row Level Security) — verificado.** Prendido en las 7 tablas,
-   política `to public using (auth.role() = 'authenticated')` en cada
-   una. Confirmado con consultas directas a `pg_tables`/`pg_policies` y
-   con un pedido HTTP real sin sesión (devuelve vacío). El bucket de
-   Storage `fotos-obra` es privado, sin acceso público.
+1. **RLS (Row Level Security) — verificado.** Prendido en todas las
+   tablas, política `to public using (auth.role() = 'authenticated')` en
+   cada una. Confirmado con consultas directas a
+   `pg_tables`/`pg_policies` y con un pedido HTTP real sin sesión
+   (devuelve vacío). El bucket de Storage `fotos-obra` es privado, sin
+   acceso público.
 2. **Protección de rutas — `proxy.ts`** (no `middleware.ts`): bloquea todo
    excepto `/login` y assets estáticos/PWA, usa `createServerClient` de
    `@supabase/ssr`. Además, **cada ruta de API vuelve a chequear la
@@ -281,12 +388,17 @@ Cubierto por tests automatizados (`lib/utils/balance.test.ts`, ver
 `lib/utils/README.md`) — es la lógica que más cambió de comportamiento en
 este proyecto, tratarla con cuidado extra.
 
+**Cambio importante (Fase 3, Bloque 5):** hasta antes de esto,
+`total_gastos_generales` era puramente informativo y NO restaba del
+`resultado`. Rodri confirmó que el presupuesto aprobado ya contempla los
+gastos generales de la obra, así que ahora SÍ restan — ver el historial
+de módulos si hace falta el detalle de por qué cambió dos veces.
+
 ### Balance por obra
 
 `gastos_generales` (la tabla) contiene DOS conceptos distintos, separados
 únicamente por el texto de `concepto` contra la lista
-`CONCEPTOS_COSTOS_DIRECTOS` en `lib/constantes.ts`. Solo uno de los dos
-cuenta como egreso:
+`CONCEPTOS_COSTOS_DIRECTOS` en `lib/constantes.ts`:
 
 ```
 total_presupuestado      = SUM(presupuesto_items.monto) WHERE obra_id = X
@@ -294,45 +406,57 @@ total_ingresos           = SUM(pagos_clientes.monto) WHERE obra_id = X
 
 costos_directos          = SUM(gastos_generales.monto) WHERE obra_id = X
                            AND concepto IN CONCEPTOS_COSTOS_DIRECTOS
-                           -- "Movimiento de suelo", "Mano de obra",
-                           -- "Instalación eléctrica"
+                           -- "Movimiento de suelo", "Mano de obra" (carga
+                           -- manual/legacy), "Instalación eléctrica"
 total_gastos_generales   = SUM(gastos_generales.monto) WHERE obra_id = X
                            AND concepto NOT IN CONCEPTOS_COSTOS_DIRECTOS
                            -- "Combustible", "Seguros vehículos/personal" —
                            -- overhead/indirecto
+total_mano_obra          = SUM(pagos_mano_obra.monto) WHERE obra_id = X
+                           -- pagos a proveedores de mano de obra
+                           -- tercerizada (distinto del "Mano de obra"
+                           -- manual de gastos_generales, ver arriba)
+total_personal           = SUM(pagos_personal.monto) WHERE obra_id = X
+                           -- pagos a personal propio de la empresa
 
 total_egresos            = costos_directos
                            + SUM(gastos_materiales.monto) WHERE obra_id = X
-                           -- total_gastos_generales NO se suma acá
+                           + total_gastos_generales
+                           + total_mano_obra
+                           + total_personal
 
 resultado                 = total_ingresos - total_egresos
 diferencia_vs_presupuesto = resultado - total_presupuestado
 -- (este campo se calcula pero hoy no se muestra en ninguna pantalla)
 ```
 
-`total_gastos_generales` se muestra aparte en la UI, como un dato
-puramente informativo — no descuenta del `resultado` de la obra. Fue un
-pedido explícito del cliente: los gastos generales (seguros, combustible)
-no se consideran costo directo de una obra puntual, así que no afectan su
-balance, aunque siguen siendo un gasto real de la empresa. `resultado` es
-un flujo de caja parcial a la fecha (cobrado menos gastado hasta ahora),
-no la ganancia final.
+`total_gastos_generales`, `total_mano_obra` y `total_personal` también se
+muestran desglosados aparte en la UI (para que Rodri vea de dónde sale el
+número), pero ya están INCLUIDOS dentro de `total_egresos` — no hay que
+sumarlos de nuevo en el frontend. `resultado` es un flujo de caja parcial
+a la fecha (cobrado menos gastado hasta ahora), no la ganancia final.
 
 ### Balance general de la empresa
 
 ```
 total_ingresos_empresa         = SUM de total_ingresos de TODAS las obras
 total_egresos_empresa          = SUM de total_egresos de TODAS las obras
-total_gastos_generales_empresa = SUM de total_gastos_generales de TODAS las obras
-resultado_empresa              = total_ingresos_empresa - total_egresos_empresa
-                                  -- total_gastos_generales_empresa tampoco
-                                  -- se resta acá, se muestra aparte
+total_gastos_generales_empresa = SUM de total_gastos_generales de TODAS las
+                                  obras (informativo, ya incluido arriba)
+total_gastos_empresa           = SUM(gastos_empresa.monto)
+                                  -- el único gasto sin obra_id: alquiler,
+                                  -- impuestos, contador, etc.
+
+resultado_empresa = total_ingresos_empresa - total_egresos_empresa
+                     - total_gastos_empresa
 ```
 
-Los cálculos son funciones puras en `lib/utils/balance.ts`, se llaman
-desde `app/api/balance/route.ts` y `app/api/obras/[id]/balance/route.ts`
-— nunca se recalculan en el frontend (los componentes usan directamente
-`balance.resultado`).
+`total_gastos_empresa` es el ÚNICO monto que se resta a nivel empresa sin
+pasar por ninguna obra puntual — todo lo demás ya se agregó obra por
+obra. Los cálculos son funciones puras en `lib/utils/balance.ts`, se
+llaman desde `app/api/balance/route.ts` y
+`app/api/obras/[id]/balance/route.ts` — nunca se recalculan en el
+frontend (los componentes usan directamente `balance.resultado`).
 
 ---
 
@@ -414,9 +538,9 @@ debajo de los 500MB del plan Free incluso con cientos de obras.
   redimensionar. Unos cientos de fotos llenan el 1GB.
 - **Egress (5GB/mes en Free).** Cada apertura de la galería redescarga
   las imágenes completas, sin caché ni miniaturas.
-- **`getBalanceGeneral()`** trae todas las obras y hace 4 consultas
-  separadas por cada una en paralelo. Con cientos de obras empieza a
-  sentirse más lento.
+- **`getBalanceGeneral()`** trae todas las obras y hace 6 consultas
+  separadas por cada una en paralelo (`getBalanceObra`). Con cientos de
+  obras empieza a sentirse más lento.
 - **Listas de Obras/Clientes sin paginar.**
 
 **Mejoras futuras, en orden de impacto/costo (ninguna necesaria hoy):**
@@ -434,8 +558,7 @@ balance → Supabase Pro si el volumen lo justifica.
 - **`scaffold-entidad`**: genera tabla SQL (con RLS) + schema Zod + ruta
   de API + formulario + página de listado para una entidad nueva,
   siguiendo el patrón de `clientes`/`obras`. Usarla al agregar cualquier
-  entidad CRUD nueva (ver Fase 3 en curso: proveedores, personal, gastos
-  de empresa).
+  entidad CRUD nueva (así se armaron proveedores y personal en la Fase 3).
 
 ---
 
@@ -462,11 +585,13 @@ balance → Supabase Pro si el volumen lo justifica.
 18. Tema oscuro, selector de fecha propio, modal de confirmación,
     lightbox de fotos                                                   ✅
 19. Infraestructura de desarrollo agéntico (CLAUDE.md, READMEs,
-    skills, tests, CI)                                                  ✅ (este cambio)
-20. Fase 3 — proveedores, mano de obra tercerizada, personal de
-    empresa, gastos de empresa, cobros por etapa                        🔲 en curso
+    skills, tests, CI)                                                  ✅
+20. Fase 3 — campos nuevos (CUIT/email, dirección, estados de obra,
+    cobros por etapa), proveedores, empleados tercerizados, mano de
+    obra tercerizada (presupuesto + pagos), personal de la empresa,
+    gastos de empresa, e integración de todo al cálculo de balance     ✅ (este cambio)
 ```
 
 ---
 
-*Proyecto: Zenit DC — nquirogawebdev — actualizado 2026-09-13*
+*Proyecto: Zenit DC — nquirogawebdev — actualizado 2026-09-14*
