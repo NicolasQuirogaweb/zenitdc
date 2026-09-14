@@ -5,6 +5,7 @@ export const gastoMaterialSchema = z.object({
   cantidad: z.string().max(50).nullable().optional(),
   monto: z.number().positive('El monto debe ser mayor a 0'),
   fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha inválida'),
+  proveedor_id: z.string().uuid().nullable().optional(),
   observaciones: z.string().max(500).nullable().optional(),
 })
 
