@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { NAV_ITEMS } from './nav-items'
+import { NAV_ITEMS, esRutaActiva } from './nav-items'
 
 export default function Sidebar() {
   const pathname = usePathname()
@@ -11,8 +11,9 @@ export default function Sidebar() {
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-56 flex-col border-r border-[color:var(--color-border)] bg-[color:var(--color-bg-surface)] p-4 md:flex">
       <p className="mb-6 px-2 text-lg font-bold text-[color:var(--color-text-primary)]">Zenit DC</p>
       <nav className="flex flex-col gap-1">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-          const activo = pathname === href || pathname.startsWith(`${href}/`)
+        {NAV_ITEMS.map((item) => {
+          const { href, label, icon: Icon } = item
+          const activo = esRutaActiva(pathname, item)
           return (
             <Link
               key={href}

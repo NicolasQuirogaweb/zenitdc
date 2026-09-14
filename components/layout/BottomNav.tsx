@@ -2,15 +2,16 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { NAV_ITEMS } from './nav-items'
+import { NAV_ITEMS, esRutaActiva } from './nav-items'
 
 export default function BottomNav() {
   const pathname = usePathname()
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-[color:var(--color-border)] bg-[color:var(--color-bg-surface)] md:hidden">
-      {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-        const activo = pathname === href || pathname.startsWith(`${href}/`)
+      {NAV_ITEMS.map((item) => {
+        const { href, label, icon: Icon } = item
+        const activo = esRutaActiva(pathname, item)
         return (
           <Link
             key={href}
