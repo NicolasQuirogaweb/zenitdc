@@ -101,10 +101,11 @@ CI:             GitHub Actions (.github/workflows/ci.yml) — tsc + lint + build
 /app
   /login                        → login
   /dashboard                    → home con resumen y accesos rápidos (grid
-                                  de 7 cards: Clientes y obras, Proveedores,
-                                  Personal, Personal tercerizado, Gastos
-                                  empresa, Pagos, Balance general — este
-                                  último al final a propósito)
+                                  de 5 cards: Clientes y obras,
+                                  Proveedores, Personal, Personal
+                                  tercerizado, Finanzas — esta última
+                                  agrupa Balance/Pagos/Gastos empresa, ver
+                                  /finanzas)
   /clientes                     → listado + alta de clientes
   /clientes/nuevo
   /clientes/[id]/editar
@@ -124,9 +125,12 @@ CI:             GitHub Actions (.github/workflows/ci.yml) — tsc + lint + build
   /personal-hub                 → hub de navegación: 2 cards, Personal de
                                   la empresa / Personal tercerizado (no
                                   hace fetch, solo son 2 links)
-  /finanzas                     → hub de navegación: 2 cards, Balance
-                                  general / Pagos (no hace fetch, solo
-                                  son 2 links)
+  /finanzas                     → hub de navegación: 3 cards, Balance
+                                  general / Pagos / Gastos empresa (no
+                                  hace fetch, solo son 3 links) — agrupa
+                                  todo lo que no es específico de una
+                                  entidad puntual (proveedor, personal,
+                                  obra)
   /balance                      → balance general de la empresa
   /proveedores                  → listado + alta de proveedores — SOLO
                                   materiales (ver "Personal tercerizado"
