@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { SkeletonLista } from '@/components/ui/Skeleton'
 import { useToast } from '@/lib/hooks/useToast'
@@ -54,12 +55,12 @@ export default function ProveedoresPage() {
             <a href="/dashboard" className="text-sm text-blue-light hover:underline">
               Volver
             </a>
-            <a
+            <Link
               href="/proveedores/nuevo"
               className="rounded-lg bg-blue-accent px-3 py-1.5 text-sm font-semibold text-white"
             >
               + Nuevo
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -73,12 +74,12 @@ export default function ProveedoresPage() {
           <div className="mt-8 text-center">
             <p className="text-[color:var(--color-text-secondary)]">No hay proveedores aún</p>
             <p className="mt-2">
-              <a
+              <Link
                 href="/proveedores/nuevo"
                 className="inline-block rounded-lg bg-blue-accent px-4 py-2 text-sm font-semibold text-white"
               >
                 Crear primer proveedor
-              </a>
+              </Link>
             </p>
           </div>
         ) : (
@@ -98,6 +99,12 @@ export default function ProveedoresPage() {
                   )}
                 </div>
                 <div className="flex items-center gap-2">
+                  <a
+                    href={`/proveedores/${p.id}`}
+                    className="text-sm text-blue-light hover:underline"
+                  >
+                    Ver
+                  </a>
                   <a
                     href={`/proveedores/${p.id}/editar`}
                     className="text-sm text-blue-light hover:underline"

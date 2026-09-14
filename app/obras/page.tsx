@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { SkeletonLista } from '@/components/ui/Skeleton'
 import EstadoObraBadge from '@/components/ui/EstadoObraBadge'
@@ -58,12 +59,12 @@ export default function ObrasPage() {
             <a href="/dashboard" className="text-sm text-blue-light hover:underline">
               Volver
             </a>
-            <a
+            <Link
               href="/obras/nuevo"
               className="rounded-lg bg-blue-accent px-3 py-1.5 text-sm font-semibold text-white"
             >
               + Nueva
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -77,12 +78,12 @@ export default function ObrasPage() {
           <div className="mt-8 text-center">
             <p className="text-[color:var(--color-text-secondary)]">No hay obras aún</p>
             <p className="mt-2">
-              <a
+              <Link
                 href="/obras/nuevo"
                 className="inline-block rounded-lg bg-blue-accent px-4 py-2 text-sm font-semibold text-white"
               >
                 Crear primera obra
-              </a>
+              </Link>
             </p>
           </div>
         ) : (
