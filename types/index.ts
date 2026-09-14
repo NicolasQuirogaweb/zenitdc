@@ -58,6 +58,7 @@ export interface GastoMaterial {
   cantidad: string | null
   monto: number
   fecha: string
+  proveedor_id: string | null
   observaciones: string | null
   created_at: string
 }
@@ -68,6 +69,7 @@ export interface GastoGeneral {
   concepto: string
   monto: number
   fecha: string
+  proveedor_id: string | null
   observaciones: string | null
   created_at: string
 }

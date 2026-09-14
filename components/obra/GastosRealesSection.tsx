@@ -8,7 +8,11 @@ import FechaInput from '@/components/ui/FechaInput'
 import CollapsibleCard from '@/components/ui/CollapsibleCard'
 import { useToast } from '@/lib/hooks/useToast'
 import { useConfirm } from '@/lib/hooks/useConfirm'
-import type { GastoGeneral } from '@/types'
+import type { GastoGeneral, Proveedor } from '@/types'
+
+interface GastoGeneralConProveedor extends GastoGeneral {
+  proveedores: { nombre: string } | null
+}
 
 interface Props {
   obraId: string
@@ -29,11 +33,13 @@ export default function GastosRealesSection({
   placeholder = 'Escribí el concepto',
   onDatosCambiaron,
 }: Props) {
-  const [gastos, setGastos] = useState<GastoGeneral[]>([])
+  const [gastos, setGastos] = useState<GastoGeneralConProveedor[]>([])
+  const [proveedores, setProveedores] = useState<Proveedor[]>([])
   const [error, setError] = useState('')
   const [concepto, setConcepto] = useState('')
   const [monto, setMonto] = useState('')
   const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10))
+  const [proveedorId, setProveedorId] = useState('')
   const [observaciones, setObservaciones] = useState('')
   const [agregando, setAgregando] = useState(false)
   const { showToast } = useToast()
@@ -43,18 +49,22 @@ export default function GastosRealesSection({
     const supabase = createClient()
     supabase
       .from('gastos_generales')
-      .select('*')
+      .select('*, proveedores(nombre)')
       .eq('obra_id', obraId)
       .order('fecha', { ascending: false })
       .order('created_at', { ascending: false })
       .then(({ data, error }) => {
-        if (data) setGastos((data as GastoGeneral[]).filter((g) => filtro(g.concepto)))
+        if (data) setGastos((data as unknown as GastoGeneralConProveedor[]).filter((g) => filtro(g.concepto)))
         else if (error) setError('Error al cargar los gastos')
       })
   }
 
   useEffect(() => {
     fetchGastos()
+    const supabase = createClient()
+    supabase.from('proveedores').select('*').order('nombre').then(({ data }) => {
+      if (data) setProveedores(data)
+    })
   }, [obraId])
 
   const handleAgregar = async (e: React.FormEvent) => {
@@ -74,6 +84,7 @@ export default function GastosRealesSection({
         concepto: concepto.trim(),
         monto: montoNum,
         fecha,
+        proveedor_id: proveedorId || null,
         observaciones: observaciones.trim() || null,
       }),
     })
@@ -88,6 +99,7 @@ export default function GastosRealesSection({
     setConcepto('')
     setMonto('')
     setFecha(new Date().toISOString().slice(0, 10))
+    setProveedorId('')
     setObservaciones('')
     showToast('success', 'Gasto registrado')
     fetchGastos()
@@ -150,6 +162,24 @@ export default function GastosRealesSection({
           <FechaInput id="fecha" value={fecha} onChange={setFecha} />
         </div>
         <div className="col-span-2">
+          <label htmlFor="proveedorId" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
+            Proveedor (opcional)
+          </label>
+          <select
+            id="proveedorId"
+            value={proveedorId}
+            onChange={(e) => setProveedorId(e.target.value)}
+            className="input-field"
+          >
+            <option value="">Sin proveedor</option>
+            {proveedores.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.nombre}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="col-span-2">
           <label htmlFor="observaciones" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
             Observaciones
           </label>
@@ -179,6 +209,7 @@ export default function GastosRealesSection({
                 <p className="font-medium text-[color:var(--color-text-primary)]">{gasto.concepto}</p>
                 <p className="text-sm text-[color:var(--color-text-secondary)]">
                   {formatMoney(Number(gasto.monto))} · {formatFecha(gasto.fecha)}
+                  {gasto.proveedores?.nombre && ` · ${gasto.proveedores.nombre}`}
                 </p>
                 {gasto.observaciones && (
                   <p className="text-xs text-[color:var(--color-text-muted)]">{gasto.observaciones}</p>
