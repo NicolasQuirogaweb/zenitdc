@@ -1,3 +1,11 @@
+export interface Proveedor {
+  id: string
+  nombre: string
+  telefono: string | null
+  contacto: string | null
+  created_at: string
+}
+
 export interface Cliente {
   id: string
   nombre: string
