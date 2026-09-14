@@ -152,11 +152,13 @@ describe('getBalanceGeneral', () => {
         'obra-1': {
           pagos_clientes: [{ monto: 5000 }],
           gastos_generales: [{ concepto: 'Combustible', monto: 100 }],
+          pagos_mano_obra: [{ monto: 600 }],
         },
         'obra-2': {
           pagos_clientes: [{ monto: 3000 }],
           gastos_materiales: [{ monto: 1000 }],
           gastos_generales: [{ concepto: 'Seguros vehículos', monto: 50 }],
+          pagos_personal: [{ monto: 200 }],
         },
       },
     })
@@ -164,11 +166,14 @@ describe('getBalanceGeneral', () => {
     const balance = await getBalanceGeneral()
 
     expect(balance.total_ingresos).toBe(8000)
-    // gastos_materiales (1000) + gastos generales de ambas obras (100 + 50)
-    expect(balance.total_egresos).toBe(1150)
+    // gastos_materiales (1000) + gastos generales de ambas obras (100 + 50) + mano de obra (600) + personal (200)
+    expect(balance.total_egresos).toBe(1950)
+    // el desglose por obra tiene que llevar mano de obra y personal, no solo gastos generales
+    expect(balance.por_obra[0]).toMatchObject({ obra_id: 'obra-1', total_mano_obra: 600, total_personal: 0 })
+    expect(balance.por_obra[1]).toMatchObject({ obra_id: 'obra-2', total_mano_obra: 0, total_personal: 200 })
     expect(balance.total_gastos_generales).toBe(150)
     expect(balance.total_gastos_empresa).toBe(400)
-    expect(balance.resultado).toBe(8000 - 1150 - 400)
+    expect(balance.resultado).toBe(8000 - 1950 - 400)
     expect(balance.por_obra).toHaveLength(2)
     expect(balance.por_obra[0]).toMatchObject({
       obra_id: 'obra-1',

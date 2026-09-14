@@ -83,6 +83,8 @@ export async function getBalanceGeneral(): Promise<BalanceGeneral> {
     total_ingresos: balances[i].total_ingresos,
     total_egresos: balances[i].total_egresos,
     total_gastos_generales: balances[i].total_gastos_generales,
+    total_mano_obra: balances[i].total_mano_obra,
+    total_personal: balances[i].total_personal,
     resultado: balances[i].resultado,
   }))
 

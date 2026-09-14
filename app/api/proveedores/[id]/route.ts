@@ -40,18 +40,30 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     const { id } = await params
 
     const supabase = await createClient()
+
+    // presupuesto_mano_obra, pagos_mano_obra y empleados_tercerizados son
+    // "on delete cascade" desde proveedores: Postgres nunca tira un error
+    // de foreign key al borrar, borra en cascada en silencio. Por eso hay
+    // que chequear a mano si hay historial antes de dejar borrar.
+    const [presupuesto, pagos, empleados] = await Promise.all([
+      supabase.from('presupuesto_mano_obra').select('id', { count: 'exact', head: true }).eq('proveedor_id', id),
+      supabase.from('pagos_mano_obra').select('id', { count: 'exact', head: true }).eq('proveedor_id', id),
+      supabase.from('empleados_tercerizados').select('id', { count: 'exact', head: true }).eq('proveedor_id', id),
+    ])
+
+    if ((presupuesto.count ?? 0) > 0 || (pagos.count ?? 0) > 0 || (empleados.count ?? 0) > 0) {
+      return NextResponse.json(
+        {
+          error:
+            'No se puede eliminar: el proveedor tiene presupuesto, pagos de mano de obra o empleados cargados. Borralos primero.',
+        },
+        { status: 409 }
+      )
+    }
+
     const { error } = await supabase.from('proveedores').delete().eq('id', id)
 
     if (error) {
-      if (
-        error.message.includes('foreign key constraint') ||
-        error.message.includes('violates foreign key')
-      ) {
-        return NextResponse.json(
-          { error: 'No se puede eliminar: el proveedor tiene gastos u obras asociadas' },
-          { status: 409 }
-        )
-      }
       return supabaseErrorResponse(error)
     }
 
