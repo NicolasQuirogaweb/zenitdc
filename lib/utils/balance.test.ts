@@ -19,10 +19,12 @@ interface Fixtures {
   >
 }
 
-function crearSupabaseMock(fixtures: Fixtures) {
+function crearSupabaseMock(fixtures: Fixtures, contadorFrom?: (tabla: string) => void) {
   return {
     from(tabla: string) {
+      contadorFrom?.(tabla)
       let obraId: string | undefined
+      let filtradoPorObra = false
       const chain: {
         select: () => typeof chain
         eq: (columna: string, valor: string) => typeof chain
@@ -31,7 +33,10 @@ function crearSupabaseMock(fixtures: Fixtures) {
       } = {
         select: () => chain,
         eq: (columna: string, valor: string) => {
-          if (columna === 'obra_id') obraId = valor
+          if (columna === 'obra_id') {
+            obraId = valor
+            filtradoPorObra = true
+          }
           return chain
         },
         order: () => chain,
@@ -44,9 +49,21 @@ function crearSupabaseMock(fixtures: Fixtures) {
             resolve({ data: fixtures.gastosEmpresa ?? [], error: null })
             return
           }
-          const datosObra = obraId ? fixtures.porObra[obraId] : undefined
-          const filas = datosObra ? (datosObra as Record<string, unknown[]>)[tabla] : undefined
-          resolve({ data: filas ?? [], error: null })
+          if (filtradoPorObra) {
+            // getBalanceObra: consulta filtrada por una obra puntual.
+            const datosObra = obraId ? fixtures.porObra[obraId] : undefined
+            const filas = datosObra ? (datosObra as Record<string, unknown[]>)[tabla] : undefined
+            resolve({ data: filas ?? [], error: null })
+            return
+          }
+          // getBalanceGeneral: consulta sin filtro, trae todas las filas de
+          // todas las obras de una — hay que taggearlas con su obra_id
+          // (en la base real ya viene en la fila; acá lo agrega el fixture).
+          const todas = Object.entries(fixtures.porObra).flatMap(([oid, datos]) => {
+            const filas = ((datos as Record<string, unknown[]>)[tabla] ?? []) as object[]
+            return filas.map((fila) => ({ ...fila, obra_id: oid }))
+          })
+          resolve({ data: todas, error: null })
         },
       }
       return chain
@@ -60,9 +77,9 @@ vi.mock('@/lib/supabase/server', () => ({
 
 import { createClient } from '@/lib/supabase/server'
 
-function mockearSupabase(fixtures: Fixtures) {
+function mockearSupabase(fixtures: Fixtures, contadorFrom?: (tabla: string) => void) {
   vi.mocked(createClient).mockResolvedValue(
-    crearSupabaseMock(fixtures) as unknown as Awaited<ReturnType<typeof createClient>>
+    crearSupabaseMock(fixtures, contadorFrom) as unknown as Awaited<ReturnType<typeof createClient>>
   )
 }
 
@@ -180,6 +197,29 @@ describe('getBalanceGeneral', () => {
       obra_nombre: 'Casa Pérez',
       cliente_nombre: 'Pérez',
     })
+  })
+
+  it('hace una sola tanda de consultas (una por tabla), no una por obra', async () => {
+    // Con muchas obras, getBalanceGeneral no debe volver a convertirse en
+    // 6N+1 consultas — esto agarra ese regresión si alguien vuelve a
+    // llamar getBalanceObra() en loop en vez de agrupar en memoria.
+    const obras = Array.from({ length: 50 }, (_, i) => ({
+      id: `obra-${i}`,
+      nombre: `Obra ${i}`,
+      clientes: null,
+    }))
+    const tablasConsultadas: string[] = []
+
+    mockearSupabase({ obras, gastosEmpresa: [], porObra: {} }, (tabla) => {
+      tablasConsultadas.push(tabla)
+    })
+
+    await getBalanceGeneral()
+
+    // 1 (obras) + 6 (presupuesto, ingresos, gastos generales, materiales,
+    // mano de obra, personal) + 1 (gastos_empresa) = 8, sin importar
+    // cuántas obras haya.
+    expect(tablasConsultadas).toHaveLength(8)
   })
 
   it('devuelve un balance vacío cuando no hay obras ni gastos de empresa cargados', async () => {

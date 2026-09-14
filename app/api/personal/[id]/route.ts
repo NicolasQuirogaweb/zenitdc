@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { requireUser, zodErrorResponse, catchApiError, supabaseErrorResponse } from '@/lib/api/helpers'
+import { requireUser, zodErrorResponse, catchApiError, supabaseErrorResponse, hasRelatedRows } from '@/lib/api/helpers'
 import { personalSchema } from '@/lib/validations/personal'
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -45,12 +45,11 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     // nunca tira un error de foreign key al borrar, borra en cascada en
     // silencio. Por eso hay que chequear a mano si hay pagos antes de
     // dejar borrar.
-    const { count } = await supabase
-      .from('pagos_personal')
-      .select('id', { count: 'exact', head: true })
-      .eq('personal_id', id)
+    const tienePagos = await hasRelatedRows(supabase, [
+      { tabla: 'pagos_personal', columna: 'personal_id', valor: id },
+    ])
 
-    if ((count ?? 0) > 0) {
+    if (tienePagos) {
       return NextResponse.json(
         { error: 'No se puede eliminar: el empleado tiene pagos registrados. Borralos primero.' },
         { status: 409 }

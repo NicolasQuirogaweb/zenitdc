@@ -1,35 +1,44 @@
 import { createClient } from '@/lib/supabase/server'
 import { CONCEPTOS_COSTOS_DIRECTOS } from '@/lib/constantes'
+import { sumMonto } from '@/lib/utils/numeros'
 import type { BalanceGeneral, BalanceObra, BalancePorObra } from '@/types'
 
-export async function getBalanceObra(obraId: string): Promise<BalanceObra> {
-  const supabase = await createClient()
+interface FilaMonto {
+  monto: number | string
+}
 
-  const [presupuesto, ingresos, gastosGenerales, egresosMat, pagosManoObra, pagosPersonal] =
-    await Promise.all([
-      supabase.from('presupuesto_items').select('monto').eq('obra_id', obraId),
-      supabase.from('pagos_clientes').select('monto').eq('obra_id', obraId),
-      supabase.from('gastos_generales').select('concepto, monto').eq('obra_id', obraId),
-      supabase.from('gastos_materiales').select('monto').eq('obra_id', obraId),
-      supabase.from('pagos_mano_obra').select('monto').eq('obra_id', obraId),
-      supabase.from('pagos_personal').select('monto').eq('obra_id', obraId),
-    ])
+interface FilaGastoGeneral extends FilaMonto {
+  concepto: string
+}
 
-  const totalPresupuestado = presupuesto.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0
-  const totalIngresos = ingresos.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0
+interface FilasBalanceObra {
+  presupuesto: FilaMonto[]
+  ingresos: FilaMonto[]
+  gastosGenerales: FilaGastoGeneral[]
+  gastosMateriales: FilaMonto[]
+  pagosManoObra: FilaMonto[]
+  pagosPersonal: FilaMonto[]
+}
 
-  const costosDirectos =
-    gastosGenerales.data
-      ?.filter((g) => CONCEPTOS_COSTOS_DIRECTOS.includes(g.concepto))
-      .reduce((s, i) => s + Number(i.monto), 0) ?? 0
-  const totalGastosGenerales =
-    gastosGenerales.data
-      ?.filter((g) => !CONCEPTOS_COSTOS_DIRECTOS.includes(g.concepto))
-      .reduce((s, i) => s + Number(i.monto), 0) ?? 0
+/**
+ * La aritmética del balance de una obra, pura (no toca Supabase) — la
+ * usan tanto `getBalanceObra` (una obra, filtrando en la consulta) como
+ * `getBalanceGeneral` (todas las obras, agrupando en memoria) para no
+ * mantener la fórmula duplicada en dos lugares.
+ */
+function calcularBalanceDesdeFilas(obraId: string, filas: FilasBalanceObra): BalanceObra {
+  const totalPresupuestado = sumMonto(filas.presupuesto)
+  const totalIngresos = sumMonto(filas.ingresos)
 
-  const totalGastosMateriales = egresosMat.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0
-  const totalManoObra = pagosManoObra.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0
-  const totalPersonal = pagosPersonal.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0
+  const costosDirectos = sumMonto(
+    filas.gastosGenerales.filter((g) => CONCEPTOS_COSTOS_DIRECTOS.includes(g.concepto))
+  )
+  const totalGastosGenerales = sumMonto(
+    filas.gastosGenerales.filter((g) => !CONCEPTOS_COSTOS_DIRECTOS.includes(g.concepto))
+  )
+  const totalGastosMateriales = sumMonto(filas.gastosMateriales)
+  const totalManoObra = sumMonto(filas.pagosManoObra)
+  const totalPersonal = sumMonto(filas.pagosPersonal)
 
   const totalEgresos =
     costosDirectos + totalGastosMateriales + totalGastosGenerales + totalManoObra + totalPersonal
@@ -47,14 +56,66 @@ export async function getBalanceObra(obraId: string): Promise<BalanceObra> {
   }
 }
 
+export async function getBalanceObra(obraId: string): Promise<BalanceObra> {
+  const supabase = await createClient()
+
+  const [presupuesto, ingresos, gastosGenerales, gastosMateriales, pagosManoObra, pagosPersonal] =
+    await Promise.all([
+      supabase.from('presupuesto_items').select('monto').eq('obra_id', obraId),
+      supabase.from('pagos_clientes').select('monto').eq('obra_id', obraId),
+      supabase.from('gastos_generales').select('concepto, monto').eq('obra_id', obraId),
+      supabase.from('gastos_materiales').select('monto').eq('obra_id', obraId),
+      supabase.from('pagos_mano_obra').select('monto').eq('obra_id', obraId),
+      supabase.from('pagos_personal').select('monto').eq('obra_id', obraId),
+    ])
+
+  return calcularBalanceDesdeFilas(obraId, {
+    presupuesto: presupuesto.data ?? [],
+    ingresos: ingresos.data ?? [],
+    gastosGenerales: gastosGenerales.data ?? [],
+    gastosMateriales: gastosMateriales.data ?? [],
+    pagosManoObra: pagosManoObra.data ?? [],
+    pagosPersonal: pagosPersonal.data ?? [],
+  })
+}
+
+/** Agrupa un array de filas por `obra_id`, para no pedirle a la base una
+ * consulta separada por cada obra (ver `getBalanceGeneral`). */
+function agruparPorObra<T extends { obra_id: string }>(filas: T[] | null): Map<string, T[]> {
+  const mapa = new Map<string, T[]>()
+  for (const fila of filas ?? []) {
+    const grupo = mapa.get(fila.obra_id)
+    if (grupo) grupo.push(fila)
+    else mapa.set(fila.obra_id, [fila])
+  }
+  return mapa
+}
+
 export async function getBalanceGeneral(): Promise<BalanceGeneral> {
   const supabase = await createClient()
 
-  const [{ data: obras }, gastosEmpresa] = await Promise.all([
+  // Una sola consulta por tabla para TODAS las obras (no una por obra):
+  // con cientos de obras, evita que esto sea 6N+1 consultas en vez de 8.
+  const [
+    { data: obras },
+    presupuesto,
+    ingresos,
+    gastosGenerales,
+    gastosMateriales,
+    pagosManoObra,
+    pagosPersonal,
+    gastosEmpresa,
+  ] = await Promise.all([
     supabase
       .from('obras')
       .select('id, nombre, clientes(nombre), created_at')
       .order('created_at', { ascending: false }),
+    supabase.from('presupuesto_items').select('obra_id, monto'),
+    supabase.from('pagos_clientes').select('obra_id, monto'),
+    supabase.from('gastos_generales').select('obra_id, concepto, monto'),
+    supabase.from('gastos_materiales').select('obra_id, monto'),
+    supabase.from('pagos_mano_obra').select('obra_id, monto'),
+    supabase.from('pagos_personal').select('obra_id, monto'),
     supabase.from('gastos_empresa').select('monto'),
   ])
 
@@ -72,8 +133,22 @@ export async function getBalanceGeneral(): Promise<BalanceGeneral> {
       : (o.clientes?.nombre ?? ''),
   }))
 
-  const balances = await Promise.all(
-    obrasNormalizadas.map((o) => getBalanceObra(o.id))
+  const presupuestoPorObra = agruparPorObra(presupuesto.data)
+  const ingresosPorObra = agruparPorObra(ingresos.data)
+  const gastosGeneralesPorObra = agruparPorObra(gastosGenerales.data)
+  const gastosMaterialesPorObra = agruparPorObra(gastosMateriales.data)
+  const pagosManoObraPorObra = agruparPorObra(pagosManoObra.data)
+  const pagosPersonalPorObra = agruparPorObra(pagosPersonal.data)
+
+  const balances = obrasNormalizadas.map((o) =>
+    calcularBalanceDesdeFilas(o.id, {
+      presupuesto: presupuestoPorObra.get(o.id) ?? [],
+      ingresos: ingresosPorObra.get(o.id) ?? [],
+      gastosGenerales: gastosGeneralesPorObra.get(o.id) ?? [],
+      gastosMateriales: gastosMaterialesPorObra.get(o.id) ?? [],
+      pagosManoObra: pagosManoObraPorObra.get(o.id) ?? [],
+      pagosPersonal: pagosPersonalPorObra.get(o.id) ?? [],
+    })
   )
 
   const porObra: BalancePorObra[] = obrasNormalizadas.map((o, i) => ({
@@ -91,7 +166,7 @@ export async function getBalanceGeneral(): Promise<BalanceGeneral> {
   const totalIngresosEmpresa = balances.reduce((s, b) => s + b.total_ingresos, 0)
   const totalEgresosEmpresa = balances.reduce((s, b) => s + b.total_egresos, 0)
   const totalGastosGeneralesEmpresa = balances.reduce((s, b) => s + b.total_gastos_generales, 0)
-  const totalGastosEmpresa = gastosEmpresa.data?.reduce((s, g) => s + Number(g.monto), 0) ?? 0
+  const totalGastosEmpresa = sumMonto(gastosEmpresa.data)
 
   return {
     total_ingresos: totalIngresosEmpresa,

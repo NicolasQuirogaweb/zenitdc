@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatMoney, formatFecha } from '@/lib/utils/formato'
+import { sumMonto, parsearMonto } from '@/lib/utils/numeros'
 import { METODOS_PAGO } from '@/lib/constantes'
 import SelectConOpciones from '@/components/ui/SelectConOpciones'
 import FechaInput from '@/components/ui/FechaInput'
@@ -48,8 +49,8 @@ export default function PagosClientesSection({ obraId, onDatosCambiaron }: Props
 
   const handleAgregar = async (e: React.FormEvent) => {
     e.preventDefault()
-    const montoNum = Number(monto)
-    if (!montoNum || montoNum <= 0 || !fecha) {
+    const montoNum = parsearMonto(monto)
+    if (montoNum === null || !fecha) {
       setError('Completá el monto (mayor a 0) y la fecha')
       return
     }
@@ -96,7 +97,7 @@ export default function PagosClientesSection({ obraId, onDatosCambiaron }: Props
     }
   }
 
-  const total = pagos.reduce((s, p) => s + Number(p.monto), 0)
+  const total = sumMonto(pagos)
 
   return (
     <CollapsibleCard

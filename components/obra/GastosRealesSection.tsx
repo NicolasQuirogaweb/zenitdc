@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatMoney, formatFecha } from '@/lib/utils/formato'
+import { sumMonto, parsearMonto } from '@/lib/utils/numeros'
 import SelectConOpciones from '@/components/ui/SelectConOpciones'
 import FechaInput from '@/components/ui/FechaInput'
 import CollapsibleCard from '@/components/ui/CollapsibleCard'
@@ -69,8 +70,8 @@ export default function GastosRealesSection({
 
   const handleAgregar = async (e: React.FormEvent) => {
     e.preventDefault()
-    const montoNum = Number(monto)
-    if (!concepto.trim() || !montoNum || montoNum <= 0 || !fecha) {
+    const montoNum = parsearMonto(monto)
+    if (!concepto.trim() || montoNum === null || !fecha) {
       setError('Completá el concepto, un monto mayor a 0 y la fecha')
       return
     }
@@ -117,7 +118,7 @@ export default function GastosRealesSection({
     }
   }
 
-  const total = gastos.reduce((s, g) => s + Number(g.monto), 0)
+  const total = sumMonto(gastos)
 
   return (
     <CollapsibleCard
