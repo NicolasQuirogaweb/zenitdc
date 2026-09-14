@@ -14,7 +14,6 @@ type Categoria =
   | 'Materiales'
   | 'Personal'
   | 'Personal tercerizado'
-  | 'Gastos de la empresa'
 
 interface Movimiento {
   id: string
@@ -32,7 +31,6 @@ const COLOR_CATEGORIA: Record<Categoria, string> = {
   Materiales: 'bg-[color:var(--color-text-muted)]/15 text-[color:var(--color-text-secondary)]',
   Personal: 'bg-green-alert/15 text-green-600',
   'Personal tercerizado': 'bg-green-alert/15 text-green-600',
-  'Gastos de la empresa': 'bg-red-alert/15 text-red-alert',
 }
 
 export default function PagosPage() {
@@ -110,7 +108,7 @@ export default function PagosPage() {
             fecha: g.fecha,
             createdAt: g.created_at,
             monto: Number(g.monto),
-            categoria: 'Gastos de la empresa',
+            categoria: 'Gastos generales',
             descripcion: [g.concepto, g.observaciones].filter(Boolean).join(' · '),
             obraNombre: null,
           })),

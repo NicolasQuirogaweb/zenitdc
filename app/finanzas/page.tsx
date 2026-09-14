@@ -44,8 +44,8 @@ export default function FinanzasPage() {
             <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-accent/15 text-blue-light">
               <Receipt className="h-6 w-6" />
             </span>
-            <h2 className="mt-3 font-semibold text-[color:var(--color-text-primary)]">Gastos empresa</h2>
-            <p className="mt-1 text-sm text-[color:var(--color-text-secondary)]">Gastos generales sin obra asociada</p>
+            <h2 className="mt-3 font-semibold text-[color:var(--color-text-primary)]">Gastos generales</h2>
+            <p className="mt-1 text-sm text-[color:var(--color-text-secondary)]">Sin obra asociada (alquiler, impuestos, contador, etc.)</p>
           </Link>
         </div>
       </div>
