@@ -133,9 +133,8 @@ export interface BalanceObra {
   total_presupuestado: number
   total_ingresos: number
   total_egresos: number
+  total_costos_directos: number
   total_gastos_generales: number
-  total_mano_obra: number
-  total_personal: number
   resultado: number
   diferencia_vs_presupuesto: number
 }
@@ -146,9 +145,8 @@ export interface BalancePorObra {
   cliente_nombre: string
   total_ingresos: number
   total_egresos: number
+  total_costos_directos: number
   total_gastos_generales: number
-  total_mano_obra: number
-  total_personal: number
   resultado: number
 }
 

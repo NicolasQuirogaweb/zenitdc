@@ -30,27 +30,30 @@ function calcularBalanceDesdeFilas(obraId: string, filas: FilasBalanceObra): Bal
   const totalPresupuestado = sumMonto(filas.presupuesto)
   const totalIngresos = sumMonto(filas.ingresos)
 
-  const costosDirectos = sumMonto(
+  const costosDirectosManual = sumMonto(
     filas.gastosGenerales.filter((g) => CONCEPTOS_COSTOS_DIRECTOS.includes(g.concepto))
   )
   const totalGastosGenerales = sumMonto(
     filas.gastosGenerales.filter((g) => !CONCEPTOS_COSTOS_DIRECTOS.includes(g.concepto))
   )
   const totalGastosMateriales = sumMonto(filas.gastosMateriales)
-  const totalManoObra = sumMonto(filas.pagosPersonalTercerizado)
-  const totalPersonal = sumMonto(filas.pagosPersonal)
+  const manoObraTercerizada = sumMonto(filas.pagosPersonalTercerizado)
+  const personalEnEstaObra = sumMonto(filas.pagosPersonal)
 
-  const totalEgresos =
-    costosDirectos + totalGastosMateriales + totalGastosGenerales + totalManoObra + totalPersonal
+  // Mano de obra tercerizada y personal propio pagados POR esta obra son,
+  // para Rodri, costo directo de la obra — no una categoría aparte. Se
+  // suman todos juntos en un solo número (ver CLAUDE.md, "Lógica de balance").
+  const totalCostosDirectos = costosDirectosManual + manoObraTercerizada + personalEnEstaObra
+
+  const totalEgresos = totalCostosDirectos + totalGastosMateriales + totalGastosGenerales
 
   return {
     obra_id: obraId,
     total_presupuestado: totalPresupuestado,
     total_ingresos: totalIngresos,
     total_egresos: totalEgresos,
+    total_costos_directos: totalCostosDirectos,
     total_gastos_generales: totalGastosGenerales,
-    total_mano_obra: totalManoObra,
-    total_personal: totalPersonal,
     resultado: totalIngresos - totalEgresos,
     diferencia_vs_presupuesto: totalIngresos - totalEgresos - totalPresupuestado,
   }
@@ -162,9 +165,8 @@ export async function getBalanceGeneral(): Promise<BalanceGeneral> {
     cliente_nombre: o.cliente_nombre,
     total_ingresos: balances[i].total_ingresos,
     total_egresos: balances[i].total_egresos,
+    total_costos_directos: balances[i].total_costos_directos,
     total_gastos_generales: balances[i].total_gastos_generales,
-    total_mano_obra: balances[i].total_mano_obra,
-    total_personal: balances[i].total_personal,
     resultado: balances[i].resultado,
   }))
 

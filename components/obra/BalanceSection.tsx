@@ -91,22 +91,18 @@ export default function BalanceSection({ obraId, refreshKey }: Props) {
           <div>
             <p className="text-sm text-[color:var(--color-text-secondary)]">Egresos</p>
             <p className="text-xs text-[color:var(--color-text-muted)]">
-              = Costos directos + materiales + gastos generales + mano de obra + personal
+              = Costos directos + materiales + gastos generales
             </p>
           </div>
           <p className="font-semibold text-[color:var(--color-text-primary)]">{formatMoney(balance.total_egresos)}</p>
         </div>
         <div className="flex items-center justify-between pl-3">
+          <p className="text-xs text-[color:var(--color-text-secondary)]">↳ Costos directos (incluye mano de obra y personal de esta obra)</p>
+          <p className="text-sm text-[color:var(--color-text-secondary)]">{formatMoney(balance.total_costos_directos)}</p>
+        </div>
+        <div className="flex items-center justify-between pl-3">
           <p className="text-xs text-[color:var(--color-text-secondary)]">↳ Gastos generales (seguros, combustible, etc.)</p>
           <p className="text-sm text-[color:var(--color-text-secondary)]">{formatMoney(balance.total_gastos_generales)}</p>
-        </div>
-        <div className="flex items-center justify-between pl-3">
-          <p className="text-xs text-[color:var(--color-text-secondary)]">↳ Mano de obra tercerizada pagada</p>
-          <p className="text-sm text-[color:var(--color-text-secondary)]">{formatMoney(balance.total_mano_obra)}</p>
-        </div>
-        <div className="flex items-center justify-between pl-3">
-          <p className="text-xs text-[color:var(--color-text-secondary)]">↳ Personal de la empresa pagado</p>
-          <p className="text-sm text-[color:var(--color-text-secondary)]">{formatMoney(balance.total_personal)}</p>
         </div>
         <div className="flex items-center justify-between border-t border-[color:var(--color-border)] pt-3">
           <div>

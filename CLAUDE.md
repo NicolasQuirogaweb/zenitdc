@@ -416,12 +416,13 @@ este proyecto, tratarla con cuidado extra.
 gastos generales de la obra, así que ahora SÍ restan — ver el historial
 de módulos si hace falta el detalle de por qué cambió dos veces.
 
-**Pendiente — Rodri no está seguro de que esta fórmula (qué resta del
-resultado y qué no) coincida 100% con cómo arma el balance en la
-práctica.** Queda explícitamente para revisar a fondo en otra sesión —
-el cambio que separó "Personal tercerizado" de "Proveedores" solo
-repuntó las tablas para mantener la fórmula consistente con el esquema
-nuevo, no la revisó de fondo.
+**Cambio (cierra el pendiente anterior):** Rodri confirmó que pagarle a
+personal tercerizado (Marcelo, Clisman) o a personal propio POR una obra
+puntual (ej. Manu como chofer de esa obra) es, para él, costo directo de
+la obra — no una categoría aparte. `total_mano_obra` y `total_personal`
+dejaron de ser campos/líneas separados: ahora se suman DENTRO de
+`total_costos_directos`. El monto total de `total_egresos` no cambió por
+esto — es pura reagrupación de cómo se presenta el mismo número.
 
 ### Balance por obra
 
@@ -433,7 +434,7 @@ nuevo, no la revisó de fondo.
 total_presupuestado      = SUM(presupuesto_items.monto) WHERE obra_id = X
 total_ingresos           = SUM(pagos_clientes.monto) WHERE obra_id = X
 
-costos_directos          = SUM(gastos_generales.monto) WHERE obra_id = X
+costos_directos_manual   = SUM(gastos_generales.monto) WHERE obra_id = X
                            AND concepto IN CONCEPTOS_COSTOS_DIRECTOS
                            -- "Movimiento de suelo", "Mano de obra" (carga
                            -- manual/legacy), "Instalación eléctrica"
@@ -441,29 +442,30 @@ total_gastos_generales   = SUM(gastos_generales.monto) WHERE obra_id = X
                            AND concepto NOT IN CONCEPTOS_COSTOS_DIRECTOS
                            -- "Combustible", "Seguros vehículos/personal" —
                            -- overhead/indirecto
-total_mano_obra          = SUM(pagos_personal_tercerizado.monto) WHERE obra_id = X
-                           -- pagos a personal tercerizado (Marcelo,
-                           -- Clisman) — distinto del "Mano de obra"
-                           -- manual de gastos_generales, ver arriba, y
-                           -- distinto de "proveedores" (solo materiales)
-total_personal           = SUM(pagos_personal.monto) WHERE obra_id = X
-                           -- pagos a personal propio de la empresa CON
-                           -- obra asociada (los que no tienen obra_id se
-                           -- restan a nivel empresa, ver más abajo)
+mano_obra_tercerizada    = SUM(pagos_personal_tercerizado.monto) WHERE obra_id = X
+personal_en_esta_obra    = SUM(pagos_personal.monto) WHERE obra_id = X
+                           -- los que NO tienen obra_id (sueldos fijos) no
+                           -- entran acá, se restan a nivel empresa, ver
+                           -- más abajo
 
-total_egresos            = costos_directos
+total_costos_directos    = costos_directos_manual
+                           + mano_obra_tercerizada
+                           + personal_en_esta_obra
+                           -- UN SOLO número — no se desglosa "mano de
+                           -- obra tercerizada" ni "personal" aparte,
+                           -- decisión explícita de Rodri
+
+total_egresos            = total_costos_directos
                            + SUM(gastos_materiales.monto) WHERE obra_id = X
                            + total_gastos_generales
-                           + total_mano_obra
-                           + total_personal
 
 resultado                 = total_ingresos - total_egresos
 diferencia_vs_presupuesto = resultado - total_presupuestado
 -- (este campo se calcula pero hoy no se muestra en ninguna pantalla)
 ```
 
-`total_gastos_generales`, `total_mano_obra` y `total_personal` también se
-muestran desglosados aparte en la UI (para que Rodri vea de dónde sale el
+`total_costos_directos` y `total_gastos_generales` también se muestran
+desglosados aparte en la UI (para que Rodri vea de dónde sale el
 número), pero ya están INCLUIDOS dentro de `total_egresos` — no hay que
 sumarlos de nuevo en el frontend. `resultado` es un flujo de caja parcial
 a la fecha (cobrado menos gastado hasta ahora), no la ganancia final.
