@@ -9,5 +9,9 @@ Secciones que aparecen dentro del detalle de un proveedor
   proveedor (los albañiles de Marcelo, o Clisman mismo). Es un registro
   de referencia/contacto (nombre, oficio, DNI, teléfono) — la plata
   (presupuestado/pagado/saldo) se maneja a nivel del proveedor, no de
-  cada empleado individual (ver la cuenta corriente de mano de obra en
-  el detalle de obra).
+  cada empleado individual.
+- **`CuentaCorrienteSection.tsx`** — el acumulado de mano de obra
+  tercerizada de este proveedor sumando TODAS las obras (presupuestado,
+  pagado, saldo total). El detalle por obra puntual vive en
+  `components/obra/ManoDeObraSection.tsx`, dentro del detalle de cada
+  obra — esta sección es la vista agregada.

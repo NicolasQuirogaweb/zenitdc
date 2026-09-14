@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import LoadingScreen from '@/components/ui/LoadingScreen'
 import EmpleadosSection from '@/components/proveedor/EmpleadosSection'
+import CuentaCorrienteSection from '@/components/proveedor/CuentaCorrienteSection'
 import type { Proveedor } from '@/types'
 
 export default function DetalleProveedorPage() {
@@ -62,6 +63,7 @@ export default function DetalleProveedorPage() {
             </a>
           </div>
 
+          <CuentaCorrienteSection proveedorId={id} />
           <EmpleadosSection proveedorId={id} />
         </div>
       </div>

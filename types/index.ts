@@ -16,6 +16,32 @@ export interface EmpleadoTercerizado {
   created_at: string
 }
 
+export interface PresupuestoManoObra {
+  id: string
+  obra_id: string
+  proveedor_id: string
+  monto: number
+  created_at: string
+}
+
+export interface PagoManoObra {
+  id: string
+  obra_id: string
+  proveedor_id: string
+  monto: number
+  fecha: string
+  observaciones: string | null
+  created_at: string
+}
+
+export interface CuentaCorrienteProveedor {
+  proveedor_id: string
+  proveedor_nombre: string
+  presupuestado: number
+  pagado: number
+  saldo: number
+}
+
 export interface Cliente {
   id: string
   nombre: string
