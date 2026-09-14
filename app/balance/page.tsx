@@ -38,7 +38,7 @@ export default function BalancePage() {
         <div className="mx-auto max-w-lg">
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-bold text-[color:var(--color-text-primary)]">Balance</h1>
-            <a href="/dashboard" className="text-sm text-blue-light hover:underline">
+            <a href="/finanzas" className="text-sm text-blue-light hover:underline">
               Volver
             </a>
           </div>
@@ -58,7 +58,7 @@ export default function BalancePage() {
       <div className="mx-auto max-w-lg">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-[color:var(--color-text-primary)]">Balance</h1>
-          <a href="/dashboard" className="text-sm text-blue-light hover:underline">
+          <a href="/finanzas" className="text-sm text-blue-light hover:underline">
             Volver
           </a>
         </div>

@@ -25,7 +25,7 @@ export const NAV_ITEMS: NavItem[] = [
     href: '/finanzas',
     label: 'Finanzas',
     icon: Wallet,
-    matchPrefixes: ['/finanzas', '/balance', '/pagos'],
+    matchPrefixes: ['/finanzas', '/balance', '/pagos', '/gastos-empresa'],
   },
 ]
 
