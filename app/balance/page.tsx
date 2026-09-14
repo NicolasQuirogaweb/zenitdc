@@ -150,21 +150,15 @@ export default function BalancePage() {
                         </p>
                       </div>
                       <div className="flex items-center justify-between pl-3">
+                        <p className="text-xs text-[color:var(--color-text-secondary)]">↳ Costos directos</p>
+                        <p className="text-sm font-medium text-[color:var(--color-text-secondary)]">
+                          {formatMoney(o.total_costos_directos)}
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between pl-3">
                         <p className="text-xs text-[color:var(--color-text-secondary)]">↳ Gastos generales</p>
                         <p className="text-sm font-medium text-[color:var(--color-text-secondary)]">
                           {formatMoney(o.total_gastos_generales)}
-                        </p>
-                      </div>
-                      <div className="flex items-center justify-between pl-3">
-                        <p className="text-xs text-[color:var(--color-text-secondary)]">↳ Mano de obra tercerizada</p>
-                        <p className="text-sm font-medium text-[color:var(--color-text-secondary)]">
-                          {formatMoney(o.total_mano_obra)}
-                        </p>
-                      </div>
-                      <div className="flex items-center justify-between pl-3">
-                        <p className="text-xs text-[color:var(--color-text-secondary)]">↳ Personal de la empresa</p>
-                        <p className="text-sm font-medium text-[color:var(--color-text-secondary)]">
-                          {formatMoney(o.total_personal)}
                         </p>
                       </div>
                       <div className="flex items-center justify-between border-t border-[color:var(--color-border)] pt-2">
@@ -186,10 +180,10 @@ export default function BalancePage() {
         </div>
 
         <p className="mt-3 text-xs text-[color:var(--color-text-muted)]">
-          Ingresos = pagos de clientes · Egresos = costos directos + materiales + gastos
-          generales + mano de obra tercerizada + personal (con obra asociada), de cada obra.
-          Resultado = Ingresos − Egresos − Gastos de la empresa − Personal sin obra asociada
-          (sueldos fijos, etc.).
+          Ingresos = pagos de clientes · Egresos = costos directos (incluye mano de obra
+          tercerizada y personal pagado en esa obra) + materiales + gastos generales, de cada
+          obra. Resultado = Ingresos − Egresos − Gastos de la empresa − Personal sin obra
+          asociada (sueldos fijos, etc.).
         </p>
       </div>
     </div>

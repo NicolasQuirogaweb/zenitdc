@@ -11,18 +11,14 @@
   de balance. `getBalanceObra` agrega 6 tablas en paralelo (presupuesto,
   pagos de cliente, gastos generales, gastos de materiales, pagos de
   personal tercerizado — `pagos_personal_tercerizado` — y pagos de
-  personal de la empresa) — al agregar una tabla nueva que sea un egreso
-  de obra, sumarla ahí, no en un lugar aparte. `getBalanceGeneral`
-  además resta de `resultado`: `gastos_empresa` (sin `obra_id`) y los
-  `pagos_personal` que tampoco tienen `obra_id` (sueldos fijos, ej.
-  redes/IT) — son los dos únicos gastos que no pertenecen a ninguna obra
-  puntual.
-
-  **Pendiente:** confirmar con Rodri que esta fórmula (qué resta del
-  resultado y qué no) coincide con cómo arma el balance en la
-  práctica — no se revisó a fondo en el cambio que separó personal
-  tercerizado de proveedores, solo se repuntaron las tablas para que
-  siguiera siendo consistente con el esquema nuevo.
+  personal de la empresa). Mano de obra tercerizada y personal pagado EN
+  esa obra se suman dentro de `total_costos_directos` (un solo número —
+  decisión explícita de Rodri, ver `CLAUDE.md`), no como líneas propias
+  — al agregar una tabla nueva que sea un egreso de obra, sumarla ahí
+  también, no como un campo aparte. `getBalanceGeneral` además resta de
+  `resultado`: `gastos_empresa` (sin `obra_id`) y los `pagos_personal`
+  que tampoco tienen `obra_id` (sueldos fijos, ej. redes/IT) — son los
+  dos únicos gastos que no pertenecen a ninguna obra puntual.
 
   **Importante para escalabilidad:** `getBalanceGeneral` NO llama a
   `getBalanceObra` en un loop por cada obra (eso sería 6N+1 consultas con

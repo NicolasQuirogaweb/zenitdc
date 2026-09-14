@@ -118,9 +118,10 @@ describe('getBalanceObra', () => {
     expect(balance.total_ingresos).toBe(7000)
     // costos directos (1000) + materiales (500) + gastos generales (300) + mano de obra (800) + personal (200)
     expect(balance.total_egresos).toBe(2800)
+    // costos directos manual (1000) + mano de obra tercerizada (800) + personal de esta obra (200):
+    // para Rodri son todos costo directo de la obra, un solo número, sin desglosar aparte
+    expect(balance.total_costos_directos).toBe(2000)
     expect(balance.total_gastos_generales).toBe(300)
-    expect(balance.total_mano_obra).toBe(800)
-    expect(balance.total_personal).toBe(200)
     expect(balance.resultado).toBe(7000 - 2800)
     expect(balance.diferencia_vs_presupuesto).toBe(balance.resultado - 10000)
   })
@@ -135,9 +136,8 @@ describe('getBalanceObra', () => {
       total_presupuestado: 0,
       total_ingresos: 0,
       total_egresos: 0,
+      total_costos_directos: 0,
       total_gastos_generales: 0,
-      total_mano_obra: 0,
-      total_personal: 0,
       resultado: 0,
       diferencia_vs_presupuesto: 0,
     })
@@ -160,6 +160,7 @@ describe('getBalanceObra', () => {
 
     // 200 + 150 (costos directos) + 80 (gastos generales, ahora también resta)
     expect(balance.total_egresos).toBe(430)
+    expect(balance.total_costos_directos).toBe(350)
     expect(balance.total_gastos_generales).toBe(80)
   })
 })
@@ -195,9 +196,10 @@ describe('getBalanceGeneral', () => {
     // gastos_materiales (1000) + gastos generales de ambas obras (100 + 50) + mano de obra (600) + personal (200)
     // — el pago de personal SIN obra (150) no entra acá, no es egreso de ninguna obra puntual
     expect(balance.total_egresos).toBe(1950)
-    // el desglose por obra tiene que llevar mano de obra y personal, no solo gastos generales
-    expect(balance.por_obra[0]).toMatchObject({ obra_id: 'obra-1', total_mano_obra: 600, total_personal: 0 })
-    expect(balance.por_obra[1]).toMatchObject({ obra_id: 'obra-2', total_mano_obra: 0, total_personal: 200 })
+    // el desglose por obra lleva costos directos (que ya incluye mano de obra tercerizada y
+    // personal de esa obra), no líneas separadas de "mano de obra"/"personal"
+    expect(balance.por_obra[0]).toMatchObject({ obra_id: 'obra-1', total_costos_directos: 600 })
+    expect(balance.por_obra[1]).toMatchObject({ obra_id: 'obra-2', total_costos_directos: 200 })
     expect(balance.total_gastos_generales).toBe(150)
     expect(balance.total_gastos_empresa).toBe(400)
     // el pago de personal sin obra resta del resultado general, igual que gastos_empresa
