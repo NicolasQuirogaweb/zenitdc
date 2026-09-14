@@ -23,6 +23,7 @@ interface Props {
   filtro: (concepto: string) => boolean
   placeholder?: string
   onDatosCambiaron?: () => void
+  mostrarProveedor?: boolean
 }
 
 export default function GastosRealesSection({
@@ -33,6 +34,7 @@ export default function GastosRealesSection({
   filtro,
   placeholder = 'Escribí el concepto',
   onDatosCambiaron,
+  mostrarProveedor = true,
 }: Props) {
   const [gastos, setGastos] = useState<GastoGeneralConProveedor[]>([])
   const [proveedores, setProveedores] = useState<Proveedor[]>([])
@@ -62,6 +64,7 @@ export default function GastosRealesSection({
 
   useEffect(() => {
     fetchGastos()
+    if (!mostrarProveedor) return
     const supabase = createClient()
     supabase.from('proveedores').select('*').order('nombre').then(({ data }) => {
       if (data) setProveedores(data)
@@ -162,24 +165,26 @@ export default function GastosRealesSection({
           </label>
           <FechaInput id="fecha" value={fecha} onChange={setFecha} />
         </div>
-        <div className="col-span-2">
-          <label htmlFor="proveedorId" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
-            Proveedor (opcional)
-          </label>
-          <select
-            id="proveedorId"
-            value={proveedorId}
-            onChange={(e) => setProveedorId(e.target.value)}
-            className="input-field"
-          >
-            <option value="">Sin proveedor</option>
-            {proveedores.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.nombre}
-              </option>
-            ))}
-          </select>
-        </div>
+        {mostrarProveedor && (
+          <div className="col-span-2">
+            <label htmlFor="proveedorId" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
+              Proveedor (opcional)
+            </label>
+            <select
+              id="proveedorId"
+              value={proveedorId}
+              onChange={(e) => setProveedorId(e.target.value)}
+              className="input-field"
+            >
+              <option value="">Sin proveedor</option>
+              {proveedores.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <div className="col-span-2">
           <label htmlFor="observaciones" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
             Observaciones
@@ -210,7 +215,7 @@ export default function GastosRealesSection({
                 <p className="font-medium text-[color:var(--color-text-primary)]">{gasto.concepto}</p>
                 <p className="text-sm text-[color:var(--color-text-secondary)]">
                   {formatMoney(Number(gasto.monto))} · {formatFecha(gasto.fecha)}
-                  {gasto.proveedores?.nombre && ` · ${gasto.proveedores.nombre}`}
+                  {mostrarProveedor && gasto.proveedores?.nombre && ` · ${gasto.proveedores.nombre}`}
                 </p>
                 {gasto.observaciones && (
                   <p className="text-xs text-[color:var(--color-text-muted)]">{gasto.observaciones}</p>

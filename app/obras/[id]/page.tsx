@@ -118,6 +118,7 @@ export default function DetalleObraPage() {
             filtro={(c) => CONCEPTOS_COSTOS_DIRECTOS.includes(c)}
             placeholder="Ej: Cuadrilla de albañilería"
             onDatosCambiaron={notificarCambio}
+            mostrarProveedor={false}
           />
           <GastosMaterialesSection obraId={id} onDatosCambiaron={notificarCambio} />
           <PagosClientesSection obraId={id} onDatosCambiaron={notificarCambio} />
