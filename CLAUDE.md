@@ -101,9 +101,10 @@ CI:             GitHub Actions (.github/workflows/ci.yml) — tsc + lint + build
 /app
   /login                        → login
   /dashboard                    → home con resumen y accesos rápidos (grid
-                                  de 6 cards: Clientes y obras, Balance
-                                  general, Proveedores, Personal, Personal
-                                  tercerizado, Gastos empresa)
+                                  de 7 cards: Clientes y obras, Proveedores,
+                                  Personal, Personal tercerizado, Gastos
+                                  empresa, Pagos, Balance general — este
+                                  último al final a propósito)
   /clientes                     → listado + alta de clientes
   /clientes/nuevo
   /clientes/[id]/editar
@@ -146,6 +147,14 @@ CI:             GitHub Actions (.github/workflows/ci.yml) — tsc + lint + build
   /gastos-empresa               → alta + historial de gastos de la empresa
                                   sin obra asociada (una sola pantalla,
                                   sin páginas separadas de alta/edición)
+  /pagos                        → historial único de TODO lo que se va
+                                  pagando (gastos generales, materiales,
+                                  personal, personal tercerizado, gastos de
+                                  empresa), tipo "Actividad" de Mercado
+                                  Pago — de SOLO LECTURA, agrega 5 tablas
+                                  ya existentes y las ordena por fecha; no
+                                  reemplaza ninguna sección específica, es
+                                  una vista adicional de control
   /api                          → rutas de API (server-side, ver app/api/README.md)
 
 /components
