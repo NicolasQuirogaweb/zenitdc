@@ -81,10 +81,16 @@ export default function BalancePage() {
                 {formatMoney(balance.total_egresos)}
               </p>
             </div>
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-[color:var(--color-text-secondary)]">Gastos generales</p>
-              <p className="font-semibold text-[color:var(--color-text-primary)]">
+            <div className="flex items-center justify-between pl-3">
+              <p className="text-xs text-[color:var(--color-text-secondary)]">↳ Gastos generales (de las obras)</p>
+              <p className="text-sm text-[color:var(--color-text-secondary)]">
                 {formatMoney(balance.total_gastos_generales)}
+              </p>
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-[color:var(--color-text-secondary)]">Gastos de la empresa</p>
+              <p className="font-semibold text-[color:var(--color-text-primary)]">
+                {formatMoney(balance.total_gastos_empresa)}
               </p>
             </div>
             <div className="flex items-center justify-between border-t border-[color:var(--color-border)] pt-3">
@@ -137,8 +143,8 @@ export default function BalancePage() {
                           {formatMoney(o.total_egresos)}
                         </p>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs text-[color:var(--color-text-secondary)]">Gastos generales</p>
+                      <div className="flex items-center justify-between pl-3">
+                        <p className="text-xs text-[color:var(--color-text-secondary)]">↳ Gastos generales</p>
                         <p className="text-sm font-medium text-[color:var(--color-text-secondary)]">
                           {formatMoney(o.total_gastos_generales)}
                         </p>
@@ -162,9 +168,9 @@ export default function BalancePage() {
         </div>
 
         <p className="mt-3 text-xs text-[color:var(--color-text-muted)]">
-          Ingresos = pagos de clientes · Egresos = costos directos + gastos de materiales de
-          cada obra. Gastos generales (seguros, combustible, etc.) se muestran aparte y no
-          descuentan del resultado.
+          Ingresos = pagos de clientes · Egresos = costos directos + materiales + gastos
+          generales + mano de obra tercerizada + personal, de cada obra. Resultado = Ingresos −
+          Egresos − Gastos de la empresa (sin obra asociada).
         </p>
       </div>
     </div>

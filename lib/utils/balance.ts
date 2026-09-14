@@ -5,12 +5,15 @@ import type { BalanceGeneral, BalanceObra, BalancePorObra } from '@/types'
 export async function getBalanceObra(obraId: string): Promise<BalanceObra> {
   const supabase = await createClient()
 
-  const [presupuesto, ingresos, gastosGenerales, egresosMat] = await Promise.all([
-    supabase.from('presupuesto_items').select('monto').eq('obra_id', obraId),
-    supabase.from('pagos_clientes').select('monto').eq('obra_id', obraId),
-    supabase.from('gastos_generales').select('concepto, monto').eq('obra_id', obraId),
-    supabase.from('gastos_materiales').select('monto').eq('obra_id', obraId),
-  ])
+  const [presupuesto, ingresos, gastosGenerales, egresosMat, pagosManoObra, pagosPersonal] =
+    await Promise.all([
+      supabase.from('presupuesto_items').select('monto').eq('obra_id', obraId),
+      supabase.from('pagos_clientes').select('monto').eq('obra_id', obraId),
+      supabase.from('gastos_generales').select('concepto, monto').eq('obra_id', obraId),
+      supabase.from('gastos_materiales').select('monto').eq('obra_id', obraId),
+      supabase.from('pagos_mano_obra').select('monto').eq('obra_id', obraId),
+      supabase.from('pagos_personal').select('monto').eq('obra_id', obraId),
+    ])
 
   const totalPresupuestado = presupuesto.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0
   const totalIngresos = ingresos.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0
@@ -24,8 +27,12 @@ export async function getBalanceObra(obraId: string): Promise<BalanceObra> {
       ?.filter((g) => !CONCEPTOS_COSTOS_DIRECTOS.includes(g.concepto))
       .reduce((s, i) => s + Number(i.monto), 0) ?? 0
 
+  const totalGastosMateriales = egresosMat.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0
+  const totalManoObra = pagosManoObra.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0
+  const totalPersonal = pagosPersonal.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0
+
   const totalEgresos =
-    costosDirectos + (egresosMat.data?.reduce((s, i) => s + Number(i.monto), 0) ?? 0)
+    costosDirectos + totalGastosMateriales + totalGastosGenerales + totalManoObra + totalPersonal
 
   return {
     obra_id: obraId,
@@ -33,6 +40,8 @@ export async function getBalanceObra(obraId: string): Promise<BalanceObra> {
     total_ingresos: totalIngresos,
     total_egresos: totalEgresos,
     total_gastos_generales: totalGastosGenerales,
+    total_mano_obra: totalManoObra,
+    total_personal: totalPersonal,
     resultado: totalIngresos - totalEgresos,
     diferencia_vs_presupuesto: totalIngresos - totalEgresos - totalPresupuestado,
   }
@@ -41,10 +50,13 @@ export async function getBalanceObra(obraId: string): Promise<BalanceObra> {
 export async function getBalanceGeneral(): Promise<BalanceGeneral> {
   const supabase = await createClient()
 
-  const { data: obras } = await supabase
-    .from('obras')
-    .select('id, nombre, clientes(nombre), created_at')
-    .order('created_at', { ascending: false })
+  const [{ data: obras }, gastosEmpresa] = await Promise.all([
+    supabase
+      .from('obras')
+      .select('id, nombre, clientes(nombre), created_at')
+      .order('created_at', { ascending: false }),
+    supabase.from('gastos_empresa').select('monto'),
+  ])
 
   interface ObraConCliente {
     id: string
@@ -77,12 +89,14 @@ export async function getBalanceGeneral(): Promise<BalanceGeneral> {
   const totalIngresosEmpresa = balances.reduce((s, b) => s + b.total_ingresos, 0)
   const totalEgresosEmpresa = balances.reduce((s, b) => s + b.total_egresos, 0)
   const totalGastosGeneralesEmpresa = balances.reduce((s, b) => s + b.total_gastos_generales, 0)
+  const totalGastosEmpresa = gastosEmpresa.data?.reduce((s, g) => s + Number(g.monto), 0) ?? 0
 
   return {
     total_ingresos: totalIngresosEmpresa,
     total_egresos: totalEgresosEmpresa,
     total_gastos_generales: totalGastosGeneralesEmpresa,
-    resultado: totalIngresosEmpresa - totalEgresosEmpresa,
+    total_gastos_empresa: totalGastosEmpresa,
+    resultado: totalIngresosEmpresa - totalEgresosEmpresa - totalGastosEmpresa,
     por_obra: porObra,
   }
 }

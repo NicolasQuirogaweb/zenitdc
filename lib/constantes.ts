@@ -19,6 +19,13 @@ export const CONCEPTOS_GASTOS_REALES = [
   'Seguros personal',
 ]
 
+export const CONCEPTOS_GASTOS_EMPRESA = [
+  'Alquiler',
+  'Impuestos',
+  'Contador',
+  'Seguro de la empresa',
+]
+
 export const METODOS_PAGO = ['Efectivo', 'Transferencia', 'Cheque']
 
 export const OPCION_OTRO = 'Otro'
