@@ -6,6 +6,8 @@ type FilaGenerica = { monto: number; concepto?: string }
 interface Fixtures {
   obras?: Array<{ id: string; nombre: string; clientes: { nombre: string } | null }>
   gastosEmpresa?: FilaGenerica[]
+  // pagos_personal SIN obra_id (sueldos fijos) — no cuelgan de ninguna obra puntual.
+  personalSinObra?: FilaGenerica[]
   porObra: Record<
     string,
     {
@@ -13,7 +15,7 @@ interface Fixtures {
       pagos_clientes?: FilaGenerica[]
       gastos_generales?: FilaGenerica[]
       gastos_materiales?: FilaGenerica[]
-      pagos_mano_obra?: FilaGenerica[]
+      pagos_personal_tercerizado?: FilaGenerica[]
       pagos_personal?: FilaGenerica[]
     }
   >
@@ -59,10 +61,15 @@ function crearSupabaseMock(fixtures: Fixtures, contadorFrom?: (tabla: string) =>
           // getBalanceGeneral: consulta sin filtro, trae todas las filas de
           // todas las obras de una — hay que taggearlas con su obra_id
           // (en la base real ya viene en la fila; acá lo agrega el fixture).
-          const todas = Object.entries(fixtures.porObra).flatMap(([oid, datos]) => {
-            const filas = ((datos as Record<string, unknown[]>)[tabla] ?? []) as object[]
-            return filas.map((fila) => ({ ...fila, obra_id: oid }))
-          })
+          const todas: { obra_id: string | null }[] = Object.entries(fixtures.porObra).flatMap(
+            ([oid, datos]) => {
+              const filas = ((datos as Record<string, unknown[]>)[tabla] ?? []) as object[]
+              return filas.map((fila) => ({ ...fila, obra_id: oid }))
+            }
+          )
+          if (tabla === 'pagos_personal' && fixtures.personalSinObra) {
+            todas.push(...fixtures.personalSinObra.map((fila) => ({ ...fila, obra_id: null })))
+          }
           resolve({ data: todas, error: null })
         },
       }
@@ -99,7 +106,7 @@ describe('getBalanceObra', () => {
             { concepto: 'Combustible', monto: 300 },
           ],
           gastos_materiales: [{ monto: 500 }],
-          pagos_mano_obra: [{ monto: 800 }],
+          pagos_personal_tercerizado: [{ monto: 800 }],
           pagos_personal: [{ monto: 200 }],
         },
       },
@@ -165,11 +172,13 @@ describe('getBalanceGeneral', () => {
         { id: 'obra-2', nombre: 'Galpón Gómez', clientes: { nombre: 'Gómez' } },
       ],
       gastosEmpresa: [{ monto: 400 }],
+      // pago de personal sin obra asociada (ej. sueldo fijo de redes/IT)
+      personalSinObra: [{ monto: 150 }],
       porObra: {
         'obra-1': {
           pagos_clientes: [{ monto: 5000 }],
           gastos_generales: [{ concepto: 'Combustible', monto: 100 }],
-          pagos_mano_obra: [{ monto: 600 }],
+          pagos_personal_tercerizado: [{ monto: 600 }],
         },
         'obra-2': {
           pagos_clientes: [{ monto: 3000 }],
@@ -184,13 +193,16 @@ describe('getBalanceGeneral', () => {
 
     expect(balance.total_ingresos).toBe(8000)
     // gastos_materiales (1000) + gastos generales de ambas obras (100 + 50) + mano de obra (600) + personal (200)
+    // — el pago de personal SIN obra (150) no entra acá, no es egreso de ninguna obra puntual
     expect(balance.total_egresos).toBe(1950)
     // el desglose por obra tiene que llevar mano de obra y personal, no solo gastos generales
     expect(balance.por_obra[0]).toMatchObject({ obra_id: 'obra-1', total_mano_obra: 600, total_personal: 0 })
     expect(balance.por_obra[1]).toMatchObject({ obra_id: 'obra-2', total_mano_obra: 0, total_personal: 200 })
     expect(balance.total_gastos_generales).toBe(150)
     expect(balance.total_gastos_empresa).toBe(400)
-    expect(balance.resultado).toBe(8000 - 1950 - 400)
+    // el pago de personal sin obra resta del resultado general, igual que gastos_empresa
+    expect(balance.total_personal_sin_obra).toBe(150)
+    expect(balance.resultado).toBe(8000 - 1950 - 400 - 150)
     expect(balance.por_obra).toHaveLength(2)
     expect(balance.por_obra[0]).toMatchObject({
       obra_id: 'obra-1',
@@ -231,6 +243,7 @@ describe('getBalanceGeneral', () => {
     expect(balance.total_egresos).toBe(0)
     expect(balance.total_gastos_generales).toBe(0)
     expect(balance.total_gastos_empresa).toBe(0)
+    expect(balance.total_personal_sin_obra).toBe(0)
     expect(balance.resultado).toBe(0)
     expect(balance.por_obra).toEqual([])
   })

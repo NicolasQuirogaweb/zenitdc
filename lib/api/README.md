@@ -16,13 +16,15 @@
   crudo de Postgres al cliente.
 - **`hasRelatedRows(supabase, checks)`** — chequea si existe alguna fila
   relacionada antes de borrar un registro "padre". Necesario para
-  cualquier tabla hija con `on delete cascade` (ej.
-  `presupuesto_mano_obra`/`pagos_mano_obra`/`empleados_tercerizados` →
-  `proveedores`, `pagos_personal` → `personal_empresa`): con cascade,
-  Postgres NUNCA tira un error de foreign key al borrar — borra en
-  cascada en silencio — así que el chequeo hay que hacerlo a mano ANTES
-  del delete, no capturando un error que nunca va a ocurrir (ver el
-  `DELETE` de `proveedores`/`personal` para el patrón completo).
+  cualquier tabla hija con `on delete cascade` (ej. `pagos_personal` →
+  `personal_empresa`, `pagos_personal_tercerizado` →
+  `personal_tercerizado`): con cascade, Postgres NUNCA tira un error de
+  foreign key al borrar — borra en cascada en silencio — así que el
+  chequeo hay que hacerlo a mano ANTES del delete, no capturando un error
+  que nunca va a ocurrir (ver el `DELETE` de `personal`/
+  `personal-tercerizado` para el patrón completo). `proveedores` no lo
+  necesita: sus referencias (`gastos_materiales`/`gastos_generales`) son
+  `on delete set null`, no cascade.
 
 Cualquier ruta de API nueva (ver skill `scaffold-entidad`) debe usar
 estos helpers en vez de reimplementar el manejo de errores.

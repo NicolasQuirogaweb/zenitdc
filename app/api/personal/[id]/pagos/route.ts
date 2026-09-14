@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { requireUser, zodErrorResponse, catchApiError, supabaseErrorResponse } from '@/lib/api/helpers'
-import { presupuestoManoObraSchema } from '@/lib/validations/manoDeObra'
+import { pagoPersonalSchema } from '@/lib/validations/personal'
 
-// Upsert: un solo presupuesto por combinación obra+proveedor. Si ya
-// existe, se actualiza el monto en vez de crear un duplicado.
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { user, response } = await requireUser()
@@ -12,17 +10,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     const { id } = await params
     const body = await request.json()
-    const parsed = presupuestoManoObraSchema.safeParse(body)
+    const parsed = pagoPersonalSchema.safeParse(body)
 
     if (!parsed.success) return zodErrorResponse(parsed.error)
 
     const supabase = await createClient()
     const { data, error } = await supabase
-      .from('presupuesto_mano_obra')
-      .upsert(
-        { ...parsed.data, obra_id: id },
-        { onConflict: 'obra_id,proveedor_id' }
-      )
+      .from('pagos_personal')
+      .insert({ ...parsed.data, personal_id: id })
       .select()
       .single()
 

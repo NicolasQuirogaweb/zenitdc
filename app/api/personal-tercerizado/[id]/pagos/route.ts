@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { requireUser, zodErrorResponse, catchApiError, supabaseErrorResponse } from '@/lib/api/helpers'
-import { pagoPersonalSchema } from '@/lib/validations/personal'
+import { pagoPersonalTercerizadoSchema } from '@/lib/validations/personalTercerizado'
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -10,14 +10,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     const { id } = await params
     const body = await request.json()
-    const parsed = pagoPersonalSchema.safeParse(body)
+    const parsed = pagoPersonalTercerizadoSchema.safeParse(body)
 
     if (!parsed.success) return zodErrorResponse(parsed.error)
 
     const supabase = await createClient()
     const { data, error } = await supabase
-      .from('pagos_personal')
-      .insert({ ...parsed.data, obra_id: id })
+      .from('pagos_personal_tercerizado')
+      .insert({ ...parsed.data, personal_tercerizado_id: id })
       .select()
       .single()
 

@@ -93,6 +93,12 @@ export default function BalancePage() {
                 {formatMoney(balance.total_gastos_empresa)}
               </p>
             </div>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-[color:var(--color-text-secondary)]">Personal sin obra asociada</p>
+              <p className="font-semibold text-[color:var(--color-text-primary)]">
+                {formatMoney(balance.total_personal_sin_obra)}
+              </p>
+            </div>
             <div className="flex items-center justify-between border-t border-[color:var(--color-border)] pt-3">
               <p className="font-semibold text-[color:var(--color-text-primary)]">Resultado</p>
               <p
@@ -181,8 +187,9 @@ export default function BalancePage() {
 
         <p className="mt-3 text-xs text-[color:var(--color-text-muted)]">
           Ingresos = pagos de clientes · Egresos = costos directos + materiales + gastos
-          generales + mano de obra tercerizada + personal, de cada obra. Resultado = Ingresos −
-          Egresos − Gastos de la empresa (sin obra asociada).
+          generales + mano de obra tercerizada + personal (con obra asociada), de cada obra.
+          Resultado = Ingresos − Egresos − Gastos de la empresa − Personal sin obra asociada
+          (sueldos fijos, etc.).
         </p>
       </div>
     </div>

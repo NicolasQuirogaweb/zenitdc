@@ -10,7 +10,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     const { id } = await params
 
     const supabase = await createClient()
-    const { error } = await supabase.from('empleados_tercerizados').delete().eq('id', id)
+    const { error } = await supabase.from('pagos_personal_tercerizado').delete().eq('id', id)
 
     if (error) {
       return supabaseErrorResponse(error)

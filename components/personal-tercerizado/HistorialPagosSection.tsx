@@ -8,10 +8,10 @@ import FechaInput from '@/components/ui/FechaInput'
 import CollapsibleCard from '@/components/ui/CollapsibleCard'
 import { useToast } from '@/lib/hooks/useToast'
 import { useConfirm } from '@/lib/hooks/useConfirm'
-import type { PagoPersonal } from '@/types'
+import type { PagoPersonalTercerizado } from '@/types'
 
 interface Props {
-  personalId: string
+  personalTercerizadoId: string
 }
 
 interface ObraOpcion {
@@ -19,11 +19,11 @@ interface ObraOpcion {
   nombre: string
 }
 
-interface PagoConObra extends PagoPersonal {
+interface PagoConObra extends PagoPersonalTercerizado {
   obras: { nombre: string } | null
 }
 
-export default function HistorialPagosSection({ personalId }: Props) {
+export default function HistorialPagosSection({ personalTercerizadoId }: Props) {
   const [pagos, setPagos] = useState<PagoConObra[]>([])
   const [obras, setObras] = useState<ObraOpcion[]>([])
   const [cargando, setCargando] = useState(true)
@@ -47,9 +47,9 @@ export default function HistorialPagosSection({ personalId }: Props) {
         if (data) setObras(data)
       })
     supabase
-      .from('pagos_personal')
+      .from('pagos_personal_tercerizado')
       .select('*, obras(nombre)')
-      .eq('personal_id', personalId)
+      .eq('personal_tercerizado_id', personalTercerizadoId)
       .order('fecha', { ascending: false })
       .order('created_at', { ascending: false })
       .then(({ data, error }) => {
@@ -61,27 +61,22 @@ export default function HistorialPagosSection({ personalId }: Props) {
 
   useEffect(() => {
     fetchTodo()
-  }, [personalId])
+  }, [personalTercerizadoId])
 
   const handleAgregar = async (e: React.FormEvent) => {
     e.preventDefault()
     const montoNum = parsearMonto(monto)
-    if (montoNum === null || !fecha || !motivo.trim()) {
-      setError('Completá un monto válido, la fecha y el motivo')
+    if (!obraId || montoNum === null || !fecha || !motivo.trim()) {
+      setError('Completá la obra, un monto válido, la fecha y el motivo')
       return
     }
 
     setError('')
     setGuardando(true)
-    const res = await fetch(`/api/personal/${personalId}/pagos`, {
+    const res = await fetch(`/api/personal-tercerizado/${personalTercerizadoId}/pagos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        obra_id: obraId || null,
-        monto: montoNum,
-        fecha,
-        motivo: motivo.trim(),
-      }),
+      body: JSON.stringify({ obra_id: obraId, monto: montoNum, fecha, motivo: motivo.trim() }),
     })
 
     setGuardando(false)
@@ -102,7 +97,7 @@ export default function HistorialPagosSection({ personalId }: Props) {
   const handleEliminar = async (pagoId: string, pagoMonto: number) => {
     if (!(await confirm(`¿Eliminar el pago de ${formatMoney(pagoMonto)}?`))) return
 
-    const res = await fetch(`/api/personal-pagos/${pagoId}`, { method: 'DELETE' })
+    const res = await fetch(`/api/personal-tercerizado-pagos/${pagoId}`, { method: 'DELETE' })
     if (res.ok) {
       showToast('success', 'Pago eliminado')
       fetchTodo()
@@ -114,7 +109,7 @@ export default function HistorialPagosSection({ personalId }: Props) {
   return (
     <CollapsibleCard
       titulo="Historial de pagos"
-      subtitulo="Pagos registrados a este empleado, con o sin obra asociada"
+      subtitulo="Pagos registrados, obra por obra"
     >
       {error && (
         <p className="mt-3 rounded-lg bg-red-alert/15 p-3 text-sm text-red-alert">{error}</p>
@@ -132,7 +127,7 @@ export default function HistorialPagosSection({ personalId }: Props) {
         <form onSubmit={handleAgregar} className="mt-2 grid grid-cols-2 gap-3">
           <div className="col-span-2">
             <label htmlFor="obraId" className="block text-sm font-medium text-[color:var(--color-text-secondary)]">
-              Obra (opcional)
+              Obra
             </label>
             <select
               id="obraId"
@@ -140,7 +135,7 @@ export default function HistorialPagosSection({ personalId }: Props) {
               onChange={(e) => setObraId(e.target.value)}
               className="input-field"
             >
-              <option value="">Sin obra asociada (sueldo fijo, gasto general, etc.)</option>
+              <option value="">Seleccionar obra...</option>
               {obras.map((o) => (
                 <option key={o.id} value={o.id}>
                   {o.nombre}
@@ -178,7 +173,7 @@ export default function HistorialPagosSection({ personalId }: Props) {
               id="motivo"
               value={motivo}
               onChange={(e) => setMotivo(e.target.value)}
-              placeholder="Ej: Sueldo septiembre, viáticos"
+              placeholder="Ej: Pago cuadrilla semana del 10/9"
               className="input-field"
             />
           </div>
@@ -207,8 +202,7 @@ export default function HistorialPagosSection({ personalId }: Props) {
                     {formatMoney(Number(pago.monto))}
                   </p>
                   <p className="text-sm text-[color:var(--color-text-secondary)]">
-                    {formatFecha(pago.fecha)}
-                    {pago.obras?.nombre && ` · ${pago.obras.nombre}`}
+                    {formatFecha(pago.fecha)} · {pago.obras?.nombre ?? 'Obra'}
                   </p>
                   <p className="text-xs text-[color:var(--color-text-muted)]">{pago.motivo}</p>
                 </div>
