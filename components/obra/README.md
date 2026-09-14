@@ -17,6 +17,11 @@ misma pantalla, cada una dentro de un `CollapsibleCard`.
   dos.
 - **`GastosMaterialesSection.tsx`** — gastos de materiales (tabla
   separada, `gastos_materiales`).
+- **`ManoDeObraSection.tsx`** — cuenta corriente con cada proveedor de
+  mano de obra tercerizada en esta obra puntual (`presupuesto_mano_obra`
+  + `pagos_mano_obra`, separadas por conveniencia — presupuestado vs.
+  efectivamente pagado). El acumulado de un proveedor sumando todas sus
+  obras vive en `components/proveedor/CuentaCorrienteSection.tsx`, no acá.
 - **`PagosClientesSection.tsx`** — pagos que el cliente le hizo a Zenit
   DC por esta obra.
 - **`BalanceSection.tsx`** — muestra el resultado calculado por
