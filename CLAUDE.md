@@ -104,8 +104,8 @@ CI:             GitHub Actions (.github/workflows/ci.yml) — tsc + lint + build
                                   de 5 cards: Clientes y obras,
                                   Proveedores, Personal, Personal
                                   tercerizado, Finanzas — esta última
-                                  agrupa Balance/Pagos/Gastos empresa, ver
-                                  /finanzas)
+                                  agrupa Balance/Pagos/Gastos generales,
+                                  ver /finanzas)
   /clientes                     → listado + alta de clientes
   /clientes/nuevo
   /clientes/[id]/editar
@@ -126,7 +126,7 @@ CI:             GitHub Actions (.github/workflows/ci.yml) — tsc + lint + build
                                   la empresa / Personal tercerizado (no
                                   hace fetch, solo son 2 links)
   /finanzas                     → hub de navegación: 3 cards, Balance
-                                  general / Pagos / Gastos empresa (no
+                                  general / Pagos / Gastos generales (no
                                   hace fetch, solo son 3 links) — agrupa
                                   todo lo que no es específico de una
                                   entidad puntual (proveedor, personal,
