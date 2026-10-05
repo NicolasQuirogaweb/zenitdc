@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { SkeletonLista } from '@/components/ui/Skeleton'
+import BuscadorInput from '@/components/ui/BuscadorInput'
+import { coincideBusqueda } from '@/lib/utils/texto'
 import { useToast } from '@/lib/hooks/useToast'
 import { useConfirm } from '@/lib/hooks/useConfirm'
 import type { Cliente } from '@/types'
@@ -11,6 +13,7 @@ export default function ClientesPage() {
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [busqueda, setBusqueda] = useState('')
   const supabase = createClient()
   const { showToast } = useToast()
   const confirm = useConfirm()
@@ -44,6 +47,8 @@ export default function ClientesPage() {
     const err = await res.json()
     setError(typeof err.error === 'string' ? err.error : 'No se pudo eliminar el cliente')
   }
+
+  const clientesFiltrados = clientes.filter((c) => coincideBusqueda(busqueda, c.nombre))
 
   return (
     <div className="min-h-screen bg-[color:var(--color-bg-page)] p-4">
@@ -82,41 +87,50 @@ export default function ClientesPage() {
             </p>
           </div>
         ) : (
-          <ul className="mt-4 space-y-2">
-            {clientes.map((c) => (
-              <li
-                key={c.id}
-                className="flex items-center justify-between rounded-lg bg-[color:var(--color-bg-surface)] p-3 shadow-sm"
-              >
-                <div>
-                  <p className="font-medium text-[color:var(--color-text-primary)]">{c.nombre}</p>
-                  {c.telefono && (
-                    <p className="text-sm text-[color:var(--color-text-secondary)]">{c.telefono}</p>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <a
-                    href={`/clientes/${c.id}/obras`}
-                    className="text-sm text-blue-light hover:underline"
+          <>
+            <BuscadorInput value={busqueda} onChange={setBusqueda} />
+            {clientesFiltrados.length === 0 ? (
+              <p className="mt-4 text-sm text-[color:var(--color-text-secondary)]">
+                No se encontraron clientes para &quot;{busqueda}&quot;
+              </p>
+            ) : (
+              <ul className="mt-4 space-y-2">
+                {clientesFiltrados.map((c) => (
+                  <li
+                    key={c.id}
+                    className="flex items-center justify-between rounded-lg bg-[color:var(--color-bg-surface)] p-3 shadow-sm"
                   >
-                    Ver obras
-                  </a>
-                  <a
-                    href={`/clientes/${c.id}/editar`}
-                    className="text-sm text-blue-light hover:underline"
-                  >
-                    Editar
-                  </a>
-                  <button
-                    onClick={() => handleDelete(c.id)}
-                    className="text-sm text-red-alert hover:underline"
-                  >
-                    Eliminar
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
+                    <div>
+                      <p className="font-medium text-[color:var(--color-text-primary)]">{c.nombre}</p>
+                      {c.telefono && (
+                        <p className="text-sm text-[color:var(--color-text-secondary)]">{c.telefono}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={`/clientes/${c.id}/obras`}
+                        className="text-sm text-blue-light hover:underline"
+                      >
+                        Ver obras
+                      </a>
+                      <a
+                        href={`/clientes/${c.id}/editar`}
+                        className="text-sm text-blue-light hover:underline"
+                      >
+                        Editar
+                      </a>
+                      <button
+                        onClick={() => handleDelete(c.id)}
+                        className="text-sm text-red-alert hover:underline"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
         )}
       </div>
     </div>

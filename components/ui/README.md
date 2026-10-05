@@ -21,6 +21,12 @@ toda la app.
   (presupuesto, gastos, pagos) la usan para no mostrar todo
   abierto a la vez en una pantalla que ya tiene mucha información.
 - **`EstadoObraBadge.tsx`** — chip de color según el estado de una obra.
+- **`BuscadorInput.tsx`** — input de búsqueda con ícono y botón de
+  limpiar. No filtra nada por sí mismo (es controlado, solo `value` +
+  `onChange`) — quien lo usa filtra el array ya cargado con
+  `coincideBusqueda` de `lib/utils/texto.ts`. Se usa en
+  proveedores/clientes/obras/pagos/gastos-empresa, siempre contra datos
+  que ya están en memoria (sin re-pedir a Supabase por cada letra).
 - **`LoadingScreen.tsx` / `Skeleton.tsx`** — estados de carga. `Skeleton`
   se usa en listas (clientes, obras) para que la pantalla no salte
   vacía→llena; `LoadingScreen` es un estado de carga de pantalla

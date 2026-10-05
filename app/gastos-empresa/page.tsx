@@ -5,10 +5,12 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { formatMoney, formatFecha } from '@/lib/utils/formato'
 import { sumMonto, parsearMonto } from '@/lib/utils/numeros'
+import { coincideBusqueda } from '@/lib/utils/texto'
 import { CONCEPTOS_GASTOS_EMPRESA } from '@/lib/constantes'
 import SelectConOpciones from '@/components/ui/SelectConOpciones'
 import FechaInput from '@/components/ui/FechaInput'
 import { SkeletonLista } from '@/components/ui/Skeleton'
+import BuscadorInput from '@/components/ui/BuscadorInput'
 import { useToast } from '@/lib/hooks/useToast'
 import { useConfirm } from '@/lib/hooks/useConfirm'
 import type { GastoEmpresa } from '@/types'
@@ -17,6 +19,7 @@ export default function GastosEmpresaPage() {
   const [gastos, setGastos] = useState<GastoEmpresa[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [busqueda, setBusqueda] = useState('')
   const [concepto, setConcepto] = useState('')
   const [monto, setMonto] = useState('')
   const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10))
@@ -89,7 +92,8 @@ export default function GastosEmpresaPage() {
     }
   }
 
-  const total = sumMonto(gastos)
+  const gastosFiltrados = gastos.filter((g) => coincideBusqueda(busqueda, g.concepto, g.observaciones))
+  const total = sumMonto(gastosFiltrados)
 
   return (
     <div className="min-h-screen bg-[color:var(--color-bg-page)] p-4">
@@ -168,38 +172,49 @@ export default function GastosEmpresaPage() {
           <h2 className="text-sm font-semibold text-[color:var(--color-text-primary)]">Historial</h2>
           {loading ? (
             <SkeletonLista />
+          ) : gastos.length === 0 ? (
+            <p className="py-3 text-sm text-[color:var(--color-text-secondary)]">No hay gastos registrados aún</p>
           ) : (
             <>
-              <div className="mt-2 divide-y divide-[color:var(--color-border)]">
-                {gastos.length === 0 ? (
-                  <p className="py-3 text-sm text-[color:var(--color-text-secondary)]">No hay gastos registrados aún</p>
-                ) : (
-                  gastos.map((gasto) => (
-                    <div key={gasto.id} className="flex items-center justify-between py-2">
-                      <div>
-                        <p className="font-medium text-[color:var(--color-text-primary)]">{gasto.concepto}</p>
-                        <p className="text-sm text-[color:var(--color-text-secondary)]">
-                          {formatMoney(Number(gasto.monto))} · {formatFecha(gasto.fecha)}
-                        </p>
-                        {gasto.observaciones && (
-                          <p className="text-xs text-[color:var(--color-text-muted)]">{gasto.observaciones}</p>
-                        )}
+              <BuscadorInput
+                value={busqueda}
+                onChange={setBusqueda}
+                placeholder="Buscar por concepto..."
+              />
+              {gastosFiltrados.length === 0 ? (
+                <p className="mt-4 py-3 text-sm text-[color:var(--color-text-secondary)]">
+                  No se encontraron gastos para &quot;{busqueda}&quot;
+                </p>
+              ) : (
+                <>
+                  <div className="mt-2 divide-y divide-[color:var(--color-border)]">
+                    {gastosFiltrados.map((gasto) => (
+                      <div key={gasto.id} className="flex items-center justify-between py-2">
+                        <div>
+                          <p className="font-medium text-[color:var(--color-text-primary)]">{gasto.concepto}</p>
+                          <p className="text-sm text-[color:var(--color-text-secondary)]">
+                            {formatMoney(Number(gasto.monto))} · {formatFecha(gasto.fecha)}
+                          </p>
+                          {gasto.observaciones && (
+                            <p className="text-xs text-[color:var(--color-text-muted)]">{gasto.observaciones}</p>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => handleEliminar(gasto.id, Number(gasto.monto))}
+                          className="text-sm text-red-alert hover:underline"
+                        >
+                          Eliminar
+                        </button>
                       </div>
-                      <button
-                        onClick={() => handleEliminar(gasto.id, Number(gasto.monto))}
-                        className="text-sm text-red-alert hover:underline"
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
+                    ))}
+                  </div>
 
-              <div className="mt-4 flex items-center justify-between border-t border-[color:var(--color-border)] pt-3">
-                <p className="font-semibold text-[color:var(--color-text-primary)]">Total</p>
-                <p className="font-semibold text-[color:var(--color-text-primary)]">{formatMoney(total)}</p>
-              </div>
+                  <div className="mt-4 flex items-center justify-between border-t border-[color:var(--color-border)] pt-3">
+                    <p className="font-semibold text-[color:var(--color-text-primary)]">Total</p>
+                    <p className="font-semibold text-[color:var(--color-text-primary)]">{formatMoney(total)}</p>
+                  </div>
+                </>
+              )}
             </>
           )}
         </div>

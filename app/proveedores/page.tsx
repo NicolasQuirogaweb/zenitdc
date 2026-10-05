@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { SkeletonLista } from '@/components/ui/Skeleton'
+import BuscadorInput from '@/components/ui/BuscadorInput'
+import { coincideBusqueda } from '@/lib/utils/texto'
 import { useToast } from '@/lib/hooks/useToast'
 import { useConfirm } from '@/lib/hooks/useConfirm'
 import type { Proveedor } from '@/types'
@@ -12,6 +14,7 @@ export default function ProveedoresPage() {
   const [proveedores, setProveedores] = useState<Proveedor[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [busqueda, setBusqueda] = useState('')
   const supabase = createClient()
   const { showToast } = useToast()
   const confirm = useConfirm()
@@ -45,6 +48,8 @@ export default function ProveedoresPage() {
     const err = await res.json()
     setError(typeof err.error === 'string' ? err.error : 'No se pudo eliminar el proveedor')
   }
+
+  const proveedoresFiltrados = proveedores.filter((p) => coincideBusqueda(busqueda, p.nombre))
 
   return (
     <div className="min-h-screen bg-[color:var(--color-bg-page)] p-4">
@@ -83,44 +88,53 @@ export default function ProveedoresPage() {
             </p>
           </div>
         ) : (
-          <ul className="mt-4 space-y-2">
-            {proveedores.map((p) => (
-              <li
-                key={p.id}
-                className="flex items-center justify-between rounded-lg bg-[color:var(--color-bg-surface)] p-3 shadow-sm"
-              >
-                <div>
-                  <p className="font-medium text-[color:var(--color-text-primary)]">{p.nombre}</p>
-                  {p.telefono && (
-                    <p className="text-sm text-[color:var(--color-text-secondary)]">{p.telefono}</p>
-                  )}
-                  {p.contacto && (
-                    <p className="text-sm text-[color:var(--color-text-secondary)]">Contacto: {p.contacto}</p>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <Link
-                    href={`/proveedores/${p.id}`}
-                    className="text-sm text-blue-light hover:underline"
+          <>
+            <BuscadorInput value={busqueda} onChange={setBusqueda} />
+            {proveedoresFiltrados.length === 0 ? (
+              <p className="mt-4 text-sm text-[color:var(--color-text-secondary)]">
+                No se encontraron proveedores para &quot;{busqueda}&quot;
+              </p>
+            ) : (
+              <ul className="mt-4 space-y-2">
+                {proveedoresFiltrados.map((p) => (
+                  <li
+                    key={p.id}
+                    className="flex items-center justify-between rounded-lg bg-[color:var(--color-bg-surface)] p-3 shadow-sm"
                   >
-                    Ver
-                  </Link>
-                  <Link
-                    href={`/proveedores/${p.id}/editar`}
-                    className="text-sm text-blue-light hover:underline"
-                  >
-                    Editar
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(p.id)}
-                    className="text-sm text-red-alert hover:underline"
-                  >
-                    Eliminar
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
+                    <div>
+                      <p className="font-medium text-[color:var(--color-text-primary)]">{p.nombre}</p>
+                      {p.telefono && (
+                        <p className="text-sm text-[color:var(--color-text-secondary)]">{p.telefono}</p>
+                      )}
+                      {p.contacto && (
+                        <p className="text-sm text-[color:var(--color-text-secondary)]">Contacto: {p.contacto}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/proveedores/${p.id}`}
+                        className="text-sm text-blue-light hover:underline"
+                      >
+                        Ver
+                      </Link>
+                      <Link
+                        href={`/proveedores/${p.id}/editar`}
+                        className="text-sm text-blue-light hover:underline"
+                      >
+                        Editar
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(p.id)}
+                        className="text-sm text-red-alert hover:underline"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
         )}
       </div>
     </div>

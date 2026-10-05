@@ -5,8 +5,10 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { formatMoney, formatFecha } from '@/lib/utils/formato'
 import { sumMonto } from '@/lib/utils/numeros'
+import { coincideBusqueda } from '@/lib/utils/texto'
 import { CONCEPTOS_COSTOS_DIRECTOS } from '@/lib/constantes'
 import { SkeletonLista } from '@/components/ui/Skeleton'
+import BuscadorInput from '@/components/ui/BuscadorInput'
 
 type Categoria =
   | 'Costos directos'
@@ -37,6 +39,7 @@ export default function PagosPage() {
   const [movimientos, setMovimientos] = useState<Movimiento[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [busqueda, setBusqueda] = useState('')
 
   useEffect(() => {
     const supabase = createClient()
@@ -125,7 +128,10 @@ export default function PagosPage() {
     )
   }, [])
 
-  const total = sumMonto(movimientos)
+  const movimientosFiltrados = movimientos.filter((m) =>
+    coincideBusqueda(busqueda, m.descripcion, m.obraNombre)
+  )
+  const total = sumMonto(movimientosFiltrados)
 
   return (
     <div className="min-h-screen bg-[color:var(--color-bg-page)] p-4">
@@ -154,38 +160,51 @@ export default function PagosPage() {
             </p>
           ) : (
             <>
-              <div className="divide-y divide-[color:var(--color-border)]">
-                {movimientos.map((m) => (
-                  <div key={m.id} className="flex items-start justify-between gap-3 py-3">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span
-                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${COLOR_CATEGORIA[m.categoria]}`}
-                        >
-                          {m.categoria}
-                        </span>
-                        <p className="text-sm text-[color:var(--color-text-secondary)]">
-                          {formatFecha(m.fecha)}
+              <BuscadorInput
+                value={busqueda}
+                onChange={setBusqueda}
+                placeholder="Buscar por nombre, concepto u obra..."
+              />
+              {movimientosFiltrados.length === 0 ? (
+                <p className="mt-4 py-3 text-sm text-[color:var(--color-text-secondary)]">
+                  No se encontraron pagos para &quot;{busqueda}&quot;
+                </p>
+              ) : (
+                <>
+                  <div className="mt-4 divide-y divide-[color:var(--color-border)]">
+                    {movimientosFiltrados.map((m) => (
+                      <div key={m.id} className="flex items-start justify-between gap-3 py-3">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-xs font-medium ${COLOR_CATEGORIA[m.categoria]}`}
+                            >
+                              {m.categoria}
+                            </span>
+                            <p className="text-sm text-[color:var(--color-text-secondary)]">
+                              {formatFecha(m.fecha)}
+                            </p>
+                          </div>
+                          <p className="mt-1 font-medium text-[color:var(--color-text-primary)]">
+                            {m.descripcion || 'Sin descripción'}
+                          </p>
+                          <p className="text-xs text-[color:var(--color-text-muted)]">
+                            {m.obraNombre ?? 'Sin obra asociada'}
+                          </p>
+                        </div>
+                        <p className="shrink-0 font-semibold text-[color:var(--color-text-primary)]">
+                          {formatMoney(m.monto)}
                         </p>
                       </div>
-                      <p className="mt-1 font-medium text-[color:var(--color-text-primary)]">
-                        {m.descripcion || 'Sin descripción'}
-                      </p>
-                      <p className="text-xs text-[color:var(--color-text-muted)]">
-                        {m.obraNombre ?? 'Sin obra asociada'}
-                      </p>
-                    </div>
-                    <p className="shrink-0 font-semibold text-[color:var(--color-text-primary)]">
-                      {formatMoney(m.monto)}
-                    </p>
+                    ))}
                   </div>
-                ))}
-              </div>
 
-              <div className="mt-4 flex items-center justify-between border-t border-[color:var(--color-border)] pt-3">
-                <p className="font-semibold text-[color:var(--color-text-primary)]">Total</p>
-                <p className="font-semibold text-[color:var(--color-text-primary)]">{formatMoney(total)}</p>
-              </div>
+                  <div className="mt-4 flex items-center justify-between border-t border-[color:var(--color-border)] pt-3">
+                    <p className="font-semibold text-[color:var(--color-text-primary)]">Total</p>
+                    <p className="font-semibold text-[color:var(--color-text-primary)]">{formatMoney(total)}</p>
+                  </div>
+                </>
+              )}
             </>
           )}
         </div>
