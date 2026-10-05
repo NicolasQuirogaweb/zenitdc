@@ -1,4 +1,4 @@
-const VERSION = 'zenitdc-v3'
+const VERSION = 'zenitdc-v4'
 const CACHE_STATIC = `${VERSION}-static`
 const CACHE_NAV = `${VERSION}-nav`
 
@@ -8,7 +8,6 @@ const PRECACHE_URLS = [
   '/dashboard',
   '/obras',
   '/clientes',
-  '/balance',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png',

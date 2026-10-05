@@ -13,7 +13,6 @@ import PresupuestoSection from '@/components/obra/PresupuestoSection'
 import GastosRealesSection from '@/components/obra/GastosRealesSection'
 import GastosMaterialesSection from '@/components/obra/GastosMaterialesSection'
 import PagosClientesSection from '@/components/obra/PagosClientesSection'
-import BalanceSection from '@/components/obra/BalanceSection'
 
 interface ObraConCliente extends Obra {
   clientes: Cliente | null
@@ -24,9 +23,6 @@ export default function DetalleObraPage() {
   const [obra, setObra] = useState<ObraConCliente | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [refreshKey, setRefreshKey] = useState(0)
-
-  const notificarCambio = () => setRefreshKey((k) => k + 1)
 
   useEffect(() => {
     const supabase = createClient()
@@ -109,7 +105,7 @@ export default function DetalleObraPage() {
             </a>
           </div>
 
-          <PresupuestoSection obraId={id} onDatosCambiaron={notificarCambio} />
+          <PresupuestoSection obraId={id} />
           <GastosRealesSection
             obraId={id}
             titulo="Costos directos de obra"
@@ -117,11 +113,10 @@ export default function DetalleObraPage() {
             conceptosSugeridos={CONCEPTOS_COSTOS_DIRECTOS}
             filtro={(c) => CONCEPTOS_COSTOS_DIRECTOS.includes(c)}
             placeholder="Ej: Cuadrilla de albañilería"
-            onDatosCambiaron={notificarCambio}
             mostrarProveedor={false}
           />
-          <GastosMaterialesSection obraId={id} onDatosCambiaron={notificarCambio} />
-          <PagosClientesSection obraId={id} onDatosCambiaron={notificarCambio} />
+          <GastosMaterialesSection obraId={id} />
+          <PagosClientesSection obraId={id} />
           <GastosRealesSection
             obraId={id}
             titulo="Gastos generales de la obra"
@@ -129,9 +124,7 @@ export default function DetalleObraPage() {
             conceptosSugeridos={CONCEPTOS_GASTOS_REALES}
             filtro={(c) => !CONCEPTOS_COSTOS_DIRECTOS.includes(c)}
             placeholder="Ej: Seguro de obra"
-            onDatosCambiaron={notificarCambio}
           />
-          <BalanceSection obraId={id} refreshKey={refreshKey} />
         </div>
       </div>
     </div>

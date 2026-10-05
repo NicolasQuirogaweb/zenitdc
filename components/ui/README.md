@@ -18,7 +18,7 @@ toda la app.
   distinto.
 - **`CollapsibleCard.tsx`** — tarjeta con contenido colapsable/expandible
   (acordeón). Todas las secciones del detalle de obra
-  (presupuesto, gastos, pagos, balance) la usan para no mostrar todo
+  (presupuesto, gastos, pagos) la usan para no mostrar todo
   abierto a la vez en una pantalla que ya tiene mucha información.
 - **`EstadoObraBadge.tsx`** — chip de color según el estado de una obra.
 - **`LoadingScreen.tsx` / `Skeleton.tsx`** — estados de carga. `Skeleton`

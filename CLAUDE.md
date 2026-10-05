@@ -4,7 +4,7 @@
 > en este repo. Reemplaza a `prompt_senior_zenitdc.md` (borrado — este
 > archivo es ahora la única fuente de verdad).
 >
-> **Actualizado 2026-09-14.**
+> **Actualizado 2026-10-05.**
 > **Recordatorio:** actualizar este archivo apenas se termine un cambio
 > grande de arquitectura o de UI — es lo que desactualizó a la versión
 > anterior más de una vez (quedó con la fórmula de balance vieja varias
@@ -35,7 +35,9 @@ explícitamente.**
 **Cliente:** Zenit DC — empresa constructora argentina
 **Usuario final:** Rodri (dueño), uso interno exclusivo
 **Objetivo:** Reemplazar Excel/WhatsApp/papel por un sistema digital que
-permita controlar ingresos, egresos y balances de cada obra en tiempo real
+permita registrar y controlar ingresos y egresos de cada obra en tiempo
+real (sin cálculo de balance por ahora, ver "Naturaleza real del
+sistema")
 **Plataforma:** PWA instalable en celular sin App Store
 **Idioma de la UI:** Español (Argentina)
 **Modelo de acceso:** cualquier usuario autenticado puede ver/editar todos
@@ -55,6 +57,13 @@ celular, para no tener que abrir Excel — no un ERP ni un sistema de
 misión crítica. Notificaciones push, colas de reintento de emails, o
 monitoreo de guardia 24/7 **no están justificados** salvo que el alcance
 cambie explícitamente.
+
+**Sin cálculo de balance, a propósito (2026-10-05):** el sistema tuvo en
+algún momento un módulo de balance (por obra y general de la empresa,
+ver "Historial de módulos" #11/#12/#23) y se sacó del todo a pedido de
+Rodri — hoy no lo necesita, solo quiere un registro prolijo de todo lo
+que entra y sale. No reintroducir cálculos derivados (balance,
+proyecciones, reportes) sin que lo pida explícitamente.
 
 ---
 
@@ -89,7 +98,9 @@ Tema visual:    oscuro fijo (fondo azul oscuro, texto blanco, logo y
                 claro/oscuro — tokens en globals.css (@theme inline)
 Deploy:         Vercel
 Storage:        Supabase Storage (fotos de obra, bucket privado + signed URLs)
-Tests:          Vitest, enfocado en lib/utils/balance.ts (ver lib/utils/README.md)
+Tests:          Vitest instalado, sin tests hoy (ver "Limitaciones
+                conocidas" — el único módulo que tenía tests, el
+                balance, se sacó del proyecto)
 CI:             GitHub Actions (.github/workflows/ci.yml) — tsc + lint + build + test
 ```
 
@@ -104,8 +115,8 @@ CI:             GitHub Actions (.github/workflows/ci.yml) — tsc + lint + build
                                   de 5 cards: Clientes y obras,
                                   Proveedores, Personal, Personal
                                   tercerizado, Finanzas — esta última
-                                  agrupa Balance/Pagos/Gastos generales,
-                                  ver /finanzas)
+                                  agrupa Pagos/Gastos generales, ver
+                                  /finanzas)
   /clientes                     → listado + alta de clientes
   /clientes/nuevo
   /clientes/[id]/editar
@@ -114,24 +125,23 @@ CI:             GitHub Actions (.github/workflows/ci.yml) — tsc + lint + build
   /obras/nuevo
   /obras/[id]                   → detalle de obra: acá viven presupuesto,
                                   costos directos, gastos de materiales,
-                                  gastos generales, pagos del cliente y
-                                  balance, todo como secciones dentro de
-                                  esta misma pantalla (no rutas separadas).
-                                  A propósito NO viven acá los pagos a
+                                  gastos generales y pagos del cliente,
+                                  todo como secciones dentro de esta misma
+                                  pantalla (no rutas separadas). A
+                                  propósito NO viven acá los pagos a
                                   personal/personal tercerizado — ver más
-                                  abajo.
+                                  abajo. Tampoco hay balance — se sacó del
+                                  todo, ver "Naturaleza real del sistema".
   /obras/[id]/editar
   /obras/[id]/fotos             → galería de fotos de la obra
   /personal-hub                 → hub de navegación: 2 cards, Personal de
                                   la empresa / Personal tercerizado (no
                                   hace fetch, solo son 2 links)
-  /finanzas                     → hub de navegación: 3 cards, Balance
-                                  general / Pagos / Gastos generales (no
-                                  hace fetch, solo son 3 links) — agrupa
-                                  todo lo que no es específico de una
-                                  entidad puntual (proveedor, personal,
-                                  obra)
-  /balance                      → balance general de la empresa
+  /finanzas                     → hub de navegación: 2 cards, Pagos /
+                                  Gastos generales (no hace fetch, solo
+                                  son 2 links) — agrupa todo lo que no es
+                                  específico de una entidad puntual
+                                  (proveedor, personal, obra)
   /proveedores                  → listado + alta de proveedores — SOLO
                                   materiales (ver "Personal tercerizado"
                                   para mano de obra subcontratada)
@@ -423,98 +433,6 @@ create table gastos_empresa (
 
 ---
 
-## Lógica de balance — el corazón del sistema (`lib/utils/balance.ts`)
-
-Cubierto por tests automatizados (`lib/utils/balance.test.ts`, ver
-`lib/utils/README.md`) — es la lógica que más cambió de comportamiento en
-este proyecto, tratarla con cuidado extra.
-
-**Cambio importante (Fase 3, Bloque 5):** hasta antes de esto,
-`total_gastos_generales` era puramente informativo y NO restaba del
-`resultado`. Rodri confirmó que el presupuesto aprobado ya contempla los
-gastos generales de la obra, así que ahora SÍ restan — ver el historial
-de módulos si hace falta el detalle de por qué cambió dos veces.
-
-**Cambio (cierra el pendiente anterior):** Rodri confirmó que pagarle a
-personal tercerizado (Marcelo, Clisman) o a personal propio POR una obra
-puntual (ej. Manu como chofer de esa obra) es, para él, costo directo de
-la obra — no una categoría aparte. `total_mano_obra` y `total_personal`
-dejaron de ser campos/líneas separados: ahora se suman DENTRO de
-`total_costos_directos`. El monto total de `total_egresos` no cambió por
-esto — es pura reagrupación de cómo se presenta el mismo número.
-
-### Balance por obra
-
-`gastos_generales` (la tabla) contiene DOS conceptos distintos, separados
-únicamente por el texto de `concepto` contra la lista
-`CONCEPTOS_COSTOS_DIRECTOS` en `lib/constantes.ts`:
-
-```
-total_presupuestado      = SUM(presupuesto_items.monto) WHERE obra_id = X
-total_ingresos           = SUM(pagos_clientes.monto) WHERE obra_id = X
-
-costos_directos_manual   = SUM(gastos_generales.monto) WHERE obra_id = X
-                           AND concepto IN CONCEPTOS_COSTOS_DIRECTOS
-                           -- "Movimiento de suelo", "Mano de obra" (carga
-                           -- manual/legacy), "Instalación eléctrica"
-total_gastos_generales   = SUM(gastos_generales.monto) WHERE obra_id = X
-                           AND concepto NOT IN CONCEPTOS_COSTOS_DIRECTOS
-                           -- "Combustible", "Seguros vehículos/personal" —
-                           -- overhead/indirecto
-mano_obra_tercerizada    = SUM(pagos_personal_tercerizado.monto) WHERE obra_id = X
-personal_en_esta_obra    = SUM(pagos_personal.monto) WHERE obra_id = X
-                           -- los que NO tienen obra_id (sueldos fijos) no
-                           -- entran acá, se restan a nivel empresa, ver
-                           -- más abajo
-
-total_costos_directos    = costos_directos_manual
-                           + mano_obra_tercerizada
-                           + personal_en_esta_obra
-                           -- UN SOLO número — no se desglosa "mano de
-                           -- obra tercerizada" ni "personal" aparte,
-                           -- decisión explícita de Rodri
-
-total_egresos            = total_costos_directos
-                           + SUM(gastos_materiales.monto) WHERE obra_id = X
-                           + total_gastos_generales
-
-resultado                 = total_ingresos - total_egresos
-diferencia_vs_presupuesto = resultado - total_presupuestado
--- (este campo se calcula pero hoy no se muestra en ninguna pantalla)
-```
-
-`total_costos_directos` y `total_gastos_generales` también se muestran
-desglosados aparte en la UI (para que Rodri vea de dónde sale el
-número), pero ya están INCLUIDOS dentro de `total_egresos` — no hay que
-sumarlos de nuevo en el frontend. `resultado` es un flujo de caja parcial
-a la fecha (cobrado menos gastado hasta ahora), no la ganancia final.
-
-### Balance general de la empresa
-
-```
-total_ingresos_empresa         = SUM de total_ingresos de TODAS las obras
-total_egresos_empresa          = SUM de total_egresos de TODAS las obras
-total_gastos_generales_empresa = SUM de total_gastos_generales de TODAS las
-                                  obras (informativo, ya incluido arriba)
-total_gastos_empresa           = SUM(gastos_empresa.monto)
-                                  -- alquiler, impuestos, contador, etc.
-total_personal_sin_obra        = SUM(pagos_personal.monto) WHERE obra_id IS NULL
-                                  -- sueldos fijos sin ligar a ninguna obra
-                                  -- puntual (ej. redes/IT)
-
-resultado_empresa = total_ingresos_empresa - total_egresos_empresa
-                     - total_gastos_empresa - total_personal_sin_obra
-```
-
-`total_gastos_empresa` y `total_personal_sin_obra` son los ÚNICOS montos
-que se restan a nivel empresa sin pasar por ninguna obra puntual — todo
-lo demás ya se agregó obra por obra. Los cálculos son funciones puras en
-`lib/utils/balance.ts`, se llaman desde `app/api/balance/route.ts` y
-`app/api/obras/[id]/balance/route.ts` — nunca se recalculan en el
-frontend (los componentes usan directamente `balance.resultado`).
-
----
-
 ## UI/UX — decisiones tomadas
 
 - Bottom nav (mobile) y Sidebar (desktop) con 5 accesos: Dashboard,
@@ -566,10 +484,12 @@ la naturaleza actual del proyecto (ver "Naturaleza real del sistema"
 arriba). Se están cerrando de a poco (ver "Skills del proyecto" — tests y
 CI ya se resolvieron en la ronda de infraestructura agéntica):
 
-1. ~~Sin tests automatizados ni CI~~ → resuelto para `balance.ts` +
-   GitHub Actions. El resto del código sigue sin cobertura de tests
-   (verificación manual con `tsc`/`build`/`lint`), correcto para el
-   tamaño actual del proyecto.
+1. **Sin tests automatizados hoy.** Tuvo tests (Vitest, sobre
+   `lib/utils/balance.ts`) durante un tiempo, pero se fueron junto con el
+   módulo de balance al sacarlo (ver "Naturaleza real del sistema").
+   `npm run test`/CI siguen corriendo y pasan en verde con 0 tests
+   (`passWithNoTests` en `vitest.config.mts`) — verificación manual con
+   `tsc`/`build`/`lint`, correcto para el tamaño actual del proyecto.
 2. **Sin monitoreo/alertas en producción** (no hay Sentry, Vercel
    Analytics). No urgente dado que el sistema no procesa pagos ni nada
    crítico.
@@ -596,14 +516,11 @@ debajo de los 500MB del plan Free incluso con cientos de obras.
   redimensionar. Unos cientos de fotos llenan el 1GB.
 - **Egress (5GB/mes en Free).** Cada apertura de la galería redescarga
   las imágenes completas, sin caché ni miniaturas.
-- ~~`getBalanceGeneral()` hacía 6 consultas por cada obra~~ → resuelto:
-  ahora agrupa en memoria, son 8 consultas totales sin importar cuántas
-  obras haya (ver `lib/utils/README.md`).
 - **Listas de Obras/Clientes sin paginar.**
 
 **Mejoras futuras, en orden de impacto/costo (ninguna necesaria hoy):**
-comprimir fotos antes de subir → paginar listas + agregar consultas de
-balance → Supabase Pro si el volumen lo justifica.
+comprimir fotos antes de subir → paginar listas → Supabase Pro si el
+volumen lo justifica.
 
 ---
 
@@ -633,8 +550,8 @@ balance → Supabase Pro si el volumen lo justifica.
 8. Gastos de materiales                                                 ✅
 9. Gastos generales (por obra)                                         ✅
 10. Galería de fotos (Supabase Storage)                                 ✅
-11. Balance por obra                                                    ✅
-12. Balance general empresa                                             ✅
+11. Balance por obra                                          ❌ ver #23
+12. Balance general empresa                                   ❌ ver #23
 13. PWA manifest + service worker + íconos                              ✅
 14. Deploy en Vercel + Supabase producción                              ✅
 15. Navegación persistente, toasts, skeletons, rediseño dashboard        ✅
@@ -658,9 +575,18 @@ balance → Supabase Pro si el volumen lo justifica.
     opcional en pagos_personal (sueldos fijos sin obra puntual) y
     obligatoria en pagos_personal_tercerizado. "Motivo" reemplaza a
     "observaciones" en ambos, obligatorio. Se simplifica el detalle de
-    obra sacando esas dos cards                                        ✅ (este cambio)
+    obra sacando esas dos cards                                        ✅
+23. Se saca el cálculo de balance del todo (por obra y general de la
+    empresa, módulos #11/#12) a pedido de Rodri: hoy el sistema es
+    registro nomás, sin números derivados. Se borran
+    lib/utils/balance.ts (y su test, el único del proyecto —
+    passWithNoTests en vitest.config.mts para que test/CI sigan en
+    verde), las 2 rutas de API, /balance, BalanceSection.tsx y los tipos
+    Balance*. Las tablas que alimentaban el cálculo (presupuesto,
+    pagos, gastos, personal) no se tocan, siguen con su propia pantalla
+    de alta/historial                                                  ✅ (este cambio)
 ```
 
 ---
 
-*Proyecto: Zenit DC — nquirogawebdev — actualizado 2026-09-14*
+*Proyecto: Zenit DC — nquirogawebdev — actualizado 2026-10-05*

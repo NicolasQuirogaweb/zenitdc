@@ -127,35 +127,3 @@ export interface GastoEmpresa {
   observaciones: string | null
   created_at: string
 }
-
-export interface BalanceObra {
-  obra_id: string
-  total_presupuestado: number
-  total_ingresos: number
-  total_egresos: number
-  total_costos_directos: number
-  total_gastos_generales: number
-  resultado: number
-  diferencia_vs_presupuesto: number
-}
-
-export interface BalancePorObra {
-  obra_id: string
-  obra_nombre: string
-  cliente_nombre: string
-  total_ingresos: number
-  total_egresos: number
-  total_costos_directos: number
-  total_gastos_generales: number
-  resultado: number
-}
-
-export interface BalanceGeneral {
-  total_ingresos: number
-  total_egresos: number
-  total_gastos_generales: number
-  total_gastos_empresa: number
-  total_personal_sin_obra: number
-  resultado: number
-  por_obra: BalancePorObra[]
-}
