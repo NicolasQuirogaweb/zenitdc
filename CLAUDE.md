@@ -63,7 +63,13 @@ algún momento un módulo de balance (por obra y general de la empresa,
 ver "Historial de módulos" #11/#12/#23) y se sacó del todo a pedido de
 Rodri — hoy no lo necesita, solo quiere un registro prolijo de todo lo
 que entra y sale. No reintroducir cálculos derivados (balance,
-proyecciones, reportes) sin que lo pida explícitamente.
+proyecciones, reportes) sin que lo pida explícitamente. **Distinto de
+esto:** `ResumenObraSection.tsx` (módulo #24) SÍ suma totales por
+categoría al final del detalle de obra — es pura suma informativa para
+entender de un vistazo cuánto se cargó en cada cosa, sin restar
+ingresos menos egresos ni mostrar ningún "resultado". No confundir las
+dos cosas: sumar lo cargado está bien, calcular ganancia/pérdida es lo
+que se sacó.
 
 ---
 
@@ -125,13 +131,16 @@ CI:             GitHub Actions (.github/workflows/ci.yml) — tsc + lint + build
   /obras/nuevo
   /obras/[id]                   → detalle de obra: acá viven presupuesto,
                                   costos directos, gastos de materiales,
-                                  gastos generales y pagos del cliente,
-                                  todo como secciones dentro de esta misma
-                                  pantalla (no rutas separadas). A
-                                  propósito NO viven acá los pagos a
-                                  personal/personal tercerizado — ver más
-                                  abajo. Tampoco hay balance — se sacó del
-                                  todo, ver "Naturaleza real del sistema".
+                                  gastos generales, pagos del cliente y,
+                                  al final, un resumen con los totales de
+                                  cada categoría (suma nomás, sin calcular
+                                  ningún resultado), todo como secciones
+                                  dentro de esta misma pantalla (no rutas
+                                  separadas). A propósito NO viven acá los
+                                  pagos a personal/personal tercerizado —
+                                  ver más abajo. Tampoco hay balance — se
+                                  sacó del todo, ver "Naturaleza real del
+                                  sistema".
   /obras/[id]/editar
   /obras/[id]/fotos             → galería de fotos de la obra
   /personal-hub                 → hub de navegación: 2 cards, Personal de
@@ -584,7 +593,18 @@ volumen lo justifica.
     verde), las 2 rutas de API, /balance, BalanceSection.tsx y los tipos
     Balance*. Las tablas que alimentaban el cálculo (presupuesto,
     pagos, gastos, personal) no se tocan, siguen con su propia pantalla
-    de alta/historial                                                  ✅ (este cambio)
+    de alta/historial                                                  ✅
+24. Buscador por nombre en proveedores/clientes/obras/pagos/gastos
+    generales (lib/utils/texto.ts, components/ui/BuscadorInput.tsx,
+    filtra en memoria, insensible a mayúsculas/acentos). Fix: el alta de
+    pagos a personal (propio y tercerizado) daba 400 siempre —
+    pagoPersonalSchema/pagoPersonalTercerizadoSchema exigían el id del
+    empleado en el body, pero la ruta lo toma de la URL. Se agrega
+    ResumenObraSection.tsx al final del detalle de obra: suma los
+    totales por categoría (presupuesto, costos directos, materiales,
+    gastos generales, pagos de cliente) — informativo nomás, sin
+    calcular ningún resultado (no es balance, ver "Naturaleza real del
+    sistema")                                                          ✅ (este cambio)
 ```
 
 ---

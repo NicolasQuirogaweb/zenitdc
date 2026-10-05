@@ -13,6 +13,7 @@ import PresupuestoSection from '@/components/obra/PresupuestoSection'
 import GastosRealesSection from '@/components/obra/GastosRealesSection'
 import GastosMaterialesSection from '@/components/obra/GastosMaterialesSection'
 import PagosClientesSection from '@/components/obra/PagosClientesSection'
+import ResumenObraSection from '@/components/obra/ResumenObraSection'
 
 interface ObraConCliente extends Obra {
   clientes: Cliente | null
@@ -125,6 +126,7 @@ export default function DetalleObraPage() {
             filtro={(c) => !CONCEPTOS_COSTOS_DIRECTOS.includes(c)}
             placeholder="Ej: Seguro de obra"
           />
+          <ResumenObraSection obraId={id} />
         </div>
       </div>
     </div>

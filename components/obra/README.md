@@ -21,6 +21,17 @@ misma pantalla, cada una dentro de un `CollapsibleCard`.
   separada, `gastos_materiales`).
 - **`PagosClientesSection.tsx`** — pagos que el cliente le hizo a Zenit
   DC por esta obra.
+- **`ResumenObraSection.tsx`** — va al final de la pantalla, abierta por
+  defecto (`abiertoInicial`, a diferencia de las demás). Suma lo ya
+  cargado en las otras secciones (presupuesto, costos directos —
+  incluye mano de obra tercerizada y personal pagado en esta obra,
+  mismo criterio que usaba el balance viejo —, materiales, gastos
+  generales, pagos de cliente) y un "Total gastado". A propósito **NO**
+  calcula ningún resultado/balance (no resta ingresos menos egresos) —
+  es pura suma informativa, ver "Sin cálculo de balance" en `CLAUDE.md`.
+  Hace su propio fetch (6 consultas, independiente de las demás
+  secciones) en vez de recibir los totales por props, para no acoplar
+  el resumen al estado interno de cada sección.
 
 Todas siguen el mismo patrón interno: estado local con `useState` +
 `fetch` a su ruta de API correspondiente + `useToast` para feedback +
