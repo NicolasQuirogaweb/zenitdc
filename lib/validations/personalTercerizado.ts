@@ -10,7 +10,9 @@ export const personalTercerizadoSchema = z.object({
 export type PersonalTercerizadoFormData = z.infer<typeof personalTercerizadoSchema>
 
 export const pagoPersonalTercerizadoSchema = z.object({
-  personal_tercerizado_id: z.string().uuid('Seleccioná a quién le pagaste'),
+  // personal_tercerizado_id NO va acá: la ruta
+  // (/api/personal-tercerizado/[id]/pagos) lo toma del parámetro de la
+  // URL, nunca del body.
   // A diferencia de personal de la empresa, acá la obra es siempre
   // obligatoria: se le paga a Marcelo/Clisman por el trabajo hecho en
   // una obra puntual, nunca un sueldo fijo sin ligar a ninguna.
