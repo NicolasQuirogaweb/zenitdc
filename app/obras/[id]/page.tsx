@@ -24,6 +24,9 @@ export default function DetalleObraPage() {
   const [obra, setObra] = useState<ObraConCliente | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [refreshKey, setRefreshKey] = useState(0)
+
+  const notificarCambio = () => setRefreshKey((k) => k + 1)
 
   useEffect(() => {
     const supabase = createClient()
@@ -106,7 +109,7 @@ export default function DetalleObraPage() {
             </a>
           </div>
 
-          <PresupuestoSection obraId={id} />
+          <PresupuestoSection obraId={id} onDatosCambiaron={notificarCambio} />
           <GastosRealesSection
             obraId={id}
             titulo="Costos directos de obra"
@@ -115,9 +118,10 @@ export default function DetalleObraPage() {
             filtro={(c) => CONCEPTOS_COSTOS_DIRECTOS.includes(c)}
             placeholder="Ej: Cuadrilla de albañilería"
             mostrarProveedor={false}
+            onDatosCambiaron={notificarCambio}
           />
-          <GastosMaterialesSection obraId={id} />
-          <PagosClientesSection obraId={id} />
+          <GastosMaterialesSection obraId={id} onDatosCambiaron={notificarCambio} />
+          <PagosClientesSection obraId={id} onDatosCambiaron={notificarCambio} />
           <GastosRealesSection
             obraId={id}
             titulo="Gastos generales de la obra"
@@ -125,8 +129,9 @@ export default function DetalleObraPage() {
             conceptosSugeridos={CONCEPTOS_GASTOS_REALES}
             filtro={(c) => !CONCEPTOS_COSTOS_DIRECTOS.includes(c)}
             placeholder="Ej: Seguro de obra"
+            onDatosCambiaron={notificarCambio}
           />
-          <ResumenObraSection obraId={id} />
+          <ResumenObraSection obraId={id} refreshKey={refreshKey} />
         </div>
       </div>
     </div>

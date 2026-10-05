@@ -9,6 +9,10 @@ import CollapsibleCard from '@/components/ui/CollapsibleCard'
 
 interface Props {
   obraId: string
+  /** Se incrementa desde la página de la obra cada vez que otra sección
+   * agrega/edita/elimina algo — fuerza a este componente a volver a
+   * pedir los totales, en vez de quedarse con los que trajo al montar. */
+  refreshKey?: number
 }
 
 interface FilaMonto {
@@ -35,7 +39,7 @@ const RESUMEN_VACIO: Resumen = {
   pagosCliente: 0,
 }
 
-export default function ResumenObraSection({ obraId }: Props) {
+export default function ResumenObraSection({ obraId, refreshKey }: Props) {
   const [resumen, setResumen] = useState<Resumen>(RESUMEN_VACIO)
   const [cargando, setCargando] = useState(true)
 
@@ -81,7 +85,7 @@ export default function ResumenObraSection({ obraId }: Props) {
         setCargando(false)
       }
     )
-  }, [obraId])
+  }, [obraId, refreshKey])
 
   const totalGastado = resumen.costosDirectos + resumen.materiales + resumen.gastosGenerales
 
