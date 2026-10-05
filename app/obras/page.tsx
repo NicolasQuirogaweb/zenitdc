@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { SkeletonLista } from '@/components/ui/Skeleton'
 import EstadoObraBadge from '@/components/ui/EstadoObraBadge'
+import BuscadorInput from '@/components/ui/BuscadorInput'
+import { coincideBusqueda } from '@/lib/utils/texto'
 import { useToast } from '@/lib/hooks/useToast'
 import { useConfirm } from '@/lib/hooks/useConfirm'
 
@@ -20,6 +22,7 @@ export default function ObrasPage() {
   const [obras, setObras] = useState<ObraConCliente[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [busqueda, setBusqueda] = useState('')
   const supabase = createClient()
   const { showToast } = useToast()
   const confirm = useConfirm()
@@ -49,6 +52,8 @@ export default function ObrasPage() {
       fetchObras()
     }
   }
+
+  const obrasFiltradas = obras.filter((o) => coincideBusqueda(busqueda, o.nombre, o.clientes?.nombre))
 
   return (
     <div className="min-h-screen bg-[color:var(--color-bg-page)] p-4">
@@ -87,44 +92,53 @@ export default function ObrasPage() {
             </p>
           </div>
         ) : (
-          <ul className="mt-4 space-y-2">
-            {obras.map((o) => (
-              <li
-                key={o.id}
-                className="rounded-lg bg-[color:var(--color-bg-surface)] p-3 shadow-sm"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <p className="font-medium text-[color:var(--color-text-primary)]">{o.nombre}</p>
-                    {o.clientes && (
-                      <p className="text-sm text-[color:var(--color-text-secondary)]">{o.clientes.nombre}</p>
-                    )}
-                    <EstadoObraBadge estado={o.estado} />
-                  </div>
-                  <div className="flex items-center gap-2 ml-3">
-                    <a
-                      href={`/obras/${o.id}`}
-                      className="text-sm text-blue-light hover:underline"
-                    >
-                      Ver
-                    </a>
-                    <a
-                      href={`/obras/${o.id}/editar`}
-                      className="text-sm text-blue-light hover:underline"
-                    >
-                      Editar
-                    </a>
-                    <button
-                      onClick={() => handleDelete(o.id)}
-                      className="text-sm text-red-alert hover:underline"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <>
+            <BuscadorInput value={busqueda} onChange={setBusqueda} />
+            {obrasFiltradas.length === 0 ? (
+              <p className="mt-4 text-sm text-[color:var(--color-text-secondary)]">
+                No se encontraron obras para &quot;{busqueda}&quot;
+              </p>
+            ) : (
+              <ul className="mt-4 space-y-2">
+                {obrasFiltradas.map((o) => (
+                  <li
+                    key={o.id}
+                    className="rounded-lg bg-[color:var(--color-bg-surface)] p-3 shadow-sm"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <p className="font-medium text-[color:var(--color-text-primary)]">{o.nombre}</p>
+                        {o.clientes && (
+                          <p className="text-sm text-[color:var(--color-text-secondary)]">{o.clientes.nombre}</p>
+                        )}
+                        <EstadoObraBadge estado={o.estado} />
+                      </div>
+                      <div className="flex items-center gap-2 ml-3">
+                        <a
+                          href={`/obras/${o.id}`}
+                          className="text-sm text-blue-light hover:underline"
+                        >
+                          Ver
+                        </a>
+                        <a
+                          href={`/obras/${o.id}/editar`}
+                          className="text-sm text-blue-light hover:underline"
+                        >
+                          Editar
+                        </a>
+                        <button
+                          onClick={() => handleDelete(o.id)}
+                          className="text-sm text-red-alert hover:underline"
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
         )}
       </div>
     </div>

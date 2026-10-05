@@ -12,3 +12,9 @@
   texto de un campo monto a un número válido o `null`, con el mismo
   criterio en todos los formularios — evita que cada sección reinvente su
   propia validación de "monto válido" con matices distintos).
+- **`texto.ts`** — `normalizarTexto(valor)` (minúsculas + sin acentos, para
+  comparar "García" con "garcia") y `coincideBusqueda(busqueda, ...campos)`
+  (true si el término aparece en alguno de los campos ya normalizado;
+  con `busqueda` vacía siempre da `true`). Usado para los buscadores de
+  proveedores/clientes/obras/pagos/gastos-empresa — filtra en memoria
+  sobre datos ya cargados, no vuelve a pedirle nada a Supabase.
