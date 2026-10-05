@@ -79,6 +79,4 @@ ruta de API + `Skeleton` mientras carga + `useToast` para feedback +
 
 Correr la skill `verificar-y-mergear` — la entidad nueva no está
 completa hasta que pase `tsc`/`build`/`lint`/`test` y esté mergeada a
-`develop`. Si la entidad nueva se conecta con `lib/utils/balance.ts`
-(cualquier cosa que sea un ingreso o egreso), actualizar los tests de
-`balance.test.ts` para cubrir el caso nuevo.
+`develop`.

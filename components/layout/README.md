@@ -11,8 +11,8 @@ Navegación persistente de la app.
   menos el límite cómodo para una bottom nav en mobile, así que
   "Personal" y "Finanzas" son accesos a páginas **hub**
   (`app/personal-hub/page.tsx`, `app/finanzas/page.tsx`): una pantalla
-  chica con cards (2 en Personal, 3 en Finanzas — Balance, Pagos,
-  Gastos generales) con el mismo patrón visual que el dashboard, en vez de
+  chica con cards (2 en Personal, 2 en Finanzas — Pagos, Gastos
+  generales) con el mismo patrón visual que el dashboard, en vez de
   ir directo a una sola sección. Si en el futuro hace falta un
   acceso de nivel superior más, primero evaluar si entra dentro de un
   hub existente o si amerita agrandar el hub del dashboard en vez de

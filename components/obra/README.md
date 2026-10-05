@@ -21,8 +21,6 @@ misma pantalla, cada una dentro de un `CollapsibleCard`.
   separada, `gastos_materiales`).
 - **`PagosClientesSection.tsx`** — pagos que el cliente le hizo a Zenit
   DC por esta obra.
-- **`BalanceSection.tsx`** — muestra el resultado calculado por
-  `lib/utils/balance.ts`, nunca recalcula nada localmente.
 
 Todas siguen el mismo patrón interno: estado local con `useState` +
 `fetch` a su ruta de API correspondiente + `useToast` para feedback +
