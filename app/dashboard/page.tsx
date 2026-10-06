@@ -107,7 +107,7 @@ export default function DashboardPage() {
               <Wallet className="h-6 w-6" />
             </span>
             <h2 className="mt-3 font-semibold text-[color:var(--color-text-primary)]">Finanzas</h2>
-            <p className="mt-1 text-sm text-[color:var(--color-text-secondary)]">Balance, pagos y gastos de la empresa</p>
+            <p className="mt-1 text-sm text-[color:var(--color-text-secondary)]">Pagos y gastos de la empresa</p>
           </Link>
         </div>
       </div>
