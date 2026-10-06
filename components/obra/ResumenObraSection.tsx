@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatMoney } from '@/lib/utils/formato'
 import { sumMonto } from '@/lib/utils/numeros'
-import { CONCEPTOS_COSTOS_DIRECTOS } from '@/lib/constantes'
+import { calcularResumenGastosObra } from '@/lib/utils/resumenObra'
 import CollapsibleCard from '@/components/ui/CollapsibleCard'
 
 interface Props {
@@ -13,14 +13,6 @@ interface Props {
    * agrega/edita/elimina algo — fuerza a este componente a volver a
    * pedir los totales, en vez de quedarse con los que trajo al montar. */
   refreshKey?: number
-}
-
-interface FilaMonto {
-  monto: number | string
-}
-
-interface FilaGastoGeneral extends FilaMonto {
-  concepto: string
 }
 
 interface Resumen {
@@ -61,25 +53,18 @@ export default function ResumenObraSection({ obraId, refreshKey }: Props) {
         pagosPersonalTercerizado,
         pagosPersonal,
       ]) => {
-        const filasGastos = (gastosGenerales.data ?? []) as FilaGastoGeneral[]
-        const costosDirectosManual = sumMonto(
-          filasGastos.filter((g) => CONCEPTOS_COSTOS_DIRECTOS.includes(g.concepto))
-        )
-        const gastosGeneralesIndirectos = sumMonto(
-          filasGastos.filter((g) => !CONCEPTOS_COSTOS_DIRECTOS.includes(g.concepto))
-        )
-        // Mano de obra tercerizada y personal pagado EN esta obra se suman
-        // dentro de costos directos, mismo criterio que usaba el balance
-        // viejo (ver CLAUDE.md) — acá es solo una suma, no hay resta de
-        // ingresos ni "resultado".
-        const manoObraTercerizada = sumMonto(pagosPersonalTercerizado.data ?? [])
-        const personalEnEstaObra = sumMonto(pagosPersonal.data ?? [])
+        const gastos = calcularResumenGastosObra({
+          gastosGenerales: gastosGenerales.data ?? [],
+          gastosMateriales: gastosMateriales.data ?? [],
+          pagosPersonalTercerizado: pagosPersonalTercerizado.data ?? [],
+          pagosPersonal: pagosPersonal.data ?? [],
+        })
 
         setResumen({
           presupuesto: sumMonto(presupuesto.data ?? []),
-          costosDirectos: costosDirectosManual + manoObraTercerizada + personalEnEstaObra,
-          materiales: sumMonto(gastosMateriales.data ?? []),
-          gastosGenerales: gastosGeneralesIndirectos,
+          costosDirectos: gastos.costosDirectos,
+          materiales: gastos.materiales,
+          gastosGenerales: gastos.gastosGenerales,
           pagosCliente: sumMonto(pagosCliente.data ?? []),
         })
         setCargando(false)

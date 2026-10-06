@@ -23,7 +23,7 @@ export default function FinanzasPage() {
               <History className="h-6 w-6" />
             </span>
             <h2 className="mt-3 font-semibold text-[color:var(--color-text-primary)]">Pagos</h2>
-            <p className="mt-1 text-sm text-[color:var(--color-text-secondary)]">Historial de todo lo que se va pagando</p>
+            <p className="mt-1 text-sm text-[color:var(--color-text-secondary)]">Organizado por personal, tercerizados y obras</p>
           </Link>
 
           <Link
@@ -33,7 +33,7 @@ export default function FinanzasPage() {
             <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-accent/15 text-blue-light">
               <Receipt className="h-6 w-6" />
             </span>
-            <h2 className="mt-3 font-semibold text-[color:var(--color-text-primary)]">Gastos generales</h2>
+            <h2 className="mt-3 font-semibold text-[color:var(--color-text-primary)]">Gastos generales de la empresa</h2>
             <p className="mt-1 text-sm text-[color:var(--color-text-secondary)]">Sin obra asociada (alquiler, impuestos, contador, etc.)</p>
           </Link>
         </div>
