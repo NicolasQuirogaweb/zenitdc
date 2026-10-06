@@ -18,3 +18,13 @@
   con `busqueda` vacía siempre da `true`). Usado para los buscadores de
   proveedores/clientes/obras/pagos/gastos-empresa — filtra en memoria
   sobre datos ya cargados, no vuelve a pedirle nada a Supabase.
+- **`resumenObra.ts`** — `calcularResumenGastosObra(filas)` (cuánto se
+  gastó en una obra, sumado por categoría — costos directos, materiales,
+  gastos generales, y el total de los tres) y `agruparPorObra(filas)`
+  (agrupa un array por `obra_id`, para pedirle a Supabase cada tabla UNA
+  sola vez en vez de una consulta por obra). Compartido entre
+  `components/obra/ResumenObraSection.tsx` (una obra) y `/pagos/obras`
+  (todas las obras) — así las dos vistas nunca pueden mostrar números
+  distintos para la misma obra. A propósito solo suma: no resta
+  ingresos ni calcula ningún "resultado" (eso se sacó, ver "Naturaleza
+  real del sistema" en CLAUDE.md).

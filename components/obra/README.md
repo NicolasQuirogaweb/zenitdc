@@ -25,17 +25,27 @@ misma pantalla, cada una dentro de un `CollapsibleCard`.
   defecto (`abiertoInicial`, a diferencia de las demás). Suma lo ya
   cargado en las otras secciones (presupuesto, costos directos —
   incluye mano de obra tercerizada y personal pagado en esta obra,
-  mismo criterio que usaba el balance viejo —, materiales, gastos
-  generales, pagos de cliente) y un "Total gastado". A propósito **NO**
-  calcula ningún resultado/balance (no resta ingresos menos egresos) —
-  es pura suma informativa, ver "Sin cálculo de balance" en `CLAUDE.md`.
-  Hace su propio fetch (6 consultas, independiente de las demás
-  secciones) en vez de recibir los totales por props, para no acoplar
-  el resumen al estado interno de cada sección.
+  materiales, gastos generales, pagos de cliente) y un "Total gastado".
+  El cálculo de costos directos/materiales/gastos generales/total viene
+  de `calcularResumenGastosObra` en `lib/utils/resumenObra.ts`
+  (compartido con `/pagos/obras`, que muestra el mismo total pero de
+  TODAS las obras — así nunca pueden quedar desincronizados); presupuesto
+  y pagos de cliente se suman acá nomás, son sumas simples de una sola
+  tabla. A propósito **NO** calcula ningún resultado/balance (no resta
+  ingresos menos egresos) — es pura suma informativa, ver "Sin cálculo
+  de balance" en `CLAUDE.md`. Hace su propio fetch (6 consultas,
+  independiente de las demás secciones) en vez de recibir los totales
+  por props, para no acoplar el resumen al estado interno de cada
+  sección. Recibe `refreshKey` de la página (se incrementa cuando
+  cualquier otra sección agrega/edita/elimina algo) para volver a pedir
+  los totales al instante, sin esperar a que recargues la página.
 
 Todas siguen el mismo patrón interno: estado local con `useState` +
 `fetch` a su ruta de API correspondiente + `useToast` para feedback +
-`useConfirm` antes de eliminar un ítem.
+`useConfirm` antes de eliminar un ítem. Las que registran algo (todas
+menos `ResumenObraSection.tsx`) avisan a la página con el callback
+opcional `onDatosCambiaron`, que la página usa para bumpear el
+`refreshKey` de arriba.
 
 **A propósito NO hay acá** una sección de mano de obra tercerizada ni de
 personal de la empresa — Rodri pidió simplificar esta pantalla. El alta

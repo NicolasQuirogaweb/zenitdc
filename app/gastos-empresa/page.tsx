@@ -99,7 +99,7 @@ export default function GastosEmpresaPage() {
     <div className="min-h-screen bg-[color:var(--color-bg-page)] p-4">
       <div className="mx-auto max-w-lg">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-[color:var(--color-text-primary)]">Gastos generales</h1>
+          <h1 className="text-xl font-bold text-[color:var(--color-text-primary)]">Gastos generales de la empresa</h1>
           <Link href="/finanzas" className="text-sm text-blue-light hover:underline">
             Volver
           </Link>

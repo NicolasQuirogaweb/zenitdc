@@ -121,8 +121,8 @@ CI:             GitHub Actions (.github/workflows/ci.yml) — tsc + lint + build
                                   de 5 cards: Clientes y obras,
                                   Proveedores, Personal, Personal
                                   tercerizado, Finanzas — esta última
-                                  agrupa Pagos/Gastos generales, ver
-                                  /finanzas)
+                                  agrupa Pagos/Gastos generales de la
+                                  empresa, ver /finanzas)
   /clientes                     → listado + alta de clientes
   /clientes/nuevo
   /clientes/[id]/editar
@@ -146,11 +146,12 @@ CI:             GitHub Actions (.github/workflows/ci.yml) — tsc + lint + build
   /personal-hub                 → hub de navegación: 2 cards, Personal de
                                   la empresa / Personal tercerizado (no
                                   hace fetch, solo son 2 links)
-  /finanzas                     → hub de navegación: 2 cards, Pagos /
-                                  Gastos generales (no hace fetch, solo
-                                  son 2 links) — agrupa todo lo que no es
-                                  específico de una entidad puntual
-                                  (proveedor, personal, obra)
+  /finanzas                     → hub de navegación: 2 cards, Pagos (que a
+                                  su vez es otro hub, ver más abajo) /
+                                  Gastos generales de la empresa (no hace
+                                  fetch, solo son 2 links) — agrupa todo
+                                  lo que no es específico de una entidad
+                                  puntual (proveedor, personal, obra)
   /proveedores                  → listado + alta de proveedores — SOLO
                                   materiales (ver "Personal tercerizado"
                                   para mano de obra subcontratada)
@@ -173,17 +174,31 @@ CI:             GitHub Actions (.github/workflows/ci.yml) — tsc + lint + build
                                   desde acá (acá la obra es OBLIGATORIA)
   /personal-tercerizado/[id]/editar
   /personal-tercerizado/nuevo
-  /gastos-empresa               → alta + historial de gastos de la empresa
-                                  sin obra asociada (una sola pantalla,
-                                  sin páginas separadas de alta/edición)
-  /pagos                        → historial único de TODO lo que se va
-                                  pagando (gastos generales, materiales,
-                                  personal, personal tercerizado, gastos de
-                                  empresa), tipo "Actividad" de Mercado
-                                  Pago — de SOLO LECTURA, agrega 5 tablas
-                                  ya existentes y las ordena por fecha; no
-                                  reemplaza ninguna sección específica, es
-                                  una vista adicional de control
+  /gastos-empresa               → alta + historial de "Gastos generales de
+                                  la empresa" (sin obra asociada, una sola
+                                  pantalla, sin páginas separadas de
+                                  alta/edición) — a propósito dice "de la
+                                  empresa" para no confundirse con los
+                                  gastos generales *de una obra puntual*
+                                  (combustible, seguros de esa obra)
+  /pagos                        → hub de navegación: 3 cards (no hace
+                                  fetch, solo son 3 links) — Pagos a
+                                  empleados de la empresa / Pagos a
+                                  empleados tercerizados / Pagos de obras.
+                                  Reemplaza a la vieja lista única "todo
+                                  junto" (de solo lectura, ninguna carga
+                                  pagos nuevos — eso se sigue haciendo
+                                  desde la ficha de cada persona/obra):
+  /pagos/personal               → TODOS los pagos_personal (todas las
+                                  personas), con buscador por
+                                  nombre/motivo/obra
+  /pagos/personal-tercerizado   → ídem con pagos_personal_tercerizado
+  /pagos/obras                  → lista de obras (más reciente primero)
+                                  con el "Total gastado" de cada una
+                                  (lib/utils/resumenObra.ts — misma
+                                  fórmula que usa el Resumen de la obra,
+                                  compartida para que nunca difieran) y
+                                  un link "Ver detalle" → /obras/[id]
   /api                          → rutas de API (server-side, ver app/api/README.md)
 
 /components
@@ -604,7 +619,20 @@ volumen lo justifica.
     totales por categoría (presupuesto, costos directos, materiales,
     gastos generales, pagos de cliente) — informativo nomás, sin
     calcular ningún resultado (no es balance, ver "Naturaleza real del
-    sistema")                                                          ✅ (este cambio)
+    sistema")                                                          ✅
+25. Fix: el Resumen de la obra no se actualizaba al instante al cargar
+    algo en otra sección — se reintroduce un refreshKey en
+    app/obras/[id]/page.tsx que las secciones ya soportaban
+    (onDatosCambiaron) pero no se les pasaba. Se reorganiza "Pagos": deja
+    de ser una lista única "todo junto" y pasa a ser un hub de 3 cards
+    (Pagos a empleados de la empresa / Pagos a empleados tercerizados /
+    Pagos de obras — este último con el total gastado de cada obra y
+    link al detalle). Se extrae lib/utils/resumenObra.ts
+    (calcularResumenGastosObra + agruparPorObra) para que
+    ResumenObraSection.tsx y /pagos/obras compartan la misma fórmula sin
+    duplicarla. "Gastos generales" (la empresa) pasa a llamarse "Gastos
+    generales de la empresa" en toda la UI, para no confundirse con los
+    gastos generales *de una obra puntual*                             ✅ (este cambio)
 ```
 
 ---
