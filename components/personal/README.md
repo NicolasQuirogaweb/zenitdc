@@ -13,7 +13,10 @@ propio `useState` + `fetch` a su ruta de API).
   puntual (ej. redes/IT), y otro que cobra por obra (ej. arquitecto,
   chofer). Todo pago requiere un **motivo obligatorio** (campo `motivo`
   en `pagos_personal`, ex "observaciones") — no hay presupuesto ni
-  cuenta corriente, es solo historial.
+  cuenta corriente, es solo historial. Tiene buscador (`BuscadorInput` +
+  `coincideBusqueda`, por motivo u obra) para encontrar un pago dentro
+  de la lista — el "Total pagado" de arriba no se filtra, siempre
+  muestra el total real de la persona.
 
 Ver `components/personal-tercerizado/README.md` para el mismo patrón
 aplicado a mano de obra subcontratada (ahí la obra sí es obligatoria).
