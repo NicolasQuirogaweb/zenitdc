@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatMoney, formatFecha } from '@/lib/utils/formato'
 import { sumMonto, parsearMonto } from '@/lib/utils/numeros'
+import { coincideBusqueda } from '@/lib/utils/texto'
 import FechaInput from '@/components/ui/FechaInput'
 import CollapsibleCard from '@/components/ui/CollapsibleCard'
+import BuscadorInput from '@/components/ui/BuscadorInput'
 import { useToast } from '@/lib/hooks/useToast'
 import { useConfirm } from '@/lib/hooks/useConfirm'
 import type { PagoPersonalTercerizado } from '@/types'
@@ -36,6 +38,7 @@ export default function HistorialPagosSection({ personalTercerizadoId }: Props) 
   const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10))
   const [motivo, setMotivo] = useState('')
   const [guardando, setGuardando] = useState(false)
+  const [busqueda, setBusqueda] = useState('')
 
   const fetchTodo = () => {
     const supabase = createClient()
@@ -105,6 +108,7 @@ export default function HistorialPagosSection({ personalTercerizadoId }: Props) 
   }
 
   const totalPagado = sumMonto(pagos)
+  const pagosFiltrados = pagos.filter((p) => coincideBusqueda(busqueda, p.motivo, p.obras?.nombre))
 
   return (
     <CollapsibleCard
@@ -189,13 +193,24 @@ export default function HistorialPagosSection({ personalTercerizadoId }: Props) 
 
       <div className="mt-4 border-t border-[color:var(--color-border)] pt-4">
         <h3 className="text-sm font-semibold text-[color:var(--color-text-primary)]">Pagos registrados</h3>
+        {!cargando && pagos.length > 0 && (
+          <BuscadorInput
+            value={busqueda}
+            onChange={setBusqueda}
+            placeholder="Buscar por motivo u obra..."
+          />
+        )}
         <div className="mt-2 divide-y divide-[color:var(--color-border)]">
           {cargando ? (
             <p className="py-3 text-sm text-[color:var(--color-text-secondary)]">Cargando...</p>
           ) : pagos.length === 0 ? (
             <p className="py-3 text-sm text-[color:var(--color-text-secondary)]">No hay pagos registrados aún</p>
+          ) : pagosFiltrados.length === 0 ? (
+            <p className="py-3 text-sm text-[color:var(--color-text-secondary)]">
+              No se encontraron pagos para &quot;{busqueda}&quot;
+            </p>
           ) : (
-            pagos.map((pago) => (
+            pagosFiltrados.map((pago) => (
               <div key={pago.id} className="flex items-center justify-between py-2">
                 <div>
                   <p className="font-medium text-[color:var(--color-text-primary)]">

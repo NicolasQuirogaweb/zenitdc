@@ -11,7 +11,8 @@ Mismo patrón que `components/personal/`.
   o Clisman se les paga un monto global por el trabajo hecho en una obra
   puntual (ellos reparten puertas adentro con su gente) — nunca un
   sueldo fijo sin ligar a ninguna obra, a diferencia de personal de la
-  empresa.
+  empresa. También tiene buscador dentro del historial (por motivo u
+  obra), mismo criterio que `components/personal/`.
 
 **Importante:** esto es un concepto DISTINTO a `proveedores` (que quedó
 exclusivamente para proveedores de materiales). No hay ninguna relación
