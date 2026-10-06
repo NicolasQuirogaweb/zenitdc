@@ -4,7 +4,7 @@
 > en este repo. Reemplaza a `prompt_senior_zenitdc.md` (borrado — este
 > archivo es ahora la única fuente de verdad).
 >
-> **Actualizado 2026-10-05.**
+> **Actualizado 2026-10-06.**
 > **Recordatorio:** actualizar este archivo apenas se termine un cambio
 > grande de arquitectura o de UI — es lo que desactualizó a la versión
 > anterior más de una vez (quedó con la fórmula de balance vieja varias
@@ -488,7 +488,11 @@ create table gastos_empresa (
 ## Despliegue y servicios necesarios
 
 Las cuentas van a nombre del cliente (Zenit DC / Rodri), no del
-desarrollador — así el cliente es dueño de su propio despliegue.
+desarrollador — así el cliente es dueño de su propio despliegue. **Hoy
+(etapa de prueba/beta) el proyecto de Vercel vive bajo la cuenta
+personal del desarrollador** (`nicolas-quirogas-projects` →
+https://zenitdc.vercel.app) — ver skill `deploy-produccion`, sección 8,
+para cuándo y cómo migrarlo a una cuenta a nombre de Rodri.
 
 | Servicio | Para qué | Plan que alcanza hoy | Cuándo hace falta más |
 |---|---|---|---|
@@ -558,6 +562,16 @@ volumen lo justifica.
   de API + formulario + página de listado para una entidad nueva,
   siguiendo el patrón de `clientes`/`obras`. Usarla al agregar cualquier
   entidad CRUD nueva (así se armaron proveedores y personal en la Fase 3).
+- **`levantar-servidor-dev`**: el ritual para levantar/reiniciar
+  `next dev` en background (matar proceso viejo si quedó colgado,
+  `rm -rf .next`, limpiar el bloque que `next dev` le agrega solo a
+  este archivo). Usarla cada vez que haga falta probar algo en el
+  navegador.
+- **`deploy-produccion`**: cómo crear/actualizar el deploy de producción
+  en Vercel usando un token (sin dashboard) — incluye por qué la
+  "Production Branch" no es editable por la API pública y cómo
+  resolverlo con fast-forward de todas formas. Usarla para deploys
+  nuevos o para diagnosticar uno que falló.
 
 ---
 
@@ -632,9 +646,18 @@ volumen lo justifica.
     ResumenObraSection.tsx y /pagos/obras compartan la misma fórmula sin
     duplicarla. "Gastos generales" (la empresa) pasa a llamarse "Gastos
     generales de la empresa" en toda la UI, para no confundirse con los
-    gastos generales *de una obra puntual*                             ✅ (este cambio)
+    gastos generales *de una obra puntual*                             ✅
+26. Primer deploy real a producción (Vercel, cuenta del desarrollador
+    por ahora — ver "Despliegue y servicios necesarios"):
+    https://zenitdc.vercel.app. Main estaba 136 commits atrás de develop
+    (nunca se había mergeado desde el setup inicial) — se puso al día
+    con fast-forward. Se cierran huecos de documentación: README.md de
+    la raíz (era el genérico de create-next-app) reescrito en español
+    con contexto real del proyecto; 2 skills nuevas,
+    `levantar-servidor-dev` y `deploy-produccion`, documentando rituales
+    que se repitieron toda la sesión sin estar escritos en ningún lado  ✅ (este cambio)
 ```
 
 ---
 
-*Proyecto: Zenit DC — nquirogawebdev — actualizado 2026-10-05*
+*Proyecto: Zenit DC — nquirogawebdev — actualizado 2026-10-06*

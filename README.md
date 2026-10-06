@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Zenit DC — Sistema de Gestión
 
-## Getting Started
+Organizador digital para Zenit DC (empresa constructora): clientes,
+obras, presupuestos, gastos, personal y pagos, todo en una PWA pensada
+para usarse desde el celular.
 
-First, run the development server:
+**La fuente de verdad del proyecto es [`CLAUDE.md`](./CLAUDE.md)** —
+ahí está el contexto completo (qué es, cómo está armado, el esquema de
+base de datos, decisiones de producto y el historial de todo lo que se
+hizo). Cada carpeta de `app/`, `components/` y `lib/` tiene además su
+propio `README.md` explicando lo que vive ahí.
+
+**Producción:** https://zenitdc.vercel.app
+
+## Correrlo en local
+
+1. Clonar el repo e instalar dependencias:
+   ```bash
+   npm install
+   ```
+2. Crear `.env.local` en la raíz con las credenciales de Supabase:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=...
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+   ```
+3. Levantar el servidor de desarrollo:
+   ```bash
+   npm run dev
+   ```
+   Abrir [http://localhost:3000](http://localhost:3000).
+
+## Otros comandos útiles
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build      # build de producción
+npm run lint       # ESLint
+npm run test       # Vitest
+npx tsc --noEmit   # chequeo de tipos
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Desarrollo con Claude Code
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Este repo usa `CLAUDE.md` + los `README.md` de cada carpeta como
+contexto para desarrollo agéntico, y tiene skills en `.claude/skills/`
+para los flujos que se repiten (`verificar-y-mergear`, `scaffold-entidad`,
+`levantar-servidor-dev`, `deploy-produccion`).
