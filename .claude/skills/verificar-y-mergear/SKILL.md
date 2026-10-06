@@ -42,6 +42,15 @@ preexistentes (hoy hay una lista conocida de warnings/errores menores sin
 resolver), confirmar que el conteo no aumentó — no hace falta arreglar
 lo que ya estaba, pero tampoco sumar nada nuevo.
 
+Si el dev server (`next dev`) estuvo corriendo en algún momento de la
+sesión, antes del `git add` correr `git status --porcelain` — `next
+dev` le agrega solo un bloque `<!-- BEGIN:nextjs-agent-rules -->` al
+final de `CLAUDE.md` cada vez que arranca, y conviene limpiarlo
+(`git checkout -- CLAUDE.md`, después de confirmar con `git diff --stat`
+que es pura adición y no se está pisando un cambio real) antes de que
+se cuele en el commit. Ver la skill `levantar-servidor-dev` para el
+detalle.
+
 ## 4. Commit
 
 En Windows, los heredoc de bash para mensajes multilínea son poco
